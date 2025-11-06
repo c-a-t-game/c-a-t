@@ -1,0 +1,37 @@
+{
+  "sources": ["src/*.c", "src/engine/**/*.c", "src/io/assets/*.c"],
+  "backends": {
+    "any": {
+      "graphics": ["sdl3", "opengl"],
+      "audio": ["mixer", "sdl3"],
+      "input": ["keybind_manager", "sdl3"]
+    }
+  },
+  "defines": {
+    "any": {
+      "BACKEND_DIR": "src/io",
+      "BUILD_DIR": "bin",
+      "BUILD_TARGET": "cat",
+      "ASSETS_DIR": "assets",
+      "ASSETS_DEST": "src/io/assets/data.h",
+      "COMPILER": "gcc"
+    },
+    "windows": {
+      "BUILD_TARGET": "cat.exe"
+    }
+  },
+  "flags": {
+    "any": {
+      "pkgconf": "sdl3 glew",
+      "cflags": "-g -Isrc -Iinclude",
+      "ldflags": "-g -Wl,--allow-multiple-definition"
+    },
+    "linux": {
+      "ldflags": "-rdynamic -lm"
+    },
+    "windows": {
+      "pkgconf": "--static",
+      "ldflags": "-static"
+    }
+  }
+}

@@ -1,0 +1,90 @@
+shopt -s globstar
+
+CONFIG_JSON=$(cat config.json)
+
+# detect OS
+if [ -n $MSYSTEM ]; then
+    case $(uname -a | awk '{print $1}') in
+        "Linux"*)
+            OS=linux
+        ;;
+        "Darwin"*)
+            OS=macos
+        ;;
+        "*"*)
+            echo Unsupported OS
+            exit 1
+        ;;
+    esac
+else
+    if [ $MSYSTEM != "MINGW64" ]; then
+        echo Must be compiled in the MINGW64 environment
+        exit 1
+    fi
+    OS=windows
+fi
+
+CFLAGS=
+LDFLAGS=
+
+# load config vars
+for i in $(echo $CONFIG_JSON | jq -r --arg OS $OS '
+  (.defines.any // {}) * (.defines[$OS] // {})
+  | to_entries | map("\(.key)=\(.value)") | .[]
+'); do
+    CFLAGS="${CFLAGS}-D$i "
+    eval $i
+done
+
+# generate $ASSETS_DEST
+rm $ASSETS_DEST 2> /dev/null
+for i in $(find $ASSETS_DIR -type f -exec realpath -s --relative-to=$ASSETS_DIR {} ';'); do
+    BYTES=$(cat $ASSETS_DIR/$i | hexdump -v -e '1/1 "0x%02X,"')
+    COUNT=$(wc -c $ASSETS_DIR/$i | awk '{print $1}')
+    echo "{ \"$i\", $COUNT, (uint8_t[]){ $BYTES }}," >> $ASSETS_DEST
+done
+
+SOURCES=$(echo $CONFIG_JSON | jq -r '.sources | .[]')
+
+# get flags
+eval $(echo $CONFIG_JSON | jq -r -c --arg OS "$OS" '
+  (.flags.any // {}) as $any |
+  (.flags[$OS] // {}) as $os |
+  reduce ($any + $os | keys_unsorted | unique[]) as $key
+    ({}; .[$key | ascii_upcase] = ([ $any[$key], $os[$key] ] | map(select(. != null)) | join(" ")))
+  | to_entries | map("\(.key)=\"${\(.key)}\(.value) \"") | .[]
+')
+
+# add backends
+for i in $(echo $CONFIG_JSON | jq -r -c '.backends.any // {} * .backends.linux // {} | to_entries | .[]'); do
+    FOLDER=$(echo $i | jq -r '.key')
+    for file in $(echo $i | jq -r '.value | .[]'); do
+        SOURCES="$SOURCES $BACKEND_DIR/$FOLDER/$file.c"
+    done
+done
+
+CFLAGS="$CFLAGS$(pkgconf --cflags $PKGCONF)"
+LDFLAGS="$LDFLAGS$(pkgconf --libs $PKGCONF)"
+
+{
+    # prolog
+    echo -e "\n.PHONY: all clean"
+    echo -e "\nall: $BUILD_TARGET"
+    echo -e "\nclean:"
+    echo -e "\trm -rf $BUILD_TARGET $BUILD_DIR $ASSETS_DEST"
+
+    # add compile targets
+    for i in $SOURCES; do
+        $COMPILER $CFLAGS -MM -MT $BUILD_DIR/${i%%.*}.o $i
+        echo -e "\t@mkdir -p \$(shell dirname \$@)"
+        echo -e "\t$COMPILER \$< $CFLAGS -c -o \$@"
+        echo ""
+    done
+
+    # add link target
+    echo "$BUILD_TARGET: $(for i in $SOURCES; do
+        echo -n "$BUILD_DIR/${i%%.*}.o "
+    done)"
+    echo -e "\t$COMPILER \$^ $LDFLAGS -o \$@"
+
+} | make -f - -j$(nproc) $@
