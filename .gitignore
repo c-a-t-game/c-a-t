@@ -1,0 +1,4 @@
+*.inc.c
+bin/
+src/io/assets/data.h
+cat

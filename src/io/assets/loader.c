@@ -42,14 +42,14 @@ static const char* get_extension(const char* name) {
     return NULL;
 }
 
-static int compare(const void* a, const void* b) {
-    return (uintptr_t)*(void**)b - (uintptr_t)*(void**)a;
+static int compare_str(const void* a, const void* b) {
+    return strcmp(*(char**)a, *(char**)b);
 }
 
 void load_assets() {
     int num_assets = sizeof(assets) / sizeof(Asset);
     int num_loaders = sizeof(loaders) / sizeof(Loader);
-    qsort(assets, num_assets, sizeof(Asset), compare);
+    qsort(assets, num_assets, sizeof(Asset), compare_str);
     for (int i = 0; i < sizeof(assets) / sizeof(Asset); i++) {
         Asset* asset = &assets[i];
         const char* ext = get_extension(asset->name);
@@ -62,7 +62,7 @@ void load_assets() {
 }
 
 void* _get_asset(const char* name) {
-    Asset* asset = bsearch(&name, assets, sizeof(assets) / sizeof(Asset), sizeof(Asset), compare);
+    Asset* asset = bsearch(&name, assets, sizeof(assets) / sizeof(Asset), sizeof(Asset), compare_str);
     if (!asset) {
         printf("Asset '%s' not found\n", name);
         return NULL;

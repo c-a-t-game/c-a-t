@@ -19,6 +19,7 @@ typedef struct {
 
 typedef struct Shader Shader;
 typedef struct Window Window;
+typedef struct Buffer Buffer;
 
 #define COLOR(x) (uint8_t)(_Generic((x), float: (x) * 255, double: (x) * 255, long double: (x) * 255, default: (x)))
 #define GRAY(x) GRAYA(x, 255)
@@ -48,9 +49,10 @@ void graphics_post_process(Window* window, Shader* shader);
 void graphics_set_shader(Window* window, Shader* shader);
 void graphics_rect(Window* window, float x, float y, float w, float h, Color color);
 void graphics_draw(Window* window, Texture* texture, float x, float y, float w, float h, float sx, float sy, float sw, float sh, Color color);
-Texture* graphics_new_buffer();
-void graphics_set_buffer(Texture* buffer);
-void graphics_destroy_buffer(Texture* buffer);
+void graphics_blit(Window* window,  Buffer* buffer,  float x, float y, float w, float h, float sx, float sy, float sw, float sh, Color color);
+Buffer* graphics_new_buffer(Window* window, int width, int height);
+void graphics_set_buffer(Window* window, Buffer* buffer);
+void graphics_destroy_buffer(Buffer* buffer);
 bool graphics_should_close();
 
 void* loader_png(uint8_t* data, int len);

@@ -1,5 +1,7 @@
 #include <SDL3/SDL.h>
 
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_surface.h>
 #include <stdlib.h>
 
 #include "io/graphics.h"
@@ -62,6 +64,9 @@ Window* graphics_open(const char* title, int width, int height) {
     Window* w = malloc(sizeof(Window));
     w->wnd = SDL_CreateWindow(title, width, height, 0);
     w->rnd = graphics_get_renderer(w->wnd);
+    w->texture_map.capacity = 4;
+    w->texture_map.size = 0;
+    w->texture_map.entries = malloc(sizeof(TextureEntry) * w->texture_map.capacity);
     curr_window = w;
     return w;
 }
@@ -110,13 +115,35 @@ void graphics_rect(Window* window, float x, float y, float w, float h, Color col
 
 void graphics_draw(Window* window, Texture* texture, float dx, float dy, float dw, float dh, float sx, float sy, float sw, float sh, Color color) {
     if (!window) window = curr_window;
-    SDL_Texture* tex = get_texture(window, texture, window->rnd);
-    SDL_SetTextureColorMod(tex, color.r, color.g, color.b);
-    SDL_SetTextureAlphaMod(tex, color.a);
-    SDL_RenderTexture(window->rnd, tex,
+    void* tex = get_texture(window, texture, window->rnd);
+    graphics_blit(window, tex, dx, dy, dw, dh, sx, sy, sw, sh, color);
+}
+
+void graphics_blit(Window* window, Buffer* buffer, float dx, float dy, float dw, float dh, float sx, float sy, float sw, float sh, Color color) {
+    if (!window) window = curr_window;
+    SDL_Texture* texture = (void*)buffer;
+    SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
+    SDL_SetTextureAlphaMod(texture, color.a);
+    SDL_RenderTexture(window->rnd, texture,
         (SDL_FRect[]){{ .x = sx, .y = sy, .w = sw, .h = sh }},
         (SDL_FRect[]){{ .x = dx, .y = dy, .w = dw, .h = dh }}
     );
+}
+
+Buffer* graphics_new_buffer(Window* window, int width, int height) {
+    if (!window) window = curr_window;
+    SDL_Texture* texture = SDL_CreateTexture(window->rnd, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width, height);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+    return (void*)texture;
+}
+
+void graphics_set_buffer(Window* window, Buffer* buffer) {
+    if (!window) window = curr_window;
+    SDL_SetRenderTarget(window->rnd, (void*)buffer);
+}
+
+void graphics_destroy_buffer(Buffer* buffer) {
+    SDL_DestroyTexture((void*)buffer);
 }
 
 void* loader_png(uint8_t* data, int len) {
