@@ -46,9 +46,9 @@ static TilesetNode* engine_get_tileset(TilemapNode* tilemap) {
     return tileset;
 }
 
-static void engine_get_tilemap_offsets(TilemapNode* tilemap, float cam_x, float cam_y, float* offset_x, float* offset_y) {
-    *offset_x = cam_x * tilemap->scroll_speed_x / tilemap->scale_x + tilemap->scroll_offset_x;
-    *offset_y = cam_y * tilemap->scroll_speed_y / tilemap->scale_y + tilemap->scroll_offset_y;
+static void engine_get_tilemap_offsets(TilemapNode* tilemap, TilesetNode* tileset, float cam_x, float cam_y, float* offset_x, float* offset_y) {
+    *offset_x = cam_x * tilemap->scroll_speed_x / tilemap->scale_x / tileset->tile_width  - tilemap->scroll_offset_x;
+    *offset_y = cam_y * tilemap->scroll_speed_y / tilemap->scale_y / tileset->tile_height - tilemap->scroll_offset_y;
 }
 
 static void engine_render_entity(EntityNode* entity, TilesetNode* tileset, float offset_x, float offset_y) {
@@ -68,8 +68,8 @@ static void engine_render_entity(EntityNode* entity, TilesetNode* tileset, float
     if (isnan(w)) w = tex->width;
     if (isnan(h)) h = tex->height;
     graphics_draw(NULL, tex,
-        (entity->pos_x * tileset->tile_width  - w / 2) * tilemap->scale_x,
-        (entity->pos_y * tileset->tile_height - h)     * tilemap->scale_y,
+        ((entity->pos_x - offset_x) * tileset->tile_width  - w / 2) * tilemap->scale_x,
+        ((entity->pos_y - offset_y) * tileset->tile_height - h)     * tilemap->scale_y,
         w * tilemap->scale_x, h * tilemap->scale_y, sx, sy, sw, sh, GRAY(255)
     );
 }
@@ -103,7 +103,7 @@ static void engine_render_chunk(TileChunkNode* chunk, TilesetNode* tileset, floa
 static void engine_render_tilemap(TilemapNode* tilemap, float width, float height, float cam_x, float cam_y) {
     TilesetNode* tileset = engine_get_tileset(tilemap);
     float offset_x, offset_y;
-    engine_get_tilemap_offsets(tilemap, cam_x, cam_y, &offset_x, &offset_y);
+    engine_get_tilemap_offsets(tilemap, tileset, cam_x, cam_y, &offset_x, &offset_y);
     int min_x = floorf(offset_x / CHUNK_SIZE);
     int min_y = floorf(offset_y / CHUNK_SIZE);
     int max_x = ceilf((offset_x + width  / tilemap->scale_x / tileset->tile_width)  / CHUNK_SIZE);
