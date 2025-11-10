@@ -16,4 +16,6 @@ bool keybind_released(const char* name);
 
 bool keybind_check(int bind);
 
+void keybind_update();
+
 #endif

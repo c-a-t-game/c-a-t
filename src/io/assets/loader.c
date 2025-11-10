@@ -1,5 +1,6 @@
 #include "io/audio.h"
 #include "io/graphics.h"
+#include "engine/engine.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,7 @@ static Loader loaders[] = {
     LOADER(txt),
     LOADER(png),
     LOADER(glsl),
+    LOADER(lvl),
 };
 
 static const char* get_extension(const char* name) {

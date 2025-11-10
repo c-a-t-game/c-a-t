@@ -30,8 +30,8 @@ static int compare_entry(const void* _a, const void* _b) {
 }
 
 static SDL_Texture* get_texture(Window* window, Texture* texture, SDL_Renderer* renderer) {
-    TextureEntry** entry = bsearch(texture, window->texture_map.entries, window->texture_map.size, sizeof(TextureEntry), compare_entry);
-    if (entry) return (*entry)->handle;
+    TextureEntry* entry = bsearch(&texture, window->texture_map.entries, window->texture_map.size, sizeof(TextureEntry), compare_entry);
+    if (entry) return entry->handle;
     if (window->texture_map.size == window->texture_map.capacity) {
         window->texture_map.capacity *= 2;
         window->texture_map.entries = realloc(window->texture_map.entries, sizeof(TextureEntry) * window->texture_map.capacity);

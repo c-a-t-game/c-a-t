@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 
 typedef struct {
     const char* name;
@@ -46,7 +47,10 @@ void keybind_remove_entry(const char* name) {
 void keybind_add(const char* name, int keybind) {
     if (!name) return;
     KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
-    if (!entry) return;
+    if (!entry) {
+        keybind_add_entry(name);
+        entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    }
     if (entry->size > 0 && entry->keybinds[0] == 0) entry->keybinds[0] = keybind;
     else {
         if (entry->size == entry->capacity) {
@@ -74,7 +78,7 @@ int* keybind_get(const char* name, int* count) {
     if (!entry) return NULL;
     int *ptr = NULL, *head = NULL;
     for (int i = 0; i < entry->size; i++) {
-        if (entry->keybinds[i] != 0) {
+        if (entry->keybinds[i] != 0 && !head) {
             *count = entry->size - i;
             ptr = head = malloc(sizeof(int) * *count);
         }
@@ -86,7 +90,7 @@ int* keybind_get(const char* name, int* count) {
 const char** keybind_get_entries(int* count) {
     const char **ptr = NULL, **head = NULL;
     for (int i = 0; i < entries_size; i++) {
-        if (entries[i].name) {
+        if (entries[i].name && !head) {
             *count = entries_size - i;
             ptr = head = malloc(sizeof(char*) * *count);
         }
@@ -110,23 +114,23 @@ void keybind_update() {
 }
 
 bool keybind_down(const char* name) {
-    if (!name) return NULL;
+    if (!name) return false;
     KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
-    if (!entry) return NULL;
+    if (!entry) return false;
     return entry->down;
 }
 
 bool keybind_pressed(const char* name) {
-    if (!name) return NULL;
+    if (!name) return false;
     KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
-    if (!entry) return NULL;
+    if (!entry) return false;
     return entry->down && !entry->prev_down;
 }
 
 bool keybind_released(const char* name) {
-    if (!name) return NULL;
+    if (!name) return false;
     KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
-    if (!entry) return NULL;
+    if (!entry) return false;
     return !entry->down && entry->prev_down;
 }
 
