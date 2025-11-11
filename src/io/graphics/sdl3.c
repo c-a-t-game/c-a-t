@@ -153,13 +153,11 @@ void* loader_png(uint8_t* data, int len) {
     return texture;
 }
 
-void graphics_post_process(Window* w, Shader* shader) {}
-void graphics_set_shader(Window* w, Shader* shader) {}
-void* loader_glsl(uint8_t* data, int len) {
-    return NULL;
-}
-
 bool graphics_should_close() {
     SDL_PumpEvents();
     return SDL_PeepEvents(NULL, 0, SDL_PEEKEVENT, SDL_EVENT_QUIT, SDL_EVENT_QUIT) > 0;
 }
+
+void graphics_post_process(Window* w, Shader* shader) {}
+void graphics_set_shader(Window* w, Shader* shader) {}
+void* loader_glsl(uint8_t* data, int len) { return NULL; }

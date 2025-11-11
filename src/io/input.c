@@ -134,6 +134,4 @@ bool keybind_released(const char* name) {
     return !entry->down && entry->prev_down;
 }
 
-bool keybind_check(int bind) {
-    return false;
-}
+bool keybind_check(int bind) { return false; }

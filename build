@@ -58,9 +58,10 @@ eval $(echo $CONFIG_JSON | jq -r -c --arg OS "$OS" '
 # add backends
 for i in $(echo $CONFIG_JSON | jq -r -c '.backends.any // {} * .backends.linux // {} | to_entries | .[]'); do
     FOLDER=$(echo $i | jq -r '.key')
-    for file in $(echo $i | jq -r '.value | reverse | .[]'); do
+    for file in $(echo $i | jq -r '.value | if type == "array" then . else [.] end | reverse | .[]'); do
         SOURCES="$SOURCES $BACKEND_DIR/$FOLDER/$file.c"
     done
+    SOURCES="$SOURCES $BACKEND_DIR/$FOLDER.c"
 done
 
 CFLAGS="$CFLAGS$(pkgconf --cflags $PKGCONF)"

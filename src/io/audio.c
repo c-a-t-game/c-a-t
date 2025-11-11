@@ -86,3 +86,5 @@ AudioInstance* audio_play(AudioSource* source) {
     instance->do_free = false;
     return instance;
 }
+
+void audio_init() {}

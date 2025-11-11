@@ -3,8 +3,8 @@
   "backends": {
     "any": {
       "graphics": ["sdl3", "opengl"],
-      "audio": ["mixer", "sdl3"],
-      "input": ["keybind_manager", "sdl3"]
+      "audio": "sdl3",
+      "input": "sdl3"
     }
   },
   "defines": {
