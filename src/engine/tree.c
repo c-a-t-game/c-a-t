@@ -1,6 +1,7 @@
 #include "engine.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 void engine_attach_node(Node* parent, Node* child) {
     engine_detach_node(child);
@@ -42,4 +43,17 @@ static void engine_delete_node_internal(Node* node) {
 void engine_delete_node(Node* node) {
     engine_detach_node(node);
     engine_delete_node_internal(node);
+}
+
+Node* engine_deep_copy(Node* node) {
+    Node* copy = malloc(node->size);
+    memcpy(copy, node, node->size);
+    copy->children = malloc(sizeof(Node*) * copy->children_capacity);
+    copy->parent = NULL;
+    for (int i = 0; i < copy->children_size; i++) {
+        Node* child = engine_deep_copy(copy->children[i]);
+        child->parent = copy;
+        copy->children[i] = child;
+    }
+    return copy;
 }
