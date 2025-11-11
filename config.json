@@ -1,5 +1,5 @@
 {
-  "sources": ["src/*.c", "src/engine/**/*.c", "src/io/assets/*.c"],
+  "sources": ["src/*.c", "src/engine/**/*.c", "src/io/assets/*.c", "src/io/audio/impl/*.c"],
   "backends": {
     "any": {
       "graphics": ["sdl3", "opengl"],

@@ -34,6 +34,7 @@ static Loader loaders[] = {
     LOADER(png),
     LOADER(glsl),
     LOADER(lvl),
+    LOADER(wav),
 };
 
 static const char* get_extension(const char* name) {

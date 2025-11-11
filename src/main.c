@@ -98,6 +98,8 @@ int main() {
     engine_attach_node(&player->node, &entity_texture->node);
     engine_attach_node(&tilemap->node, &player->node);
     engine_attach_node(&level->node, &tilemap->node);
+    
+    audio_play_oneshot(get_asset(AudioSource, "RECONSTRUCTWHAT.wav"));
 
     while (!graphics_should_close()) {
         graphics_start_frame(NULL);
