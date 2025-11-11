@@ -4,6 +4,7 @@
 #include "io/assets.h"
 #include "io/graphics.h"
 #include "io/input.h"
+#include "io/audio.h"
 
 #include "engine/engine.h"
 
@@ -26,9 +27,14 @@ Texture* player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, f
 
 int main() {
     load_assets();
+    audio_init();
+    keybind_add("up", 26);
+    keybind_add("down", 22);
+    keybind_add("left", 4);
+    keybind_add("right", 7);
     Window* window = graphics_open(":3", 1152, 768);
     graphics_set_active(window);
-    
+
     LevelRootNode* level = engine_new_node(LevelRoot);
     TilemapNode* bg = engine_new_node(Tilemap);
     bg->scale_x = 1;
@@ -82,7 +88,7 @@ int main() {
     engine_attach_node(&tileset->node, &ground->node);
     engine_attach_node(&tilemap->node, &tileset->node);
     EntityNode* player = engine_new_node(Entity);
-    player->pos_x = 1; 
+    player->pos_x = 1;
     player->pos_y = 2;
     EntityUpdateNode* entity_update = engine_new_node(EntityUpdate);
     entity_update->func = player_update;
@@ -92,21 +98,16 @@ int main() {
     engine_attach_node(&player->node, &entity_texture->node);
     engine_attach_node(&tilemap->node, &player->node);
     engine_attach_node(&level->node, &tilemap->node);
-    
-    keybind_add("up", 26);
-    keybind_add("down", 22);
-    keybind_add("left", 4);
-    keybind_add("right", 7);
-    
+
     while (!graphics_should_close()) {
         graphics_start_frame(NULL);
         Buffer* buffer = graphics_new_buffer(NULL, 384, 256);
         graphics_set_buffer(NULL, buffer);
-        
+
         keybind_update();
         engine_update(level);
         engine_render(level, 1152, 768);
-        
+
         graphics_set_buffer(NULL, NULL);
         graphics_blit(NULL, buffer, 0, 0, 1152, 768, 0, 0, 384, 256, GRAY(255));
         graphics_end_frame(NULL);
