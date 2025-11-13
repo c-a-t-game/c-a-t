@@ -1,4 +1,3 @@
-#include <SDL3/SDL_timer.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,7 +7,6 @@
 #include "io/audio.h"
 
 #include "engine/engine.h"
-#include "pawscript.h"
 
 int tile_texture(TilemapNode* tilemap, TileNode* tile, int x, int y) {
     return 0;
@@ -30,10 +28,12 @@ Texture* player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, f
 int main() {
     load_assets();
     audio_init();
+    keybind_add("up", 26);
+    keybind_add("down", 22);
+    keybind_add("left", 4);
+    keybind_add("right", 7);
     Window* window = graphics_open(":3", 1152, 768);
     graphics_set_active(window);
-
-    PawScriptContext* context = get_asset(PawScriptContext, "test.paw");
 
     LevelRootNode* level = engine_new_node(LevelRoot);
     TilemapNode* bg = engine_new_node(Tilemap);
@@ -53,8 +53,7 @@ int main() {
     engine_attach_node(&bg_tileset->node, &bg_air->node);
     TileNode* bg_tile = engine_new_node(Tile);
     TileTextureNode* bg_tex = engine_new_node(TileTexture);
-    //bg_tex->func = tile_texture;
-    pawscript_get(context, "tile_texture", &bg_tex->func);
+    bg_tex->func = tile_texture;
     engine_attach_node(&bg_tile->node, &bg_tex->node);
     engine_attach_node(&bg_tileset->node, &bg_tile->node);
     engine_attach_node(&bg->node, &bg_tileset->node);
@@ -84,8 +83,7 @@ int main() {
     engine_attach_node(&tileset->node, &air->node);
     TileNode* ground = engine_new_node(Tile);
     TileTextureNode* ground_tex = engine_new_node(TileTexture);
-    //ground_tex->func = tile_texture;
-    pawscript_get(context, "tile_texture", &ground_tex->func);
+    ground_tex->func = tile_texture;
     engine_attach_node(&ground->node, &ground_tex->node);
     engine_attach_node(&tileset->node, &ground->node);
     engine_attach_node(&tilemap->node, &tileset->node);
@@ -93,12 +91,10 @@ int main() {
     player->pos_x = 1;
     player->pos_y = 2;
     EntityUpdateNode* entity_update = engine_new_node(EntityUpdate);
-    //entity_update->func = player_update;
-    pawscript_get(context, "player_update", &entity_update->func);
+    entity_update->func = player_update;
     engine_attach_node(&player->node, &entity_update->node);
     EntityTextureNode* entity_texture = engine_new_node(EntityTexture);
-    //entity_texture->func = player_texture;
-    pawscript_get(context, "player_texture", &entity_texture->func);
+    entity_texture->func = player_texture;
     engine_attach_node(&player->node, &entity_texture->node);
     engine_attach_node(&tilemap->node, &player->node);
     engine_attach_node(&level->node, &tilemap->node);

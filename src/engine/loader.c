@@ -1,12 +1,12 @@
 #include "engine.h"
 
 #include "io/assets.h"
-#include "pawscript.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdalign.h>
+#include <dlfcn.h>
 
 static void* stub() { return NULL; }
 
@@ -41,13 +41,8 @@ static void asset(void* ptr, int size, uint8_t** bytes) {
 }
 
 static void func(void* ptr, int size, uint8_t** bytes) {
-    char* script = (char*)*bytes; *bytes += strlen(script) + 1;
     char* func = (char*)*bytes; *bytes += strlen(func) + 1;
-    PawScriptContext* context = get_asset(PawScriptContext, script);
-    if (!pawscript_get(context, func, ptr)) {
-        printf("Function %s not found in script %s\n", func, script);
-        *(void**)ptr = stub;
-    }
+    *(void**)ptr = dlsym(RTLD_DEFAULT, func);
 }
 
 typedef struct {
