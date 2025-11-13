@@ -45,6 +45,7 @@ for i in $(find $ASSETS_DIR -type f -exec realpath -s --relative-to=$ASSETS_DIR 
 done
 
 SOURCES=$(echo $CONFIG_JSON | jq -r '.sources | .[]')
+CPP_SOURCES=$(echo $CONFIG_JSON | jq -r '.cpp_sources | .[]')
 
 # get flags
 eval $(echo $CONFIG_JSON | jq -r -c --arg OS "$OS" '
@@ -67,6 +68,8 @@ done
 CFLAGS="$CFLAGS$(pkgconf --cflags $PKGCONF)"
 LDFLAGS="$LDFLAGS$(pkgconf --libs $PKGCONF)"
 
+LINKER="${LINKER:-${CPP_COMPILER:-${COMPILER}}}"
+
 {
     # prolog
     echo -e "\n.PHONY: all clean"
@@ -74,7 +77,7 @@ LDFLAGS="$LDFLAGS$(pkgconf --libs $PKGCONF)"
     echo -e "\nclean:"
     echo -e "\trm -rf $BUILD_TARGET $BUILD_DIR $ASSETS_DEST"
 
-    # add compile targets
+    # add C compile targets
     for i in $SOURCES; do
         $COMPILER $CFLAGS -MM -MT $BUILD_DIR/${i%%.*}.o $i
         echo -e "\t@mkdir -p \$(shell dirname \$@)"
@@ -82,10 +85,18 @@ LDFLAGS="$LDFLAGS$(pkgconf --libs $PKGCONF)"
         echo ""
     done
 
+    # add C++ compile targets
+    for i in $CPP_SOURCES; do
+        $CPP_COMPILER $CFLAGS -MM -MT $BUILD_DIR/${i%%.*}.o $i
+        echo -e "\t@mkdir -p \$(shell dirname \$@)"
+        echo -e "\t$CPP_COMPILER \$< $CFLAGS -c -o \$@"
+        echo ""
+    done
+
     # add link target
-    echo "$BUILD_TARGET: $(for i in $SOURCES; do
+    echo "$BUILD_TARGET: $(for i in $SOURCES $CPP_SOURCES; do
         echo -n "$BUILD_DIR/${i%%.*}.o "
     done)"
-    echo -e "\t$COMPILER \$^ $LDFLAGS -o \$@"
+    echo -e "\t$LINKER \$^ $LDFLAGS -o \$@"
 
 } | make -f - -j$(nproc) $@

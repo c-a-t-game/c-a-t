@@ -55,7 +55,4 @@ void graphics_set_buffer(Window* window, Buffer* buffer);
 void graphics_destroy_buffer(Buffer* buffer);
 bool graphics_should_close();
 
-void* loader_png(uint8_t* data, int len);
-void* loader_glsl(uint8_t* data, int len);
-
 #endif

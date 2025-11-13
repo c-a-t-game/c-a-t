@@ -1,11 +1,14 @@
 #include "engine.h"
 
 #include "io/assets.h"
+#include "pawscript.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdalign.h>
+
+static void* stub() { return NULL; }
 
 static void _(void* ptr, int size, uint8_t** bytes) {}
 
@@ -35,6 +38,16 @@ static void polygon(void* ptr, int size, uint8_t** bytes) {
 static void asset(void* ptr, int size, uint8_t** bytes) {
     char* str = (char*)*bytes; *bytes += strlen(str) + 1;
     *(void**)ptr = get_asset(void, str);
+}
+
+static void func(void* ptr, int size, uint8_t** bytes) {
+    char* script = (char*)*bytes; *bytes += strlen(script) + 1;
+    char* func = (char*)*bytes; *bytes += strlen(func) + 1;
+    PawScriptContext* context = get_asset(PawScriptContext, script);
+    if (!pawscript_get(context, func, ptr)) {
+        printf("Function %s not found in script %s\n", func, script);
+        *(void**)ptr = stub;
+    }
 }
 
 typedef struct {

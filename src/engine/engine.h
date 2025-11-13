@@ -57,6 +57,4 @@ uint8_t engine_get_tile(TilemapNode* node, int x, int y);
 void engine_update(LevelRootNode* node);
 void engine_render(LevelRootNode* node, float width, float height);
 
-void* loader_lvl(uint8_t* bytes, int size);
-
 #endif

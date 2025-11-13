@@ -1,14 +1,8 @@
-#include "io/audio.h"
-#include "io/graphics.h"
-#include "engine/engine.h"
+#include "loaders.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-static void* loader_txt(uint8_t* data, int len) {
-    return strndup((char*)data, len);
-}
 
 typedef struct {
     const char* name;
@@ -25,16 +19,14 @@ typedef struct {
 } Loader;
 
 static Asset assets[] = {
+#ifdef CLANGD_IGNORE
 #include "data.h"
+#endif
 };
 
-#define LOADER(ext) { #ext, loader_##ext }
 static Loader loaders[] = {
-    LOADER(txt),
-    LOADER(png),
-    LOADER(glsl),
-    LOADER(lvl),
-    LOADER(wav),
+#define LOADER(ext) { #ext, loader_##ext },
+#include "loader_def.h"
 };
 
 static const char* get_extension(const char* name) {

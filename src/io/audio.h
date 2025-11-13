@@ -27,6 +27,4 @@ void audio_rate(AudioInstance* instance, float factor);
 void audio_play_oneshot(AudioSource* audio); // holy fucking shit niko oneshot 🥞🐱
 AudioInstance* audio_play(AudioSource* audio);
 
-void* loader_wav(uint8_t* bytes, int size);
-
 #endif

@@ -40,25 +40,21 @@ NODE(Entity,
 )
 
 NODE(CustomRender,
-    _(void(*)(), func, asset)
+    _(void(*)(), func, func)
 )
 
 NODE(TileTexture,
-    _(int(*)(TilemapNode* tilemap, TileNode* tile, int x, int y), func, asset)
-)
-
-NODE(TileTextureCollision,
-    _(void(*)(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction), func, asset)
+    _(int(*)(TilemapNode* tilemap, TileNode* tile, int x, int y), func, func)
 )
 
 NODE(EntityUpdate,
-    _(void(*)(EntityNode* entity, TilemapNode* tilemap), func, asset)
+    _(void(*)(EntityNode* entity, TilemapNode* tilemap), func, func)
 )
 
 NODE(EntityTexture,
-    _(Texture*(*)(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h), func, asset)
+    _(Texture*(*)(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h), func, func)
 )
 
-NODE(EntityCollision,
-    _(void(*)(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction), func, asset)
+NODE(Collision,
+    _(void(*)(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction), func, func)
 )

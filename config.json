@@ -1,5 +1,6 @@
 {
   "sources": ["src/*.c", "src/engine/**/*.c", "src/io/assets/*.c", "src/io/audio/impl/*.c"],
+  "cpp_sources": ["src/pawscript.cpp"],
   "backends": {
     "any": {
       "graphics": ["sdl3", "opengl"],
@@ -14,7 +15,9 @@
       "BUILD_TARGET": "cat",
       "ASSETS_DIR": "assets",
       "ASSETS_DEST": "src/io/assets/data.h",
-      "COMPILER": "gcc"
+      "COMPILER": "clang",
+      "CPP_COMPILER": "clang++",
+      "CLANGD_IGNORE": "1"
     },
     "windows": {
       "BUILD_TARGET": "cat.exe"

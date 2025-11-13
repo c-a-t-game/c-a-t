@@ -1,7 +1,7 @@
 #include "io/input.h"
 
 #include <stdlib.h>
-#include <stdint.h>
+#include <string.h>
 #include <stdio.h>
 
 typedef struct {
@@ -13,8 +13,8 @@ typedef struct {
 static KeybindEntry* entries = NULL;
 static int entries_size = 0, entries_capacity = 4;
 
-static int compare_ptr(const void* a, const void* b) {
-    return (uintptr_t)*(void**)b - (uintptr_t)*(void**)a;
+static int compare_str(const void* a, const void* b) {
+    return strcmp(*(char**)a, *(char**)b);
 }
 
 static int compare_int(const void* a, const void* b) {
@@ -23,7 +23,7 @@ static int compare_int(const void* a, const void* b) {
 
 void keybind_add_entry(const char* name) {
     if (!entries) entries = malloc(sizeof(KeybindEntry) * entries_capacity);
-    if (bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr)) return;
+    if (bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str)) return;
     KeybindEntry entry = (KeybindEntry){ name, malloc(sizeof(int) * 4), 0, 4 };
     if (entries_size > 0 && !entries[0].name) entries[0] = entry;
     else {
@@ -33,23 +33,23 @@ void keybind_add_entry(const char* name) {
         }
         entries[entries_size++] = entry;
     }
-    qsort(entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    qsort(entries, entries_size, sizeof(KeybindEntry), compare_str);
 }
 
 void keybind_remove_entry(const char* name) {
-    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     if (!entry) return;
     free(entry->keybinds);
     entry->name = NULL;
-    qsort(entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    qsort(entries, entries_size, sizeof(KeybindEntry), compare_str);
 }
 
 void keybind_add(const char* name, int keybind) {
     if (!name) return;
-    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     if (!entry) {
         keybind_add_entry(name);
-        entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+        entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     }
     if (entry->size > 0 && entry->keybinds[0] == 0) entry->keybinds[0] = keybind;
     else {
@@ -64,7 +64,7 @@ void keybind_add(const char* name, int keybind) {
 
 void keybind_remove(const char* name, int keybind) {
     if (!name) return;
-    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     if (!entry) return;
     int* ptr = bsearch(&keybind, entry->keybinds, entry->size, sizeof(int), compare_int);
     if (!ptr) return;
@@ -74,7 +74,7 @@ void keybind_remove(const char* name, int keybind) {
 
 int* keybind_get(const char* name, int* count) {
     if (!name) return NULL;
-    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     if (!entry) return NULL;
     int *ptr = NULL, *head = NULL;
     for (int i = 0; i < entry->size; i++) {
@@ -115,21 +115,21 @@ void keybind_update() {
 
 bool keybind_down(const char* name) {
     if (!name) return false;
-    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     if (!entry) return false;
     return entry->down;
 }
 
 bool keybind_pressed(const char* name) {
     if (!name) return false;
-    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     if (!entry) return false;
     return entry->down && !entry->prev_down;
 }
 
 bool keybind_released(const char* name) {
     if (!name) return false;
-    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_ptr);
+    KeybindEntry* entry = bsearch(&name, entries, entries_size, sizeof(KeybindEntry), compare_str);
     if (!entry) return false;
     return !entry->down && entry->prev_down;
 }

@@ -1,0 +1,197 @@
+type AudioSample = s16;
+
+type AudioSource = struct {
+    void# context;
+    void#<-(void# context) init;
+    void<-(void# context, void# instance) free;
+    void<-(void# context, void# instance, f32 sec) seek;
+    void<-(void# context, void# instance, f32 factor) rate;
+    void<-(void# context, void# instance, AudioSample# out, s32 samples) play;
+};
+
+type AudioInstance = struct {
+    void# handle;
+    void<-() delete => (extern void<-(void#) audio_stop)(this.handle);
+    void<-() stop => delete(this);
+    void<-() pause => (extern void<-(void#) audio_pause)(this.handle);
+    void<-() resume => (extern void<-(void#) audio_resume)(this.handle);
+    void<-(f32 sec) seek => (extern void<-(void#, f32) audio_seek)(this.handle, sec);
+    void<-(f32 factor) rate => (extern void<-(void#, f32) audio_rate)(this.handle, factor);
+};
+
+type Texture = struct {
+    s32# colors;
+    s32 width;
+    s32 height;
+};
+
+type Shader = void#;
+type Buffer = void#;
+
+type Polygon = struct {
+    s32 num_contours;
+    s32# hole;
+    struct {
+        s32 num_vertices;
+        struct {
+            f64 x;
+            f64 y;
+        } vertex;
+    } contour;
+};
+
+type Node = struct {
+    s32 node_type;
+    s32 children_size;
+    s32 children_capacity;
+    defer(Node)# children;
+    defer(Node) parent;
+    s32 size;
+};
+
+type LevelRootNode = struct {
+    inline Node node;
+    f32 cam_x; f32 cam_y;
+};
+
+type TileChunkNode = struct {
+    inline Node node;
+    s32 x; s32 y;
+    inline(256) s8# tile;
+};
+
+type TilemapNode = struct {
+    inline Node node;
+    inline Polygon collision;
+    f32 scale_x; f32 scale_y;
+    f32 scroll_offset_x; f32 scroll_offset_y;
+    f32 scroll_speed_x; f32 scroll_speed_y;
+};
+
+type TilesetNode = struct {
+    inline Node node;
+    Texture# tileset;
+    s32 tile_width;
+    s32 tile_height;
+    s32 tiles_per_row;
+};
+
+type TileNode = struct {
+    inline Node node;
+    inline Polygon polygon;
+};
+
+type EntityNode = struct {
+    inline Node node;
+    f32 pos_x; f32 pos_y;
+    f32 vel_x; f32 vel_y;
+    f32 width; f32 height;
+};
+
+type CustomRenderNode = struct {
+    inline Node node;
+    void<-() func;
+};
+
+type TileTextureNode = struct {
+    inline Node node;
+    void<-(TilemapNode tilemap, TileNode tile, s32 x, s32 y) func;
+};
+
+type EntityUpdateNode = struct {
+    inline Node node;
+    void<-(EntityNode entity, TilemapNode tilemap) func;
+};
+
+type EntityTextureNode = struct {
+    inline Node node;
+    Texture<-(EntityNode entity, TilemapNode tilemap, f32# srcx, f32# srcy, f32# srcw, f32# srch, f32# w, f32# h) func;
+};
+
+type CollisionNode = struct {
+    inline Node node;
+    void<-(TilemapNode tilemap, TileNode tile, s32 x, s32 y) func;
+};
+
+const struct {
+    inline struct {
+        void<-(s8# name) add_entry = extern void<-() keybind_add_entry;
+        void<-(s8# name) remove_entry = extern void<-() keybind_remove_entry;
+        void<-(s8# name, s32 keybind) add = extern void<-() keybind_add;
+        void<-(s8# name, s32 keybind) remove = extern void<-() keybind_remove;
+        s32#<-(s8# name, s32# count) get = extern void<-() keybind_get;
+        s8##<-(s32# count) get_entries = extern void<-() keybind_get_entries;
+
+        bool<-(s8# name) down = extern void<-() keybind_down;
+        bool<-(s8# name) pressed = extern void<-() keybind_pressed;
+        bool<-(s8# name) released = extern void<-() keybind_released;
+    } keybind;
+    inline struct {
+        s32 sample_rate = 44100;
+
+        void<-(AudioInstance instance) stop = extern void<-() audio_stop;
+        void<-(AudioInstance instance) pause = extern void<-() audio_pause;
+        void<-(AudioInstance instance) resume = extern void<-() audio_resume;
+        void<-(AudioInstance instance, f32 sec) seek = extern void<-() audio_seek;
+        void<-(AudioInstance instance, f32 factor) rate = extern void<-() audio_rate;
+        void<-(AudioSource audio) play_oneshot = extern void<-() audio_play_oneshot;
+        AudioInstance<-(AudioSource audio) play => return new[AudioInstance]{ .handle = (extern void<-()<-(AudioSource) audio_play)(audio) };
+    } audio;
+    inline struct {
+        s32<-(u8 x) gray => return this.rgba(x, x, x, 255);
+        s32<-(u8 x, u8 a) graya => return this.rgba(x, x, x, a);
+        s32<-(u8 r, u8 g, u8 b) rgb => return this.rgba(r, g, b, 255);
+        s32<-(u8 r, u8 g, u8 b, u8 a) rgba => return r << 24 | g << 16 | b << 8 | a;
+
+        void<-(Shader shader) post_process => (extern void<-(void#, void#) graphics_post_process)(null, shader);
+        void<-(Shader shader) set_shader => (extern void<-(void#, void#) graphics_set_shader)(null, shader);
+        void<-(f32 x, f32 y, f32 w, f32 h, s32 color) rect => (extern void<-(void#, f32, f32, f32, f32, s32) graphics_rect)(null, x, y, w, h, color);
+        void<-(Texture texture, f32 x, f32 y, f32 w, f32 h, f32 sx, f32 sy, f32 sw, f32 sh, s32 color) draw => (extern void<-(void#, Texture, f32, f32, f32, f32, f32, f32, f32, f32, s32) graphics_draw)(null, texture, x, y, w, h, sx, sy, sw, sh, color);
+        void<-(Buffer buffer, f32 x, f32 y, f32 w, f32 h, f32 sx, f32 sy, f32 sw, f32 sh, s32 color) blit => (extern void<-(void#, Buffer, f32, f32, f32, f32, f32, f32, f32, f32, s32) graphics_blit)(null, buffer, x, y, w, h, sx, sy, sw, sh, color);
+        Buffer<-(s32 w, s32 h) new_buffer => return (extern Buffer<-(void#, s32, s32) graphics_new_buffer)(null, w, h);
+        void<-(Buffer buffer) set_buffer => (extern void<-(void#, Buffer) graphics_set_buffer)(null, buffer);
+        void<-(Buffer buffer) destroy_buffer = extern void<-() graphics_destroy_buffer;
+    } graphics;
+    inline struct {
+        void#<-(s8#) get = extern void<-() _get_asset;
+    } assets;
+    inline struct {
+        type custom_render = void<-();
+        type tile_texture = s32<-(TilemapNode tilemap, TileNode tile, s32 x, s32 y);
+        type entity_update = void<-(EntityNode entity, TilemapNode tilemap);
+        type entity_texture = Texture<-(EntityNode entity, TilemapNode tilemap, f32# srcx, f32# srcy, f32# srcw, f32# srch, f32# w, f32# h);
+        type collision = void<-(EntityNode entity, TilemapNode tilemap, s32 x, s32 y, s32 direction);
+    } funcs;
+    inline struct {
+        s32 none = 0;
+        s32 up = 1;
+        s32 left = 2;
+        s32 down = 3;
+        s32 right = 4;
+    } dir;
+    void#<-(type T) new_node {
+        T node = new[T];
+        if node.node.node_type == LevelRootNode     => node.node.node_type = 0;
+        if node.node.node_type == TileChunkNode     => node.node.node_type = 1;
+        if node.node.node_type == TilemapNode       => node.node.node_type = 2;
+        if node.node.node_type == TilesetNode       => node.node.node_type = 3;
+        if node.node.node_type == TileNode          => node.node.node_type = 4;
+        if node.node.node_type == EntityNode        => node.node.node_type = 5;
+        if node.node.node_type == CustomRenderNode  => node.node.node_type = 6;
+        if node.node.node_type == TileTextureNode   => node.node.node_type = 7;
+        if node.node.node_type == EntityUpdateNode  => node.node.node_type = 8;
+        if node.node.node_type == EntityTextureNode => node.node.node_type = 9;
+        if node.node.node_type == CollisionNode     => node.node.node_type = 10;
+        node.node.size = sizeof(T);
+        return node;
+    };
+    void<-(Node parent, Node child) attach_node = extern void<-() engine_attach_node;
+    void<-(Node child) detach_node = extern void<-() engine_detach_node;
+    void<-(Node node) delete_node = extern void<-() engine_delete_node;
+    Node<-(Node node) deep_copy = extern void<-() engine_deep_copy;
+    void<-(TilemapNode node) compute_collision = extern void<-() engine_compute_collision;
+    void<-(TilemapNode node, s32 x, s32 y, s32 index) set_tile = extern void<-() engine_set_tile;
+    s32<-(TilemapNode node, s32 x, s32 y) get_tile = extern void<-() engine_get_tile;
+    void<-(LevelRootNode node) update = extern void<-() engine_update;
+    void<-(LevelRootNode node) render = extern void<-() engine_render;
+} engine = new[typeof(engine)];
