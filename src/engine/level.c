@@ -2,39 +2,10 @@
 
 #include <stdlib.h>
 
-static void engine_resolve_collision() {
-    
-}
-
-static void engine_update_entity(EntityNode* entity, TilemapNode* tilemap) {
-    for (int i = 0; i < entity->node.children_size; i++) {
-        if (!entity->node.children[i]) continue;
-        if (entity->node.children[i]->type != NodeType_EntityUpdate) continue;
-        ((EntityUpdateNode*)entity->node.children[i])->func(entity, tilemap);
-    }
-    entity->pos_y += entity->vel_y;
-    engine_resolve_collision();
-    entity->pos_x += entity->vel_x;
-    engine_resolve_collision();
-}
-
-static void engine_update_tilemap(TilemapNode* tilemap) {
-    for (int i = 0; i < tilemap->node.children_size; i++) {
-        if (!tilemap->node.children[i]) continue;
-        if (tilemap->node.children[i]->type != NodeType_Entity) continue;
-        EntityNode* entity = (EntityNode*)tilemap->node.children[i];
-        engine_update_entity(entity, tilemap);
-    }
-}
-
-void engine_update(LevelRootNode* node) {
-    for (int i = 0; i < node->node.children_size; i++) {
-        if (!node->node.children[i]) continue;
-        if (node->node.children[i]->type != NodeType_Tilemap) continue;
-        TilemapNode* tilemap = (TilemapNode*)node->node.children[i];
-        engine_update_tilemap(tilemap);
-    }
-}
+typedef enum {
+    Axis_X,
+    Axis_Y,
+} Axis;
 
 static TilesetNode* engine_get_tileset(TilemapNode* tilemap) {
     TilesetNode* tileset = NULL;
@@ -44,6 +15,77 @@ static TilesetNode* engine_get_tileset(TilemapNode* tilemap) {
         tileset = (TilesetNode*)tilemap->node.children[i];
     }
     return tileset;
+}
+
+static bool engine_rect_intersect(
+    float x1a, float y1a, float x2a, float y2a,
+    float x1b, float y1b, float x2b, float y2b
+) {
+    return x2a > x1b && x2b > x1a && y2a > y1b && y2b > y1a;
+}
+
+#include <stdio.h>
+
+static void engine_resolve_collision(EntityNode* entity, TilemapNode* tilemap, TilesetNode* tileset, Axis axis) {
+    float fx = entity->pos_x - entity->width / 2;
+    float fy = entity->pos_y - entity->height;
+    float tx = entity->pos_x + entity->width / 2;
+    float ty = entity->pos_y;
+    int min_x = floorf(fx) - 1;
+    int min_y = floorf(fy) - 1;
+    int max_x = ceilf(fx) + 1;
+    int max_y = ceilf(ty) + 1;
+    for (int y = min_y; y <= max_y; y++) {
+        for (int x = min_x; x <= max_x; x++) {
+            TileNode* tile = (TileNode*)tileset->node.children[*engine_tile(tilemap, x, y)];
+            if (!tile->is_solid) continue;
+            if (!engine_rect_intersect(fx, fy, tx, ty, x, y, x + 1, y + 1)) continue;
+            if (axis == Axis_X) {
+                if (entity->vel_x == 0) (void)0;
+                else if (entity->vel_x > 0) entity->pos_x = x     - entity->width / 2;
+                else if (entity->vel_x < 0) entity->pos_x = x + 1 + entity->width / 2;
+                entity->vel_x = 0;
+            }
+            if (axis == Axis_Y) {
+                if (entity->vel_y == 0) (void)0;
+                else if (entity->vel_y > 0) entity->pos_y = y;
+                else if (entity->vel_y < 0) entity->pos_y = y + 1 + entity->height;
+                entity->oTouchingGround = entity->vel_y >= 0;
+                entity->vel_y = 0;
+            }
+        }
+    }
+}
+
+static void engine_update_entity(EntityNode* entity, TilemapNode* tilemap, TilesetNode* tileset) {
+    for (int i = 0; i < entity->node.children_size; i++) {
+        if (!entity->node.children[i]) continue;
+        if (entity->node.children[i]->type != NodeType_EntityUpdate) continue;
+        ((EntityUpdateNode*)entity->node.children[i])->func(entity, tilemap);
+    }
+    entity->oTouchingGround = false;
+    entity->pos_y += entity->vel_y;
+    engine_resolve_collision(entity, tilemap, tileset, Axis_Y);
+    entity->pos_x += entity->vel_x;
+    engine_resolve_collision(entity, tilemap, tileset, Axis_X);
+}
+
+static void engine_update_tilemap(TilemapNode* tilemap, TilesetNode* tileset) {
+    for (int i = 0; i < tilemap->node.children_size; i++) {
+        if (!tilemap->node.children[i]) continue;
+        if (tilemap->node.children[i]->type != NodeType_Entity) continue;
+        EntityNode* entity = (EntityNode*)tilemap->node.children[i];
+        engine_update_entity(entity, tilemap, tileset);
+    }
+}
+
+void engine_update(LevelRootNode* node) {
+    for (int i = 0; i < node->node.children_size; i++) {
+        if (!node->node.children[i]) continue;
+        if (node->node.children[i]->type != NodeType_Tilemap) continue;
+        TilemapNode* tilemap = (TilemapNode*)node->node.children[i];
+        engine_update_tilemap(tilemap, engine_get_tileset(tilemap));
+    }
 }
 
 static void engine_get_tilemap_offsets(TilemapNode* tilemap, TilesetNode* tileset, float cam_x, float cam_y, float* offset_x, float* offset_y) {
@@ -127,4 +169,24 @@ void engine_render(LevelRootNode* level, float width, float height) {
         TilemapNode* tilemap = (TilemapNode*)level->node.children[i];
         engine_render_tilemap(tilemap, width, height, level->cam_x, level->cam_y);
     }
+}
+
+uint8_t* engine_tile(TilemapNode* node, int x, int y) {
+    int chunk_x = x / CHUNK_SIZE;
+    int chunk_y = y / CHUNK_SIZE;
+    TileChunkNode* chunk = NULL;
+    for (int i = 0; i < node->node.children_size && !chunk; i++) {
+        if (!node->node.children[i]) continue;
+        if (node->node.children[i]->type != NodeType_TileChunk) continue;
+        TileChunkNode* c = (TileChunkNode*)node->node.children[i];
+        if (c->x != chunk_x || c->y != chunk_y) continue;
+        chunk = c;
+    }
+    if (!chunk) {
+        chunk = engine_new_node(TileChunk);
+        chunk->x = chunk_x;
+        chunk->y = chunk_y;
+        engine_attach_node(&node->node, &chunk->node);
+    }
+    return &chunk->tile[(x % CHUNK_SIZE + CHUNK_SIZE) % CHUNK_SIZE][(y % CHUNK_SIZE + CHUNK_SIZE) % CHUNK_SIZE];
 }

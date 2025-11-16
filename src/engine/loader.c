@@ -17,24 +17,6 @@ static void raw(void* ptr, int size, uint8_t** bytes) {
     *bytes += size;
 }
 
-static void polygon(void* ptr, int size, uint8_t** bytes) {
-    gpc_polygon* p = ptr;
-    p->num_contours = *(uint32_t*)*bytes; *bytes += 4;
-    p->hole = malloc(p->num_contours * sizeof(int));
-    p->contour = malloc(p->num_contours * sizeof(gpc_vertex_list));
-    for (int i = 0; i < p->num_contours; i++) {
-        gpc_vertex_list* vl = &p->contour[i];
-        p->hole[i] = *(uint8_t*)*bytes; *bytes += 1;
-        vl->num_vertices = *(uint32_t*)*bytes; *bytes += 4;
-        vl->vertex = malloc(vl->num_vertices * sizeof(gpc_vertex));
-        for (int j = 0; j < vl->num_vertices; j++) {
-            gpc_vertex* v = &vl->vertex[j];
-            v->x = *(float*)*bytes; *bytes += 4;
-            v->y = *(float*)*bytes; *bytes += 4;
-        }
-    }
-}
-
 static void asset(void* ptr, int size, uint8_t** bytes) {
     char* str = (char*)*bytes; *bytes += strlen(str) + 1;
     *(void**)ptr = get_asset(void, str);

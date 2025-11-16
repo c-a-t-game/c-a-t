@@ -10,7 +10,6 @@ NODE(TileChunk,
 )
 
 NODE(Tilemap,
-    _(gpc_polygon, collision, _)
     _(float, scale_x, raw)
     _(float, scale_y, raw)
     _(float, scroll_offset_x, raw)
@@ -27,7 +26,7 @@ NODE(Tileset,
 )
 
 NODE(Tile,
-    _(gpc_polygon, collision, polygon)
+    _(bool, is_solid, raw)
 )
 
 NODE(Entity,
@@ -37,6 +36,7 @@ NODE(Entity,
     _(float, vel_y, _)
     _(float, width, raw)
     _(float, height, raw)
+    _(ObjectStorage, data, raw)
 )
 
 NODE(CustomRender,

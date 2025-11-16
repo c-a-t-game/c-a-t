@@ -5,9 +5,16 @@
 #include <math.h>
 
 #include "io/graphics.h"
-#include "gpc.h"
+#include "object_storage.h"
 
 #define CHUNK_SIZE 16
+#define OBJECT_STORAGE_SIZE 256
+
+typedef union {
+    int as_int[OBJECT_STORAGE_SIZE / sizeof(int)];
+    int as_flt[OBJECT_STORAGE_SIZE / sizeof(float)];
+    int as_ptr[OBJECT_STORAGE_SIZE / sizeof(void*)];
+} ObjectStorage;
 
 typedef enum {
 #define NODE(type, ...) NodeType_##type,
@@ -50,9 +57,7 @@ void engine_detach_node(Node* child);
 void engine_delete_node(Node* node);
 Node* engine_deep_copy(Node* node);
 
-void engine_compute_collision(TilemapNode* node);
-void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile_index);
-uint8_t engine_get_tile(TilemapNode* node, int x, int y);
+uint8_t* engine_tile(TilemapNode* node, int x, int y);
 
 void engine_update(LevelRootNode* node);
 void engine_render(LevelRootNode* node, float width, float height);
