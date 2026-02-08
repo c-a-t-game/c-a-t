@@ -30,7 +30,7 @@ static void wav_seek(void* ctx, void* inst, float sec) {
     *(int*)inst = sec * SAMPLE_RATE;
 }
 
-void* loader_wav(uint8_t* bytes, int size) {
+void* loader_wav(const char* filename, uint8_t* bytes, int size) {
     AudioSource* source = malloc(sizeof(AudioSource));
     source->context = bytes + 40; // skip over header but keep number of bytes in data block
     source->init = wav_init;

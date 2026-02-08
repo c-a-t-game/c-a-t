@@ -32,19 +32,28 @@ for i in $(echo $CONFIG_JSON | jq -r --arg OS $OS '
   (.defines.any // {}) * (.defines[$OS] // {})
   | to_entries | map("\(.key)=\(.value)") | .[]
 '); do
-    CFLAGS="${CFLAGS}-D$i "
-    eval $i
+    KEY=${i%%=*}
+    VAL=${i##*=}
+    if [ "${!KEY}" == "" ]; then
+        CFLAGS="${CFLAGS}-D$i "
+        eval $i
+    else
+        CFLAGS="${CFLAGS}-D$KEY=$VAL "
+    fi
 done
 
 # generate $ASSETS_DEST
-rm $ASSETS_DEST 2> /dev/null
-for i in $(find $ASSETS_DIR -type f -exec realpath -s --relative-to=$ASSETS_DIR {} ';'); do
-    BYTES=$(cat $ASSETS_DIR/$i | hexdump -v -e '1/1 "0x%02X,"')
-    COUNT=$(wc -c $ASSETS_DIR/$i | awk '{print $1}')
-    echo "{ \"$i\", $COUNT, (uint8_t[]){ $BYTES }}," >> $ASSETS_DEST
-done
+if [ "$COMPILE_ASSETS" == "yes" ]; then
+    rm $ASSETS_DEST 2> /dev/null
+    for i in $(find $ASSETS_DIR -type f -exec realpath -s --relative-to=$ASSETS_DIR {} ';'); do
+        echo "Compiling asset \"$i\""
+        BYTES=$(cat $ASSETS_DIR/$i | hexdump -v -e '1/1 "0x%02X,"')
+        COUNT=$(wc -c $ASSETS_DIR/$i | awk '{print $1}')
+        echo "{ \"$i\", $COUNT, (uint8_t[]){ $BYTES }}," >> $ASSETS_DEST
+    done
+fi
 
-SOURCES=$(echo $CONFIG_JSON | jq -r '.sources | .[]')
+SOURCES=$(echo "$CONFIG_JSON" | jq -r '.sources | .[]')
 
 # get flags
 eval $(echo $CONFIG_JSON | jq -r -c --arg OS "$OS" '
@@ -56,7 +65,7 @@ eval $(echo $CONFIG_JSON | jq -r -c --arg OS "$OS" '
 ')
 
 # add backends
-for i in $(echo $CONFIG_JSON | jq -r -c '.backends.any // {} * .backends.linux // {} | to_entries | .[]'); do
+for i in $(echo $CONFIG_JSON | jq -r -c '(.backends.any // {}) * (.backends.linux // {}) | to_entries | .[]'); do
     FOLDER=$(echo $i | jq -r '.key')
     for file in $(echo $i | jq -r '.value | if type == "array" then . else [.] end | reverse | .[]'); do
         SOURCES="$SOURCES $BACKEND_DIR/$FOLDER/$file.c"

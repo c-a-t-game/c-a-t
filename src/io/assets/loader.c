@@ -15,7 +15,7 @@ typedef struct {
 
 typedef struct {
     const char* ext;
-    void*(*loader)(uint8_t* data, int len);
+    void*(*loader)(const char* filename, uint8_t* data, int len);
 } Loader;
 
 static Asset assets[] = {
@@ -51,7 +51,7 @@ void load_assets() {
         for (int j = 0; j < num_loaders; j++) {
             Loader* loader = &loaders[j];
             if (strcmp(ext, loader->ext) != 0) continue;
-            asset->data = loader->loader(asset->raw, asset->length);
+            asset->data = loader->loader(asset->name, asset->raw, asset->length);
         }
     }
 }

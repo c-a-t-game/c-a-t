@@ -5,13 +5,10 @@
 #include <math.h>
 
 #include "io/graphics.h"
-#include "gpc.h"
-
-#define CHUNK_SIZE 16
 
 typedef enum {
 #define NODE(type, ...) NodeType_##type,
-#include "nodes.h"
+#include "assets/api/nodes.h"
 #undef NODE
 } NodeType;
 
@@ -34,7 +31,7 @@ struct Node {
 
 #define _(type, name, parser) typeof(type) name;
 #define NODE(type, ...) typedef struct { Node node; __VA_ARGS__ } type##Node;
-#include "nodes.h"
+#include "assets/api/nodes.h"
 #undef NODE
 #undef _
 
@@ -50,11 +47,10 @@ void engine_detach_node(Node* child);
 void engine_delete_node(Node* node);
 Node* engine_deep_copy(Node* node);
 
-void engine_compute_collision(TilemapNode* node);
-void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile_index);
-uint8_t engine_get_tile(TilemapNode* node, int x, int y);
+uint8_t* engine_tile(TilemapNode* node, int x, int y);
+void* engine_property(EntityNode* node, const char* name);
 
-void engine_update(LevelRootNode* node);
+void engine_update(LevelRootNode* node, float delta_time);
 void engine_render(LevelRootNode* node, float width, float height);
 
 #endif

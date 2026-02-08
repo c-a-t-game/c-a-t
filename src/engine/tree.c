@@ -51,7 +51,11 @@ Node* engine_deep_copy(Node* node) {
     copy->children = malloc(sizeof(Node*) * copy->children_capacity);
     copy->parent = NULL;
     for (int i = 0; i < copy->children_size; i++) {
-        Node* child = engine_deep_copy(copy->children[i]);
+        if (node->children[i] == NULL) {
+            copy->children[i] = NULL;
+            continue;
+        }
+        Node* child = engine_deep_copy(node->children[i]);
         child->parent = copy;
         copy->children[i] = child;
     }

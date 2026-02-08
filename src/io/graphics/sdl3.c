@@ -146,7 +146,7 @@ void graphics_destroy_buffer(Buffer* buffer) {
     SDL_DestroyTexture((void*)buffer);
 }
 
-void* loader_png(uint8_t* data, int len) {
+void* loader_png(const char* filename, uint8_t* data, int len) {
     int c;
     Texture* texture = malloc(sizeof(Texture));
     texture->colors = (Color*)stbi_load_from_memory(data, len, &texture->width, &texture->height, &c, 4);
@@ -160,4 +160,4 @@ bool graphics_should_close() {
 
 void graphics_post_process(Window* w, Shader* shader) {}
 void graphics_set_shader(Window* w, Shader* shader) {}
-void* loader_glsl(uint8_t* data, int len) { return NULL; }
+void* loader_glsl(const char* filename, uint8_t* data, int len) { return NULL; }

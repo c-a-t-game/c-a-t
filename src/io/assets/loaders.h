@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define LOADER(x) void* loader_##x(uint8_t* data, int len);
+#define LOADER(x) void* loader_##x(const char* filename, uint8_t* data, int len);
 #include "loader_def.h"
 #undef LOADER
 

@@ -1,10 +1,16 @@
 {
-  "sources": ["src/*.c", "src/engine/**/*.c", "src/io/assets/*.c", "src/io/audio/impl/*.c"],
+  "sources": ["src/*.c", "src/jitc/*.c", "src/engine/**/*.c", "src/io/assets/*.c", "src/io/audio/impl/*.c"],
   "backends": {
     "any": {
-      "graphics": ["sdl3", "opengl"],
+      "graphics": "sdl3",
       "audio": "sdl3",
       "input": "sdl3"
+    },
+    "linux": {
+      "platform": "linux"
+    },
+    "windows": {
+      "platform": "windows"
     }
   },
   "defines": {
@@ -15,7 +21,18 @@
       "ASSETS_DIR": "assets",
       "ASSETS_DEST": "src/io/assets/data.h",
       "COMPILER": "gcc",
-      "CLANGD_IGNORE": "1"
+      "CLANGD_IGNORE": "1",
+      "COMPILE_ASSETS": "no",
+      "JITC_DEBUG": "0",
+      "JITC_DEBUG_ERRORS": "0",
+      "JITC_DEBUG_TOKENS": "0",
+      "JITC_DEBUG_PREPROCESSOR": "0",
+      "JITC_DEBUG_AST": "0",
+      "JITC_DEBUG_RWX": "1",
+      "JITC_DEBUG_CODEGEN_STACK": "0",
+      "JITC_DEBUG_CODEGEN_EMIT": "0",
+      "JITC_DEBUG_IR": "0",
+      "JITC_DEBUG_GDB": "1"
     },
     "windows": {
       "BUILD_TARGET": "cat.exe"
@@ -23,8 +40,8 @@
   },
   "flags": {
     "any": {
-      "pkgconf": "sdl3 glew",
-      "cflags": "-g -Isrc -Iinclude",
+      "pkgconf": "sdl3",
+      "cflags": "-g -Isrc -Iinclude -I.",
       "ldflags": "-g -Wl,--allow-multiple-definition"
     },
     "linux": {
