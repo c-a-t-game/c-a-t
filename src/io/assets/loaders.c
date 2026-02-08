@@ -17,7 +17,7 @@ void* loader_txt(const char* filename, uint8_t* bytes, int size) {
 
 void* loader_h(const char* filename, uint8_t* bytes, int size) {
     char* data = strndup((char*)bytes, size);
-    jitc_create_header(jitc_context, get_basename(filename), data);
+    jitc_create_header(jitc_context, filename, data);
     return data;
 }
 

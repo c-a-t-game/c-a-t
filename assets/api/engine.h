@@ -1,8 +1,8 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "symbols.h"
-#include "types.h"
+#include "api/symbols.h"
+#include "api/types.h"
 
 #include "stdlib.h"
 
@@ -23,7 +23,7 @@ preserve Assets* assets;
 preserve Input* input;
 
 #define NODE(type, ...) preserve int get_type(__ID__(type, Node)* this) -> __ID__(NodeType_, type);
-#include "nodes.h"
+#include "api/nodes.h"
 #undef NODE
 
 <T> T* new_node(Engine* this) {
@@ -32,6 +32,9 @@ preserve Input* input;
     node.node.size = sizeof(T);
     return node;
 }
+
+preserve uint64_t get_micros(Engine* this) -> __get_micros();
+preserve uint64_t get_millis(Engine* this) -> __get_millis();
 
 preserve void attach(Node* this, Node* child) -> __engine_attach_node(this, child);
 preserve void detach(Node* this) -> __engine_detach_node(this);

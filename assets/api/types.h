@@ -9,7 +9,7 @@
 
 typedef enum {
 #define NODE(type, ...) __ID__(NodeType_, type),
-#include "nodes.h"
+#include "api/nodes.h"
 #undef NODE
 } NodeType;
 
@@ -58,7 +58,7 @@ struct Node {
 
 #define _(type, name, parser) typeof(type) name;
 #define NODE(type, ...) typedef struct { Node node; __VA_ARGS__ } __ID__(type, Node);
-#include "nodes.h"
+#include "api/nodes.h"
 #undef NODE
 #undef _
 

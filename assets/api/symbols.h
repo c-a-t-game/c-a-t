@@ -1,7 +1,7 @@
 #ifndef SYMBOLS_H
 #define SYMBOLS_H
 
-#include "types.h"
+#include "api/types.h"
 
 #ifndef __JITC__
 #define extern(symbol) extern
@@ -60,6 +60,9 @@ extern("keybind_pressed") bool __keybind_pressed(const char* name);
 extern("keybind_released") bool __keybind_released(const char* name);
 
 extern("_get_asset") void* __get_asset(const char* name);
+
+extern("get_millis") uint64_t __get_millis();
+extern("get_micros") uint64_t __get_micros();
 
 extern LevelRootNode* current_level;
 

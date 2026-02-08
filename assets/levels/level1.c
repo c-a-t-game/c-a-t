@@ -1,18 +1,25 @@
-#include "engine.h"
+#include "api/engine.h"
 
-#include "stdio.h"
-
-extern Node* entity_player(float x, float y);
+#include "levels/entities/player.h"
 
 static Tile bg[] = {1};
 static Tile fg[] = {
-    0,0,0,0,0,0,0,
-    0,0,1,0,1,0,0,
-    0,0,1,0,1,0,0,
-    0,0,0,0,0,0,0,
-    0,1,0,1,0,1,0,
-    0,0,1,0,1,0,0,
-    0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 };
 
 Node* level1() -> engine.open<LevelRootNode>()
@@ -46,6 +53,7 @@ Node* level1() -> engine.open<LevelRootNode>()
             .prop<int>(16) // tiles_per_row
             .open<TileNode>().close()
             .open<TileNode>()
+                .prop<bool>(true) // is_solid
                 .event<TileTextureNode>(lambda(): int -> 0)
             .close()
         .close()
@@ -55,10 +63,12 @@ Node* level1() -> engine.open<LevelRootNode>()
         .prop<float>(0.0f) // scroll_offset_y
         .prop<float>(1.0f) // scroll_speed_x
         .prop<float>(1.0f) // scroll_speed_y
-        .prop<int>(7) // width
-        .prop<int>(7) // height
+        .prop<int>(24) // width
+        .prop<int>(16) // height
         .prop<Tile>(0) // oob_tile
         .prop<Tile*>(fg) // tiles
         .attach(entity_player(1, 2))
     .close()
 .build();
+
+

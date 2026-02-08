@@ -7,6 +7,7 @@
 #include "io/graphics.h"
 #include "io/input.h"
 #include "io/audio.h"
+#include "io/platform.h"
 
 #include "engine/engine.h"
 #include "jitc/jitc.h"
@@ -45,18 +46,22 @@ int main() {
     }
     entry_point();
 
-    audio_play_oneshot(get_asset(AudioSource, "RECONSTRUCTWHAT.wav"));
     Window* window = graphics_open(":3", 1152, 768);
     graphics_set_active(window);
     audio_init();
 
+    uint64_t last_micros = get_micros();
     while (!graphics_should_close()) {
+        uint64_t curr_micros = get_micros();
+        float delta_time = (curr_micros - last_micros) / 1000000.f * 60;
+        last_micros = curr_micros;
+        
         graphics_start_frame(NULL);
         Buffer* buffer = graphics_new_buffer(NULL, 384, 256);
         graphics_set_buffer(NULL, buffer);
 
         keybind_update();
-        engine_update(current_level, 1);
+        engine_update(current_level, delta_time);
         engine_render(current_level, 1152, 768);
 
         graphics_set_buffer(NULL, NULL);

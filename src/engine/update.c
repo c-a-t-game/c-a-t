@@ -148,6 +148,7 @@ void* engine_property(EntityNode* node, const char* name) {
         if (node->data.capacity == 0) node->data.capacity = 4;
         else node->data.capacity *= 2;
         node->data.entries = realloc(node->data.entries, node->data.capacity * sizeof(*node->data.entries));
+        memset(node->data.entries + node->data.count, 0, (node->data.capacity - node->data.count) * sizeof(*node->data.entries));
     }
     node->data.entries[node->data.count++].key = (char*)name;
     qsort(node->data.entries, node->data.count, sizeof(*node->data.entries), compare_string);
