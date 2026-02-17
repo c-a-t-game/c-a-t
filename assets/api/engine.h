@@ -5,6 +5,9 @@
 #include "api/types.h"
 
 #include "stdlib.h"
+#include "string.h"
+#include "stdio.h"
+#include "math.h"
 
 typedef struct {} Engine;
 typedef struct {} Graphics;
@@ -42,6 +45,9 @@ preserve void delete(Node* this) -> __engine_delete_node(this);
 preserve void copy(Node* this) -> __engine_copy_node(this);
 preserve uint8_t* tile(TilemapNode* this, int x, int y) -> __engine_tile(this, x, y);
 <T> T* prop(EntityNode* this, const char* name) -> (T*)__engine_property(this, name);
+
+preserve EntityNode* find(LevelRootNode* this, const char* name) -> __engine_find_entity(this, name);
+preserve EntityNode* find(TilemapNode* this, const char* name) -> __engine_find_entity_on_tilemap(this, name);
 
 preserve Window* get_main(Graphics* this) -> __graphics_main_window();
 preserve Window* open(Graphics* this, const char* title, int width, int height) -> __graphics_open(title, width, height);
@@ -139,6 +145,11 @@ preserve Node* build(NodeBuilder* this) {
     Node* node = this.curr_node;
     free(this);
     return node;
+}
+
+preserve bool is(EntityNode* this, const char* name) {
+    if (!this.name) return false;
+    return strcmp(this.name, name) == 0;
 }
 
 #endif

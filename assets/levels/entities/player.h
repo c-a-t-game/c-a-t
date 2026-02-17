@@ -1,6 +1,3 @@
-#include "math.h"
-#include "stdio.h"
-
 #define signum(x) ((x) == 0 ? 0 : (x) / fabsf(x))
 
 Node* entity_player(float x, float y) -> engine.open<EntityNode>()
@@ -10,7 +7,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0) // vel_y
     .prop<float>(0.75) // width
     .prop<float>(0.75) // height
-    .event<EntityUpdateNode>(lambda(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
+    .prop<const char*>("player") // name
+    .event<EntityUpdateNode>(lambda entity_player_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         int curr_dir = signum(entity.vel_x);
         int dir = input.down("left") * -1 + input.down("right") * 1;
         bool moving = dir != 0;
@@ -21,7 +19,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
         if (entity.vel_x < -0.2) entity.vel_x = -0.2;
         if (entity.vel_x >  0.2) entity.vel_x =  0.2;
         if (signum(entity.vel_x) != curr_dir && curr_dir != 0) entity.vel_x = 0;
-    
+
         if (moving && dir < 0) {
             *entity.prop<bool>("facing_left") = true;
             *entity.prop<float>("cam_offset") -= 0.1 * delta_time;
@@ -32,20 +30,20 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             *entity.prop<float>("cam_offset") += 0.1 * delta_time;
             if (*entity.prop<float>("cam_offset") > 2) *entity.prop<float>("cam_offset") = 2;
         }
-    
+
         *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 184;
         ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10;
-    
+
         if (!*entity.prop<bool>("first_frame_flag")) {
             *entity.prop<float>("jump_buffer_timer") = 999;
             *entity.prop<bool>("first_frame_flag") = true;
         }
-    
+
         entity.vel_y += 0.03 * delta_time;
-        
+
         *entity.prop<float>("jump_buffer_timer") += delta_time;
         *entity.prop<float>("coyote_timer") += delta_time;
-        
+
         if (!input.down("jump")) *entity.prop<bool>("jumping") = false;
         if (input.pressed("jump")) *entity.prop<float>("jump_buffer_timer") = 0;
         if (*entity.prop<bool>("touching_ground")) {
@@ -63,18 +61,16 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             else entity.vel_y = -0.3;
         }
     })
-    .event<EntityTextureNode>(lambda(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
+    .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
         if      (entity.vel_y >  0) sprite = 7;
         else if (entity.vel_y <  0) sprite = 6;
         else if (entity.vel_x != 0) sprite = (int)(entity.pos_x * 1) % 2 + 4;
-        else {
-            int* frames = (int[]){ 0, 1, 2, 3, 2, 1 };
-            sprite = frames[engine.get_millis() % (6 * 150) / 150];
-        }
-    
+        else sprite = (int[]){ 0, 1, 2, 3, 2, 1 }[engine.get_millis() % (6 * 150) / 150];
+
         *srcx = sprite * 16;
         *srcy = 0;
+
         *w = *entity.prop<bool>("facing_left") ? -16 : 16;
         *srcw = *srch = *h = 16;
         return assets.get<Texture>("player.png");

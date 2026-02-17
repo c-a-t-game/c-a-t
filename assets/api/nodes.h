@@ -24,6 +24,7 @@ NODE(Entity,
     float pos_x, pos_y;
     float vel_x, vel_y;
     float width, height;
+    const char* name;
     struct {
         int count, capacity;
         struct {
@@ -47,6 +48,10 @@ NODE(EntityUpdate,
 
 NODE(EntityTexture,
     Texture*(*func)(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h);
+)
+
+NODE(EntityCollision,
+    void(*func)(EntityNode* collidee, EntityNode* collider);
 )
 
 NODE(Collision,

@@ -55,7 +55,7 @@ int main() {
         uint64_t curr_micros = get_micros();
         float delta_time = (curr_micros - last_micros) / 1000000.f * 60;
         last_micros = curr_micros;
-        
+
         graphics_start_frame(NULL);
         Buffer* buffer = graphics_new_buffer(NULL, 384, 256);
         graphics_set_buffer(NULL, buffer);

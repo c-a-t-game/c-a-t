@@ -2,6 +2,7 @@
 #define ENGINE_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 
 #include "io/graphics.h"
@@ -49,6 +50,8 @@ Node* engine_deep_copy(Node* node);
 
 uint8_t* engine_tile(TilemapNode* node, int x, int y);
 void* engine_property(EntityNode* node, const char* name);
+EntityNode* engine_find_entity(LevelRootNode* level, const char* name);
+EntityNode* engine_find_entity_on_tilemap(TilemapNode* tilemap, const char* name);
 
 void engine_update(LevelRootNode* node, float delta_time);
 void engine_render(LevelRootNode* node, float width, float height);

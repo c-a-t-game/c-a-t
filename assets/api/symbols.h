@@ -29,6 +29,8 @@ extern("engine_delete_node") void __engine_delete_node(Node* node);
 extern("engine_deep_copy") Node* __engine_copy_node(Node* node);
 extern("engine_tile") uint8_t* __engine_tile(TilemapNode* node, int x, int y);
 extern("engine_property") void* __engine_property(EntityNode* node, const char* name);
+extern("engine_find_entity") EntityNode* __engine_find_entity(LevelRootNode* level, const char* name);
+extern("engine_find_entity_on_tilemap") EntityNode* __engine_find_entity_on_tilemap(TilemapNode* tilemap, const char* name);
 
 extern("graphics_main_window") Window* __graphics_main_window();
 extern("graphics_open") Window* __graphics_open(const char* title, int width, int height);

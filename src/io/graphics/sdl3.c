@@ -1,7 +1,5 @@
 #include <SDL3/SDL.h>
 
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_surface.h>
 #include <stdlib.h>
 
 #include "io/graphics.h"
@@ -47,7 +45,8 @@ static SDL_Texture* get_texture(Window* window, Texture* texture, SDL_Renderer* 
 
 SDL_Renderer* graphics_get_renderer(SDL_Window* window) {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-    SDL_SetRenderScale(renderer, 1.25f, 1.25f);
+    float scale = SDL_GetWindowDisplayScale(window);
+    SDL_SetRenderScale(renderer, scale, scale);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderVSync(renderer, 1);
     return renderer;

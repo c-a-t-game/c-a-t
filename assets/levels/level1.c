@@ -1,9 +1,9 @@
 #include "api/engine.h"
 
 #include "levels/entities/player.h"
+#include "levels/entities/mouse.h"
 
-static Tile bg[] = {1};
-static Tile fg[] = {
+static Tile tiles[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -40,10 +40,9 @@ Node* level1() -> engine.open<LevelRootNode>()
         .prop<float>(-0.125f) // scroll_offset_y
         .prop<float>(0.5f) // scroll_speed_x
         .prop<float>(0.5f) // scroll_speed_y
-        .prop<int>(1) // width
-        .prop<int>(1) // height
-        .prop<Tile>(0) // oob_tile
-        .prop<Tile*>(bg) // tiles
+        .prop<int>(0) // width
+        .prop<int>(0) // height
+        .prop<Tile>(1) // oob_tile
     .close()
     .open<TilemapNode>()
         .open<TilesetNode>()
@@ -66,9 +65,8 @@ Node* level1() -> engine.open<LevelRootNode>()
         .prop<int>(24) // width
         .prop<int>(16) // height
         .prop<Tile>(0) // oob_tile
-        .prop<Tile*>(fg) // tiles
-        .attach(entity_player(1, 2))
+        .prop<Tile*>(tiles) // tiles
+        .attach(entity_player(1.5, 14))
+        .attach(entity_mouse(22.5, 14))
     .close()
 .build();
-
-

@@ -1,7 +1,6 @@
 #include "engine/engine.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <stddef.h>
 
 TilesetNode* engine_get_tileset(TilemapNode* tilemap) {
     TilesetNode* tileset = NULL;
@@ -107,9 +106,26 @@ static void engine_update_entity(EntityNode* entity, TilemapNode* tilemap, Tiles
     engine_resolve_collision(entity, tilemap, tileset, Axis_Y);
     entity->pos_x += entity->vel_x * delta_time;
     engine_resolve_collision(entity, tilemap, tileset, Axis_X);
+    for (int i = 0; i < tilemap->node.children_size; i++) {
+        if (!tilemap->node.children[i]) continue;
+        if (tilemap->node.children[i]->type != NodeType_Entity) continue;
+        EntityNode* collider = (EntityNode*)tilemap->node.children[i];
+        if (collider == entity) continue;
+        if (
+            collider->pos_x + collider->width / 2 > entity->pos_x - entity->width / 2 &&
+            collider->pos_x - collider->width / 2 < entity->pos_x + entity->width / 2 &&
+            collider->pos_y + collider->height > entity->pos_y &&
+            collider->pos_y < entity->pos_y + entity->height
+        ) for (int i = 0; i < entity->node.children_size; i++) {
+            if (!entity->node.children[i]) continue;
+            if (entity->node.children[i]->type != NodeType_EntityCollision) continue;
+            ((EntityCollisionNode*)entity->node.children[i])->func(entity, collider);
+            if (!tilemap->node.children[index]) return; // entity deleted
+        }
+    }
     if (*(Direction*)engine_property(entity, "hor_collision") != Direction_None) *(Direction*)engine_property(entity, "last_hor_collision") = *(Direction*)engine_property(entity, "hor_collision");
     if (*(Direction*)engine_property(entity, "ver_collision") != Direction_None) *(Direction*)engine_property(entity, "last_ver_collision") = *(Direction*)engine_property(entity, "ver_collision");
-    *(float*)engine_property(entity, "delta_time") += delta_time;
+    *(float*)engine_property(entity, "timer") += delta_time;
 }
 
 static void engine_update_tilemap(TilemapNode* tilemap, TilesetNode* tileset, float delta_time) {
@@ -128,29 +144,4 @@ void engine_update(LevelRootNode* node, float delta_time) {
         TilemapNode* tilemap = (TilemapNode*)node->node.children[i];
         engine_update_tilemap(tilemap, engine_get_tileset(tilemap), delta_time);
     }
-}
-
-static int compare_string(const void* a, const void* b) {
-    return strcmp(*(char**)a, *(char**)b);
-}
-
-uint8_t* engine_tile(TilemapNode* node, int x, int y) {
-    if (x < 0 || y < 0 || x >= node->width || y >= node->height) return &node->oob_tile;
-    return &node->tiles[y * node->width + x];
-}
-
-void* engine_property(EntityNode* node, const char* name) {
-    if (node->data.entries) {
-        void* ptr = bsearch(&name, node->data.entries, node->data.count, sizeof(*node->data.entries), compare_string);
-        if (ptr) return &((typeof(*node->data.entries)*)ptr)->value;
-    }
-    if (node->data.count == node->data.capacity) {
-        if (node->data.capacity == 0) node->data.capacity = 4;
-        else node->data.capacity *= 2;
-        node->data.entries = realloc(node->data.entries, node->data.capacity * sizeof(*node->data.entries));
-        memset(node->data.entries + node->data.count, 0, (node->data.capacity - node->data.count) * sizeof(*node->data.entries));
-    }
-    node->data.entries[node->data.count++].key = (char*)name;
-    qsort(node->data.entries, node->data.count, sizeof(*node->data.entries), compare_string);
-    return &((typeof(*node->data.entries)*)bsearch(&name, node->data.entries, node->data.count, sizeof(*node->data.entries), compare_string))->value;
 }
