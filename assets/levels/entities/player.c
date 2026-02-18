@@ -22,6 +22,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
         if (entity.vel_x >  0.2) entity.vel_x =  0.2;
         if (signum(entity.vel_x) != curr_dir && curr_dir != 0) entity.vel_x = 0;
 
+        entity.prop<float>("cam_offset");
         if (moving && dir < 0) {
             *entity.prop<bool>("facing_left") = true;
             *entity.prop<float>("cam_offset") -= 0.1 * delta_time;
@@ -33,8 +34,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             if (*entity.prop<float>("cam_offset") > 2) *entity.prop<float>("cam_offset") = 2;
         }
 
-        *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 184;
-        ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10;
+        *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 192;
+        ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
 
         if (!*entity.prop<bool>("first_frame_flag")) {
             *entity.prop<float>("jump_buffer_timer") = 999;

@@ -43,9 +43,11 @@ static SDL_Texture* get_texture(Window* window, Texture* texture, SDL_Renderer* 
     return handle;
 }
 
-SDL_Renderer* graphics_get_renderer(SDL_Window* window) {
+SDL_Renderer* graphics_get_renderer(SDL_Window* window, int requested_width) {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-    float scale = SDL_GetWindowDisplayScale(window);
+    int window_width;
+    SDL_GetWindowSize(window, &window_width, NULL);
+    float scale = window_width / (float)requested_width;
     SDL_SetRenderScale(renderer, scale, scale);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderVSync(renderer, 1);
@@ -63,7 +65,7 @@ Window* graphics_open(const char* title, int width, int height) {
 
     Window* w = malloc(sizeof(Window));
     w->wnd = SDL_CreateWindow(title, width, height, 0);
-    w->rnd = graphics_get_renderer(w->wnd);
+    w->rnd = graphics_get_renderer(w->wnd, width);
     w->texture_map.capacity = 4;
     w->texture_map.size = 0;
     w->texture_map.entries = malloc(sizeof(TextureEntry) * w->texture_map.capacity);
