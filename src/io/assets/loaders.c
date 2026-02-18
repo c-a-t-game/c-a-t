@@ -22,6 +22,7 @@ void* loader_h(const char* filename, uint8_t* bytes, int size) {
 }
 
 void* loader_c(const char* filename, uint8_t* bytes, int size) {
-    add_compile_job(filename);
+    char* code = strndup((char*)bytes, size);
+    add_compile_job(code, filename);
     return strndup((char*)bytes, size);
 }

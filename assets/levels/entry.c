@@ -1,6 +1,4 @@
-#include "api/engine.h"
-
-extern Node* level1();
+#depends "levels/level1.c"
 
 void entry_point() {
     input.add("left", 4);

@@ -1,3 +1,5 @@
+#depends "levels/engine.c"
+
 Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
     .prop<float>(y) // pos_y

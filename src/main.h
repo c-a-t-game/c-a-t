@@ -5,6 +5,6 @@
 
 extern jitc_context_t* jitc_context;
 
-void add_compile_job(const char* filename);
+void add_compile_job(const char* code, const char* filename);
 
 #endif

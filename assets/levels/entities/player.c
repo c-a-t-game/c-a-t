@@ -1,3 +1,5 @@
+#depends "levels/engine.c"
+
 #define signum(x) ((x) == 0 ? 0 : (x) / fabsf(x))
 
 Node* entity_player(float x, float y) -> engine.open<EntityNode>()

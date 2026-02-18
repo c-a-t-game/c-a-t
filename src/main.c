@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "main.h"
 
@@ -14,30 +15,29 @@
 
 LevelRootNode* current_level;
 jitc_context_t* jitc_context;
+bool compilation_failed = false;
 
-int compile_jobs_size, compile_jobs_capacity;
-const char** compile_jobs;
+void add_compile_job(const char* code, const char* filename) {
+    if (jitc_append_task(jitc_context, code, filename)) return;
+    compilation_failed = true;
+    jitc_report_error(jitc_context, stderr);
+}
 
-void add_compile_job(const char* filename) {
-    if (compile_jobs_size == compile_jobs_capacity) {
-        if (compile_jobs_capacity == 0) compile_jobs_capacity = 4;
-        else compile_jobs_capacity *= 2;
-        compile_jobs = realloc(compile_jobs, sizeof(char*) * compile_jobs_capacity);
-    }
-    compile_jobs[compile_jobs_size++] = filename;
+void compile_progress(const char* curr_file, int total, int compiled) {
+    char progress[51];
+    memset(progress, 0, 51);
+    memset(progress, '=', compiled * 50 / total);
+    printf("%3d%% [%-50s] %s\n", compiled * 100 / total, progress, curr_file ?: "Done");
 }
 
 int main() {
     jitc_context = jitc_create_context();
     load_assets();
-    for (int i = 0; i < compile_jobs_size; i++) {
-        printf("Compiling '%s'\n", compile_jobs[i]);
-        if (!jitc_parse(jitc_context, get_asset(char, compile_jobs[i]), compile_jobs[i])) {
-            jitc_report_error(jitc_context, stderr);
-            return 1;
-        }
+    if (compilation_failed) return 1;
+    if (!jitc_build(jitc_context, compile_progress)) {
+        jitc_report_error(jitc_context, stderr);
+        return 1;
     }
-    printf("Compiled\n");
 
     void(*entry_point)() = jitc_get(jitc_context, "entry_point");
     if (!entry_point) {

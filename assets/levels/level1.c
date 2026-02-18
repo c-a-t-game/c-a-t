@@ -1,7 +1,5 @@
-#include "api/engine.h"
-
-#include "levels/entities/player.h"
-#include "levels/entities/mouse.h"
+#depends "levels/entities/player.c"
+#depends "levels/entities/mouse.c"
 
 static Tile tiles[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
