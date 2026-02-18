@@ -21,10 +21,9 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
     })
     .event<EntityCollisionNode>(lambda entity_mouse_collision(EntityNode* collidee, EntityNode* collider): void {
         if (!collider.is("player")) return;
-        if (collider.vel_y > 0 || *collider.prop<bool>("killed_enemy")) {
+        if (collider.vel_y > 0) {
             collider.vel_y = -0.3;
             *collider.prop<bool>("jumping") = true;
-            *collider.prop<bool>("killed_enemy") = true;
             *collider.prop<float>("floor_y") = collider.pos_y;
             collidee.node.delete();
         }

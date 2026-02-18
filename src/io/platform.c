@@ -5,3 +5,4 @@
 
 uint64_t get_millis() { return get_micros() / 1000; }
 uint64_t get_micros() { return 0; }
+void watch_file(const char* filename, FileWatchCallback callback) {}

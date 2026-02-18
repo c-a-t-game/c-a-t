@@ -16,18 +16,33 @@
 LevelRootNode* current_level;
 jitc_context_t* jitc_context;
 bool compilation_failed = false;
+static uint64_t compile_time = 0;
 
-void add_compile_job(const char* code, const char* filename) {
-    if (jitc_append_task(jitc_context, code, filename)) return;
-    compilation_failed = true;
-    jitc_report_error(jitc_context, stderr);
-}
-
-void compile_progress(const char* curr_file, int total, int compiled) {
+static void compile_progress(const char* curr_file, int total, int compiled) {
     char progress[51];
     memset(progress, 0, 51);
     memset(progress, '=', compiled * 50 / total);
     printf("%3d%% [%-50s] %s\n", compiled * 100 / total, progress, curr_file ?: "Done");
+}
+
+static void recompile_file(const char* file) {
+    uint64_t start = get_micros();
+    printf("Reloading '%s'...", file);
+    if (!jitc_parse_file(jitc_context, file)) jitc_report_error(jitc_context, stdout);
+    else printf("%.2f ms\n", (get_micros() - start) / 1000.f);
+    compile_time += get_micros() - start;
+}
+
+void add_compile_job(const char* code, const char* filename) {
+    if (!jitc_append_task(jitc_context, code, filename)) {
+        compilation_failed = true;
+        jitc_report_error(jitc_context, stdout);
+        return;
+    }
+    char path[sizeof("assets/") + strlen(filename)];
+    strcpy(path, "assets/");
+    strcat(path, filename);
+    watch_file(strdup(path), recompile_file);
 }
 
 int main() {
@@ -53,8 +68,9 @@ int main() {
     uint64_t last_micros = get_micros();
     while (!graphics_should_close()) {
         uint64_t curr_micros = get_micros();
-        float delta_time = (curr_micros - last_micros) / 1000000.f * 60;
+        float delta_time = (curr_micros - last_micros - compile_time) / 1000000.f * 60;
         last_micros = curr_micros;
+        compile_time = 0;
 
         graphics_start_frame(NULL);
         Buffer* buffer = graphics_new_buffer(NULL, 384, 256);
@@ -68,6 +84,8 @@ int main() {
         graphics_blit(NULL, buffer, 0, 0, 1152, 768, 0, 0, 384, 256, GRAY(255));
         graphics_end_frame(NULL);
         graphics_destroy_buffer(buffer);
+
+        check_watched_files();
     }
     graphics_close(window);
     return 0;
