@@ -79,6 +79,7 @@ int main() {
         keybind_update();
         engine_update(current_level, delta_time);
         engine_render(current_level, 1152, 768);
+        engine_cleanup();
 
         graphics_set_buffer(NULL, NULL);
         graphics_blit(NULL, buffer, 0, 0, 1152, 768, 0, 0, 384, 256, GRAY(255));

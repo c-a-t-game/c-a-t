@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+static Node deleted_nodes;
+
+static void engine_mark_deleted(Node* node) {
+    for (int i = 0; i < node->children_size; i++) {
+        if (!node->children[i]) continue;
+        engine_mark_deleted(node->children[i]);
+    }
+    engine_attach_node(&deleted_nodes, node);
+}
+
 void engine_attach_node(Node* parent, Node* child) {
     engine_detach_node(child);
     child->parent = parent;
@@ -31,18 +41,8 @@ void engine_detach_node(Node* child) {
     child->parent = NULL;
 }
 
-static void engine_delete_node_internal(Node* node) {
-    for (int i = 0; i < node->children_size; i++) {
-        if (!node->children[i]) continue;
-        engine_delete_node_internal(node->children[i]);
-    }
-    free(node->children);
-    free(node);
-}
-
 void engine_delete_node(Node* node) {
-    engine_detach_node(node);
-    engine_delete_node_internal(node);
+    engine_mark_deleted(node);
 }
 
 Node* engine_deep_copy(Node* node) {
@@ -60,4 +60,13 @@ Node* engine_deep_copy(Node* node) {
         copy->children[i] = child;
     }
     return copy;
+}
+
+void engine_cleanup() {
+    for (int i = 0; i < deleted_nodes.children_size; i++) {
+        Node* node = deleted_nodes.children[i];
+        free(node->children);
+        free(node);
+    }
+    deleted_nodes.children_size = 0;
 }

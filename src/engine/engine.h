@@ -43,6 +43,8 @@ struct Node {
     node; \
 })
 
+void engine_cleanup();
+
 void engine_attach_node(Node* parent, Node* child);
 void engine_detach_node(Node* child);
 void engine_delete_node(Node* node);

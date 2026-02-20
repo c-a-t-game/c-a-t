@@ -63,6 +63,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             ) *entity.prop<bool>("jumping") = false;
             else entity.vel_y = -0.3;
         }
+        
+        if (input.pressed("reload")) engine.reload();
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;

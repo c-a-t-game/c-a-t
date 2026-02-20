@@ -1,8 +1,8 @@
-#include "stdint.h"
-#include "stdlib.h"
-#include "string.h"
-#include "stdio.h"
-#include "math.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
 
 #ifndef __JITC__
 #define __ID__(a, b) a##b
@@ -110,13 +110,14 @@ extern("_get_asset") void* __get_asset(const char* name);
 extern("get_millis") uint64_t __get_millis();
 extern("get_micros") uint64_t __get_micros();
 
-extern LevelRootNode* current_level;
-
 typedef struct {} Engine;
 typedef struct {} Graphics;
 typedef struct {} Assets;
 typedef struct {} Input;
 typedef Node*(*Level)();
+
+extern("current_level") LevelRootNode* __curr_level_node;
+Level __curr_level_loader;
 
 typedef struct {
     Node* curr_node;
@@ -148,6 +149,14 @@ void delete(Node* this) -> __engine_delete_node(this);
 void copy(Node* this) -> __engine_copy_node(this);
 uint8_t* tile(TilemapNode* this, int x, int y) -> __engine_tile(this, x, y);
 <T> T* prop(EntityNode* this, const char* name) -> (T*)__engine_property(this, name);
+
+void load(Engine* this, Level level) {
+    if (__curr_level_node) __curr_level_node.node.delete();
+    __curr_level_loader = level;
+    __curr_level_node = level();
+}
+
+void reload(Engine* this) -> this.load(__curr_level_loader);
 
 EntityNode* find(LevelRootNode* this, const char* name) -> __engine_find_entity(this, name);
 EntityNode* find(TilemapNode* this, const char* name) -> __engine_find_entity_on_tilemap(this, name);
