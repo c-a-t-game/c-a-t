@@ -229,7 +229,6 @@ NodeBuilder* exec(NodeBuilder* this, void(*func)(NodeBuilder* builder)) {
 
 <T> NodeBuilder* open(NodeBuilder* this) {
     T* child = engine.new_node<T>();
-    printf("made node %p\n", child);
     this.curr_node.attach(child);
     this.curr_node = child;
     this.ptr = sizeof(Node);
