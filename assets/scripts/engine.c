@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifndef __JITC__
-#define __ID__(a, b) a##b
-#endif
-
 typedef enum {
 #define NODE(type, ...) __ID__(NodeType_, type),
 #include "headers/nodes.h"
@@ -233,6 +229,7 @@ NodeBuilder* exec(NodeBuilder* this, void(*func)(NodeBuilder* builder)) {
 
 <T> NodeBuilder* open(NodeBuilder* this) {
     T* child = engine.new_node<T>();
+    printf("made node %p\n", child);
     this.curr_node.attach(child);
     this.curr_node = child;
     this.ptr = sizeof(Node);

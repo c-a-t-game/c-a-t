@@ -1,4 +1,4 @@
-#depends "levels/engine.c"
+#depends "scripts/engine.c"
 
 Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
@@ -29,10 +29,10 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
         }
     })
     .event<EntityTextureNode>(lambda entity_mouse_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
-        *srcx = 0;//16 * (int)(engine.get_millis() % (200 * 2) / 200);
+        *srcx = 16 * (int)(engine.get_millis() % (200 * 2) / 200);
         *srcy = 0;
         *srcw = *srch = *h = 16;
         *w = *entity.prop<Direction>("last_hor_collision") == Direction_Left ? 16 : -16;
-        return assets.get<Texture>("trolley.png");
+        return assets.get<Texture>("images/entities/mouse.png");
     })
 .build();
