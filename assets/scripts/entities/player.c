@@ -1,4 +1,4 @@
-#depends "levels/engine.c"
+#depends "scripts/engine.c"
 
 #define signum(x) ((x) == 0 ? 0 : (x) / fabsf(x))
 
@@ -63,7 +63,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             ) *entity.prop<bool>("jumping") = false;
             else entity.vel_y = -0.3;
         }
-        
+
         if (input.pressed("reload")) engine.reload();
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
@@ -78,6 +78,6 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
 
         *w = *entity.prop<bool>("facing_left") ? -16 : 16;
         *srcw = *srch = *h = 16;
-        return assets.get<Texture>("player.png");
+        return assets.get<Texture>("images/entities/player.png");
     })
 .build();

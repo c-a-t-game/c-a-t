@@ -1,4 +1,4 @@
-#depends "levels/level1.c"
+#depends "scripts/levels/level1.c"
 
 void entry_point() {
     input.add("left", 4);
