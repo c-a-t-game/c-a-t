@@ -27,29 +27,27 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             if (*tilemap.tile(x - 1, y + 1) == 1) mask |= SW;
             if (*tilemap.tile(x + 1, y - 1) == 1) mask |= NE;
             if (*tilemap.tile(x + 1, y + 1) == 1) mask |= SE;
-        
+
             if (!(mask & N) || !(mask & W)) mask &= ~NW;
             if (!(mask & S) || !(mask & W)) mask &= ~SW;
             if (!(mask & N) || !(mask & E)) mask &= ~NE;
             if (!(mask & S) || !(mask & E)) mask &= ~SE;
-            
+
             return mask;
         })
     .close()
-    .open<TileNode>() // branch
-        .event<TileTextureNode>(lambda(): int -> 242)
-    .close()
     .open<TileNode>() // tree
-        .event<TileTextureNode>(lambda(): int -> 226)
+        .event<TileTextureNode>(lambda grass_tree_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
+            if (*tilemap.tile(x, y - 1) == 2) return 242;
+            return 226;
+        })
     .close()
-    .open<TileNode>() // bush left
-        .event<TileTextureNode>(lambda(): int -> 243)
-    .close()
-    .open<TileNode>() // bush middle
-        .event<TileTextureNode>(lambda(): int -> 244)
-    .close()
-    .open<TileNode>() // bush right
-        .event<TileTextureNode>(lambda(): int -> 244)
+    .open<TileNode>() // bush
+        .event<TileTextureNode>(lambda grass_bush_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
+            if (*tilemap.tile(x - 1, y) != 3) return 243;
+            if (*tilemap.tile(x + 1, y) == 3) return 244;
+            return 245;
+        })
     .close()
 .build();
 
