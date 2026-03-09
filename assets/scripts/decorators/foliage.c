@@ -15,6 +15,8 @@ Tile foliage_decorator(TilemapNode* tilemap, int x, int y) {
     y--;
 
     for (int i = 0; i < size; i++) {
+        if (x < 0 || x >= tilemap.width || y < 0 || y >= tilemap.height) return 1;
+
         if (*tilemap.tile(x, y) != 0) return 1;
         if (variant == Foliage_Bush && *tilemap.tile(x, y + 1) != 1) return 1;
 
