@@ -18,6 +18,15 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
                 SE = (1 << 7),
             };
 
+            if (*tilemap.tile(x, y - 1) == 6) {
+                if (*tilemap.tile(x - 1, y - 1) != 6) return 48;
+                return 49;
+            }
+            if (*tilemap.tile(x, y + 1) == 6) {
+                if (*tilemap.tile(x - 1, y + 1) != 6) return 64;
+                return 65;
+            }
+
             int mask = 0;
             if (*tilemap.tile(x + 0, y - 1) == 1) mask |= N;
             if (*tilemap.tile(x - 1, y + 0) == 1) mask |= W;
@@ -36,17 +45,49 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             return mask;
         })
     .close()
-    .open<TileNode>() // tree
+    .open<TileNode>() // tree decor
         .event<TileTextureNode>(lambda grass_tree_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
             if (*tilemap.tile(x, y - 1) == 2) return 242;
             return 226;
         })
     .close()
-    .open<TileNode>() // bush
+    .open<TileNode>() // bush decor
         .event<TileTextureNode>(lambda grass_bush_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
             if (*tilemap.tile(x - 1, y) != 3) return 243;
             if (*tilemap.tile(x + 1, y) == 3) return 244;
             return 245;
+        })
+    .close()
+    .open<TileNode>() // crate
+        .prop<bool>(true) // solid
+        .event<TileTextureNode>(lambda(): int -> 240)
+    .close()
+    .open<TileNode>() // coin
+        .event<TileTextureNode>(lambda(): int -> 241)
+    .close()
+    .open<TileNode>() // tree stump
+        .prop<bool>(true) // solid
+        .event<TileTextureNode>(lambda grass_tree_stump_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
+            if (*tilemap.tile(x - 1, y) == 7) return 50;
+            if (*tilemap.tile(x + 1, y) == 7) return 51;
+            if (*tilemap.tile(x - 1, y) == 6) {
+                if (*tilemap.tile(x, y - 1) != 6 && *tilemap.tile(x, y - 1) != 1) return 17;
+                if (*tilemap.tile(x, y + 1) != 6 && *tilemap.tile(x, y + 1) != 1) return 81;
+                return 33;
+            }
+            else {
+                if (*tilemap.tile(x, y - 1) != 6 && *tilemap.tile(x, y - 1) != 1) return 16;
+                if (*tilemap.tile(x, y + 1) != 6 && *tilemap.tile(x, y + 1) != 1) return 80;
+                return 32;
+            }
+        })
+    .close()
+    .open<TileNode>() // tree branch
+        .prop<bool>(true) // solid
+        .event<TileTextureNode>(lambda grass_tree_branch_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
+            if (*tilemap.tile(x - 1, y) != 6 && *tilemap.tile(x - 1, y) != 7) return 34;
+            if (*tilemap.tile(x + 1, y) != 6 && *tilemap.tile(x + 1, y) != 7) return 36;
+            return 35;
         })
     .close()
 .build();
