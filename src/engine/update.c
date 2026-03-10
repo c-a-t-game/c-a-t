@@ -44,7 +44,7 @@ static void engine_resolve_collision(EntityNode* entity, TilemapNode* tilemap, T
     for (int y = min_y; y <= max_y; y++) {
         for (int x = min_x; x <= max_x; x++) {
             TileNode* tile = (TileNode*)tileset->node.children[*engine_tile(tilemap, x, y)];
-            bool solid = tile->is_solid;
+            bool solid = tile->collision == Collision_Solid;
             if (!engine_rect_intersect(fx, fy, tx, ty, x, y, x + 1, y + 1)) continue;
             if (axis == Axis_X) {
                 if (entity->vel_x == 0) (void)0;
@@ -67,6 +67,7 @@ static void engine_resolve_collision(EntityNode* entity, TilemapNode* tilemap, T
                 if (solid) entity->vel_x = 0;
             }
             if (axis == Axis_Y) {
+                solid = tile->collision == Collision_Solid || (tile->collision == Collision_TopOnly && entity->vel_y > 0 && entity->prev_pos_y <= y);
                 if (entity->vel_y == 0) (void)0;
                 else if (entity->vel_y > 0) {
                     if (solid) {
@@ -126,6 +127,8 @@ static void engine_update_entity(EntityNode* entity, TilemapNode* tilemap, Tiles
     if (*(Direction*)engine_property(entity, "hor_collision") != Direction_None) *(Direction*)engine_property(entity, "last_hor_collision") = *(Direction*)engine_property(entity, "hor_collision");
     if (*(Direction*)engine_property(entity, "ver_collision") != Direction_None) *(Direction*)engine_property(entity, "last_ver_collision") = *(Direction*)engine_property(entity, "ver_collision");
     *(float*)engine_property(entity, "timer") += delta_time;
+    entity->prev_pos_x = entity->pos_x;
+    entity->prev_pos_y = entity->pos_y;
 }
 
 static void engine_update_tilemap(TilemapNode* tilemap, TilesetNode* tileset, float delta_time) {
