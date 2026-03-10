@@ -17,7 +17,7 @@ NODE(Tileset,
 )
 
 NODE(Tile,
-    bool is_solid;
+    Collision collision;
 )
 
 NODE(Entity,
@@ -25,6 +25,7 @@ NODE(Entity,
     float vel_x, vel_y;
     float width, height;
     const char* name;
+    float prev_pos_x, prev_pos_y;
     struct {
         int count, capacity;
         struct {

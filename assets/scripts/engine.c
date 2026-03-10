@@ -44,6 +44,12 @@ typedef enum {
     Direction_Right,
 } Direction;
 
+typedef enum {
+    Collision_None,
+    Collision_TopOnly,
+    Collision_Solid,
+} Collision;
+
 typedef struct Node Node;
 struct Node {
     NodeType type;
