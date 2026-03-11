@@ -39,5 +39,6 @@ Node* level1() -> engine.open<LevelRootNode>()
         .prop<Tile>(0) // oob_tile
         .prop<Tile*>(level1_tiles) // tiles
         .attach(entity_player(1.5, 14))
+        .attach(entity_mouse(20, 7))
     .close().decorate(foliage_decorator)
 .build();
