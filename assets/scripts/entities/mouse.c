@@ -1,5 +1,24 @@
 #depends "scripts/engine.c"
 
+Node* entity_squished_mouse(float x, float y) -> engine.open<EntityNode>()
+    .prop<float>(x) // pos_x
+    .prop<float>(y) // pos_y
+    .prop<float>(0) // vel_x
+    .prop<float>(0) // vel_y
+    .prop<float>(0.75) // width
+    .prop<float>(0.75) // height
+    .event<EntityUpdateNode>(lambda entity_squished_mouse_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
+        if (*entity.prop<float>("timer") >= 60) entity.node.delete();
+        *entity.prop<float>("timer") += delta_time;
+    })
+    .event<EntityTextureNode>(lambda entity_squished_mouse_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
+        *srcx = 32;
+        *srcy = 0;
+        *srcw = *srch = *w = *h = 16;
+        return assets.get<Texture>("images/entities/mouse.png");
+    })
+.build();
+
 Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
     .prop<float>(y) // pos_y
@@ -25,6 +44,7 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
             collider.vel_y = -0.3;
             *collider.prop<bool>("jumping") = true;
             *collider.prop<float>("floor_y") = collider.pos_y;
+            collidee.node.parent.attach(entity_squished_mouse(collidee.pos_x, collidee.pos_y));
             collidee.node.delete();
         }
     })
