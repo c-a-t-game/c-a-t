@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "main.h"
+#include "storage.h"
 
 #include "io/assets.h"
 #include "io/graphics.h"
@@ -48,6 +49,7 @@ void add_compile_job(const char* code, const char* filename) {
 int main() {
     jitc_context = jitc_create_context();
     load_assets();
+    storage_init();
     if (compilation_failed) return 1;
     if (!jitc_build(jitc_context, compile_progress)) {
         jitc_report_error(jitc_context, stderr);

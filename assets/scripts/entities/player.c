@@ -64,7 +64,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             else entity.vel_y = -0.3;
         }
 
-        if (input.pressed("reload")) engine.reload();
+        if (input.pressed("reload")) (*storage.get<int>("num_coins"))++;
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
