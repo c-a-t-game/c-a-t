@@ -5,5 +5,9 @@ void entry_point() {
     input.add("right", 7);
     input.add("jump", 44);
     input.add("reload", 21);
+
+    if (storage.num_slots() == 0) storage.use(storage.add());
+    else storage.load(0);
+
     engine.load(level1);
 }

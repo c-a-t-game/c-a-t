@@ -1,5 +1,6 @@
 #depends "scripts/entities/player.c"
 #depends "scripts/entities/mouse.c"
+#depends "scripts/entities/hud.c"
 
 #depends "scripts/tilesets/grass.c"
 
@@ -40,5 +41,6 @@ Node* level1() -> engine.open<LevelRootNode>()
         .prop<Tile*>(level1_tiles) // tiles
         .attach(entity_player(1.5, 14))
         .attach(entity_mouse(20, 7))
+        .attach(entity_hud())
     .close().decorate(foliage_decorator)
 .build();

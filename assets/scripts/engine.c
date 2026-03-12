@@ -68,6 +68,12 @@ struct Node {
 typedef struct Shader Shader;
 typedef struct Window Window;
 typedef struct Buffer Buffer;
+typedef struct Engine Engine;
+typedef struct Graphics Graphics;
+typedef struct Assets Assets;
+typedef struct Input Input;
+typedef struct Storage Storage;
+typedef struct StorageSlot StorageSlot;
 
 extern("engine_attach_node") void __engine_attach_node(Node* parent, Node* child);
 extern("engine_detach_node") void __engine_detach_node(Node* child);
@@ -107,15 +113,17 @@ extern("keybind_down") bool __keybind_down(const char* name);
 extern("keybind_pressed") bool __keybind_pressed(const char* name);
 extern("keybind_released") bool __keybind_released(const char* name);
 
+extern("storage_get_slot") StorageSlot* __storage_get_slot(uint32_t index);
+extern("storage_add_slot") StorageSlot* __storage_add_slot();
+extern("storage_remove_slot") void __storage_remove_slot(uint32_t index);
+extern("storage_get") void* __storage_get(StorageSlot* storage, const char* name, size_t size);
+extern("storage_num_slots") uint32_t __storage_num_slots();
+
 extern("_get_asset") void* __get_asset(const char* name);
 
 extern("get_millis") uint64_t __get_millis();
 extern("get_micros") uint64_t __get_micros();
 
-typedef struct {} Engine;
-typedef struct {} Graphics;
-typedef struct {} Assets;
-typedef struct {} Input;
 typedef Node*(*Level)();
 
 extern("current_level") LevelRootNode* __curr_level_node;
@@ -130,6 +138,7 @@ Engine* engine;
 Graphics* gfx;
 Assets* assets;
 Input* input;
+Storage* storage;
 
 #define NODE(type, ...) int get_type(__ID__(type, Node)* this) -> __ID__(NodeType_, type);
 #include "headers/nodes.h"
@@ -163,7 +172,7 @@ void reload(Engine* this) -> this.load(__curr_level_loader);
 EntityNode* find(LevelRootNode* this, const char* name) -> __engine_find_entity(this, name);
 EntityNode* find(TilemapNode* this, const char* name) -> __engine_find_entity_on_tilemap(this, name);
 
-Window* get_main(Graphics* this) -> __graphics_main_window();
+Window* main(Graphics* this) -> __graphics_main_window();
 Window* open(Graphics* this, const char* title, int width, int height) -> __graphics_open(title, width, height);
 void close(Window* this) -> __graphics_close(this);
 void focus(Window* this) -> __graphics_focus(this);
@@ -193,6 +202,23 @@ bool pressed(Input* this, const char* name) -> __keybind_pressed(name);
 bool released(Input* this, const char* name) -> __keybind_released(name);
 
 <T> T* get(Assets* this, const char* name) -> __get_asset(name);
+
+StorageSlot* __curr_storage;
+
+<T> T* get(StorageSlot* this, const char* name) -> __storage_get(this, name, sizeof(T));
+<T> T* get(Storage* this, const char* name) -> this.curr().get<T>(name);
+
+int count(Storage* this) -> __storage_num_slots();
+StorageSlot* add(Storage* this) -> __storage_add_slot();
+StorageSlot* slot(Storage* this, uint32_t index) -> __storage_get_slot(index);
+StorageSlot* curr(Storage* this) -> __curr_storage;
+StorageSlot* load(Storage* this, uint32_t index) -> __curr_storage = this.slot(index);
+StorageSlot* use(Storage* this, StorageSlot* slot) -> __curr_storage = slot;
+uint32_t num_slots(Storage* this) -> __storage_num_slots();
+void remove(StorageSlot* this) {
+    if (__curr_storage == this) __curr_storage = nullptr;
+    __storage_remove_slot(this);
+}
 
 NodeBuilder* breakpoint(NodeBuilder* this) {
     interrupt;
