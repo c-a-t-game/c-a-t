@@ -1,4 +1,5 @@
 #define TILE(x, y) ((y)*16+(x))
+#define ANIMATE(frames, delay) ((int)engine.get_millis() % (uint64_t)((frames) * (delay)) / (delay))
 
 Node* tileset_grass() -> engine.open<TilesetNode>()
     .prop<Texture*>(assets.get<Texture>("images/tilesets/grass.png"))
@@ -62,10 +63,20 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
     .close()
     .open<TileNode>() // crate
         .prop<Collision>(Collision_Solid)
-        .event<TileTextureNode>(lambda(): int -> TILE(0, 15))
+        .event<TileTextureNode>(lambda grass_crate_anim(): int -> (int[]){
+            TILE(0, 15), TILE(0, 15), TILE(0, 15), TILE(0, 15),
+            TILE(0, 15), TILE(0, 14), TILE(0, 13), TILE(0, 14),
+        }[ANIMATE(8, 150)])
     .close()
     .open<TileNode>() // coin
-        .event<TileTextureNode>(lambda(): int -> TILE(1, 15))
+        .event<TileTextureNode>(lambda grass_coin_anim(): int -> (int[]){
+            TILE(1, 12), TILE(1, 13), TILE(1, 14), TILE(1, 15),
+        }[ANIMATE(4, 150)])
+        .event<CollisionNode>(lambda grass_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
+            if (!entity.is("player")) return;
+            *tilemap.tile(x, y) = 0;
+            *storage.get<int>("num_coins") += 1;
+        })
     .close()
     .open<TileNode>() // tree stump
         .prop<Collision>(Collision_Solid)
