@@ -1,8 +1,9 @@
-#include "io/input.h"
+#include "core/io/input.h"
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+
+#include <SDL3/SDL.h>
 
 typedef struct {
     const char* name;
@@ -134,4 +135,6 @@ bool keybind_released(const char* name) {
     return !entry->down && entry->prev_down;
 }
 
-bool keybind_check(int bind) { return false; }
+bool keybind_check(int bind) {
+    return SDL_GetKeyboardState(NULL)[bind];
+}

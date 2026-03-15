@@ -6,7 +6,7 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
-#include "io/platform.h"
+#include "core/io/platform.h"
 
 typedef struct {
     int wd;

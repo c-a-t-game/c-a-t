@@ -2,7 +2,7 @@
 #include <string.h>
 #include <dlfcn.h>
 
-#include "main.h"
+#include "core/scripts.h"
 
 static const char* get_basename(const char* filename) {
     for (int i = strlen(filename) - 1; i >= 0; i--) {
@@ -17,12 +17,12 @@ void* loader_txt(const char* filename, uint8_t* bytes, int size) {
 
 void* loader_h(const char* filename, uint8_t* bytes, int size) {
     char* data = strndup((char*)bytes, size);
-    jitc_create_header(jitc_context, filename, data);
+    scripts_header(filename, data);
     return data;
 }
 
 void* loader_c(const char* filename, uint8_t* bytes, int size) {
     char* code = strndup((char*)bytes, size);
-    add_compile_job(code, filename);
+    scripts_add(code, filename);
     return strndup((char*)bytes, size);
 }
