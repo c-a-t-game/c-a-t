@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#include "core/io/graphics.h"
+#include "io/graphics.h"
 #include "stb_image.h"
 
 typedef struct {

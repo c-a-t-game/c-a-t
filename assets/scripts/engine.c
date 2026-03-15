@@ -84,6 +84,7 @@ extern("engine_property") void* __engine_property(EntityNode* node, const char* 
 extern("engine_find_entity") EntityNode* __engine_find_entity(LevelRootNode* level, const char* name);
 extern("engine_find_entity_on_tilemap") EntityNode* __engine_find_entity_on_tilemap(TilemapNode* tilemap, const char* name);
 
+extern("graphics_main_window") Window* __graphics_main_window();
 extern("graphics_open") Window* __graphics_open(const char* title, int width, int height);
 extern("graphics_close") void __graphics_close(Window* window);
 extern("graphics_focus") void __graphics_focus(Window* window);
@@ -120,6 +121,7 @@ extern("storage_num_slots") uint32_t __storage_num_slots();
 
 extern("_get_asset") void* __get_asset(const char* name);
 
+extern("get_millis") uint64_t __get_millis();
 extern("get_micros") uint64_t __get_micros();
 
 typedef Node*(*Level)();
@@ -150,7 +152,7 @@ Storage* storage;
 }
 
 uint64_t get_micros(Engine* this) -> __get_micros();
-uint64_t get_millis(Engine* this) -> __get_micros() / 1000;
+uint64_t get_millis(Engine* this) -> __get_millis();
 
 void attach(Node* this, Node* child) -> __engine_attach_node(this, child);
 void detach(Node* this) -> __engine_detach_node(this);
@@ -170,7 +172,7 @@ void reload(Engine* this) -> this.load(__curr_level_loader);
 EntityNode* find(LevelRootNode* this, const char* name) -> __engine_find_entity(this, name);
 EntityNode* find(TilemapNode* this, const char* name) -> __engine_find_entity_on_tilemap(this, name);
 
-Window* main(Graphics* this) -> NULL;
+Window* main(Graphics* this) -> __graphics_main_window();
 Window* open(Graphics* this, const char* title, int width, int height) -> __graphics_open(title, width, height);
 void close(Window* this) -> __graphics_close(this);
 void focus(Window* this) -> __graphics_focus(this);

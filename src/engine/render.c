@@ -1,5 +1,7 @@
 #include "engine.h"
 
+#include "io/platform.h"
+
 #include <stdlib.h>
 
 extern TilesetNode* engine_get_tileset(TilemapNode* tilemap);

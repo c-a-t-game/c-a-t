@@ -19,7 +19,7 @@ typedef struct {
 } Loader;
 
 static Asset assets[] = {
-#ifndef CLANGD_IGNORE
+#ifdef CLANGD_IGNORE
 #include "data.h"
 #endif
 };

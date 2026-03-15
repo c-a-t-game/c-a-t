@@ -1,3 +1,3 @@
-[submodule "src/core/jitc"]
-	path = src/core/jitc
+[submodule "src/jitc"]
+	path = src/jitc
 	url = https://github.com/Dominicentek/jitc
