@@ -3,9 +3,10 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 
-#include "io/graphics.h"
+#include "core/io/graphics.h"
 
 typedef enum {
 #define NODE(type, ...) NodeType_##type,
