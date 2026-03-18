@@ -48,6 +48,18 @@ void engine_delete_node(Node* node) {
 Node* engine_deep_copy(Node* node) {
     Node* copy = malloc(node->size);
     memcpy(copy, node, node->size);
+    if (copy->type == NodeType_Tilemap) {
+        TilemapNode* tilemap = (TilemapNode*)copy;
+        TilemapNode* orig = (TilemapNode*)node;
+        int size = (orig->end_x - orig->start_x) * (orig->end_y - orig->start_y);
+        tilemap->tiles = memcpy(malloc(size), orig->tiles, size);
+    }
+    if (copy->type == NodeType_Entity) {
+        EntityNode* entity = (EntityNode*)copy;
+        EntityNode* orig = (EntityNode*)node;
+        int size = sizeof(*entity->data.entries) * entity->data.capacity;
+        entity->data.entries = memcpy(malloc(size), orig->data.entries, size);
+    }
     copy->children = malloc(sizeof(Node*) * copy->children_capacity);
     copy->parent = NULL;
     for (int i = 0; i < copy->children_size; i++) {
@@ -65,6 +77,8 @@ Node* engine_deep_copy(Node* node) {
 void engine_cleanup() {
     for (int i = 0; i < deleted_nodes.children_size; i++) {
         Node* node = deleted_nodes.children[i];
+        if (node->type == NodeType_Tilemap) free(((TilemapNode*)node)->tiles);
+        if (node->type == NodeType_Entity) free(((EntityNode*)node)->data.entries);
         free(node->children);
         free(node);
     }

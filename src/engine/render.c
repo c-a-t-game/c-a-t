@@ -35,7 +35,7 @@ static void engine_render_entity(EntityNode* entity, TilesetNode* tileset, float
 }
 
 static void engine_render_tile(TilemapNode* tilemap, TilesetNode* tileset, float x, float y, float offset_x, float offset_y) {
-    TileNode* tile = (TileNode*)tileset->node.children[*engine_tile(tilemap, x, y)];
+    TileNode* tile = (TileNode*)tileset->node.children[engine_get_tile(tilemap, x, y)];
     if (tile == NULL || tile->node.type != NodeType_Tile) return;
     int index = -1;
     for (int i = 0; i < tile->node.children_size && index == -1; i++) {

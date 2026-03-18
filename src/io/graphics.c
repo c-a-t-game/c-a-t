@@ -2,15 +2,12 @@
 
 #include <stddef.h>
 
-static Window* main_window;
-
 Window* graphics_open(const char* title, int width, int height) { return NULL; }
-Window* graphics_main_window() { return main_window; }
-void graphics_set_main(Window* w) { main_window = w; }
 void graphics_close(Window* w) {}
 void graphics_focus(Window* w) {}
 void graphics_get_size(Window* w, int* width, int* height) {}
 void graphics_get_pos(Window* w, int* x, int* y) {}
+float graphics_get_dpi_scale(Window* w) { return 0; }
 void graphics_set_active(Window* w) {}
 void graphics_start_frame(Window* w) {}
 void graphics_end_frame(Window* w) {}

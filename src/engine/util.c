@@ -7,9 +7,37 @@ static int compare_string(const void* a, const void* b) {
     return strcmp(*(char**)a, *(char**)b);
 }
 
-uint8_t* engine_tile(TilemapNode* node, int x, int y) {
-    if (x < 0 || y < 0 || x >= node->width || y >= node->height) return &node->oob_tile;
-    return &node->tiles[y * node->width + x];
+void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile) {
+    if (x < node->start_x || y < node->start_y || x >= node->end_x || y >= node->end_y || !node->tiles) {
+        int growth_left = 0, growth_right = 0, growth_top = 0, growth_bottom = 0;
+        if (x < node->start_x) growth_left  = (node->start_x - x + 31) / 32 * 32;
+        if (y < node->start_y) growth_top   = (node->start_y - y + 31) / 32 * 32;
+        if (x >= node->end_x)  growth_right  = (x -  node->end_x + 31) / 32 * 32;
+        if (y >= node->end_y)  growth_bottom = (y -  node->end_y + 31) / 32 * 32;
+        int old_start_x = node->start_x, old_start_y = node->start_y, old_end_x = node->end_x, old_end_y = node->end_y;
+        node->start_x -= growth_left;
+        node->start_y -= growth_top;
+        node->end_x += growth_right;
+        node->end_y += growth_bottom;
+        int pitch = node->end_x - node->start_x;
+        int old_pitch = old_end_x - old_start_x;
+        size_t size = (node->end_x - node->start_x) * (node->end_y - node->start_y);
+        uint8_t* new_tiles = malloc(size);
+        memset(new_tiles, node->oob_tile, size);
+        if (node->tiles) for (int y = old_start_y; y < old_end_y; y++)
+            for (int x = old_start_x; x < old_end_x; x++)
+                new_tiles[(y - old_start_y) * pitch + (x - old_start_x)] = node->tiles[(y - old_start_y) * old_pitch + (x - old_start_x)];
+        free(node->tiles);
+        node->tiles = new_tiles;
+    }
+    int pitch = node->end_x - node->start_x;
+    node->tiles[(y - node->start_y) * pitch + (x - node->start_x)] = tile;
+}
+
+uint8_t engine_get_tile(TilemapNode* node, int x, int y) {
+    if (x < node->start_x || y < node->start_y || x >= node->end_x || y >= node->end_y || !node->tiles) return node->oob_tile;
+    int pitch = node->end_x - node->start_x;
+    return node->tiles[(y - node->start_y) * pitch + (x - node->start_x)];
 }
 
 void* engine_property(EntityNode* node, const char* name) {
@@ -30,15 +58,17 @@ void* engine_property(EntityNode* node, const char* name) {
 
 EntityNode* engine_find_entity(LevelRootNode* node, const char* name) {
     for (int i = 0; i < node->node.children_size; i++) {
+        if (!node->node.children[i]) continue;
         if (node->node.children[i]->type != NodeType_Tilemap) continue;
-        EntityNode* node = engine_find_entity_on_tilemap((TilemapNode*)node->node.children[i], name);
-        if (node) return node;
+        EntityNode* entity = engine_find_entity_on_tilemap((TilemapNode*)node->node.children[i], name);
+        if (entity) return entity;
     }
     return NULL;
 }
 
 EntityNode* engine_find_entity_on_tilemap(TilemapNode* node, const char* name) {
     for (int i = 0; i < node->node.children_size; i++) {
+        if (!node->node.children[i]) continue;
         if (node->node.children[i]->type != NodeType_Entity) continue;
         EntityNode* entity = (EntityNode*)node->node.children[i];
         if (entity->name && strcmp(entity->name, name) == 0) return entity;

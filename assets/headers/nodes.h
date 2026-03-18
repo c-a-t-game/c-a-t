@@ -6,7 +6,7 @@ NODE(Tilemap,
     float scale_x, scale_y;
     float scroll_offset_x, scroll_offset_y;
     float scroll_speed_x, scroll_speed_y;
-    int width, height;
+    int start_x, start_y, end_x, end_y;
     uint8_t oob_tile, *tiles;
 )
 

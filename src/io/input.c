@@ -13,6 +13,8 @@ typedef struct {
 static KeybindEntry* entries = NULL;
 static int entries_size = 0, entries_capacity = 4;
 
+static int prev_mouse, curr_mouse;
+
 static int compare_str(const void* a, const void* b) {
     return strcmp(*(char**)a, *(char**)b);
 }
@@ -111,6 +113,8 @@ void keybind_update() {
         entry->prev_down = entry->down;
         entry->down = down;
     }
+    prev_mouse = curr_mouse;
+    curr_mouse = keybind_mouse();
 }
 
 bool keybind_down(const char* name) {
@@ -134,4 +138,19 @@ bool keybind_released(const char* name) {
     return !entry->down && entry->prev_down;
 }
 
+bool keybind_mouse_down(int button) {
+    return curr_mouse & button;
+}
+
+bool keybind_mouse_pressed(int button) {
+    return (curr_mouse & button) && !(prev_mouse & button);
+}
+
+bool keybind_mouse_released(int button) {
+    return !(curr_mouse & button) && (prev_mouse & button);
+}
+
+float keybind_mouse_x() { return 0; }
+float keybind_mouse_y() { return 0; }
 bool keybind_check(int bind) { return false; }
+int keybind_mouse() { return 0; }

@@ -1,3 +1,5 @@
+#depends "scripts/editor.c"
+
 #define TILE(x, y) ((y)*16+(x))
 #define ANIMATE(frames, delay) ((int)engine.get_millis() % (uint64_t)((frames) * (delay)) / (delay))
 
@@ -21,24 +23,24 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
                 SE = (1 << 7),
             };
 
-            if (*tilemap.tile(x, y - 1) == 6) {
-                if (*tilemap.tile(x - 1, y - 1) != 6) return TILE(0, 3);
+            if (tilemap.get(x, y - 1) == 6) {
+                if (tilemap.get(x - 1, y - 1) != 6) return TILE(0, 3);
                 return TILE(1, 3);
             }
-            if (*tilemap.tile(x, y + 1) == 6) {
-                if (*tilemap.tile(x - 1, y + 1) != 6) return TILE(0, 4);
+            if (tilemap.get(x, y + 1) == 6) {
+                if (tilemap.get(x - 1, y + 1) != 6) return TILE(0, 4);
                 return TILE(1, 4);
             }
 
             int mask = 0;
-            if (*tilemap.tile(x + 0, y - 1) == 1) mask |= N;
-            if (*tilemap.tile(x - 1, y + 0) == 1) mask |= W;
-            if (*tilemap.tile(x + 0, y + 1) == 1) mask |= S;
-            if (*tilemap.tile(x + 1, y + 0) == 1) mask |= E;
-            if (*tilemap.tile(x - 1, y - 1) == 1) mask |= NW;
-            if (*tilemap.tile(x - 1, y + 1) == 1) mask |= SW;
-            if (*tilemap.tile(x + 1, y - 1) == 1) mask |= NE;
-            if (*tilemap.tile(x + 1, y + 1) == 1) mask |= SE;
+            if (tilemap.get(x + 0, y - 1) == 1) mask |= N;
+            if (tilemap.get(x - 1, y + 0) == 1) mask |= W;
+            if (tilemap.get(x + 0, y + 1) == 1) mask |= S;
+            if (tilemap.get(x + 1, y + 0) == 1) mask |= E;
+            if (tilemap.get(x - 1, y - 1) == 1) mask |= NW;
+            if (tilemap.get(x - 1, y + 1) == 1) mask |= SW;
+            if (tilemap.get(x + 1, y - 1) == 1) mask |= NE;
+            if (tilemap.get(x + 1, y + 1) == 1) mask |= SE;
 
             if (!(mask & N) || !(mask & W)) mask &= ~NW;
             if (!(mask & S) || !(mask & W)) mask &= ~SW;
@@ -50,14 +52,14 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
     .close()
     .open<TileNode>() // tree decor
         .event<TileTextureNode>(lambda grass_tree_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
-            if (*tilemap.tile(x, y - 1) == 2) return TILE(2, 15);
+            if (tilemap.get(x, y - 1) == 2) return TILE(2, 15);
             return TILE(2, 14);
         })
     .close()
     .open<TileNode>() // bush decor
         .event<TileTextureNode>(lambda grass_bush_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
-            if (*tilemap.tile(x - 1, y) != 3) return TILE(3, 15);
-            if (*tilemap.tile(x + 1, y) == 3) return TILE(4, 15);
+            if (tilemap.get(x - 1, y) != 3) return TILE(3, 15);
+            if (tilemap.get(x + 1, y) == 3) return TILE(4, 15);
             return TILE(5, 15);
         })
     .close()
@@ -73,24 +75,25 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             TILE(1, 12), TILE(1, 13), TILE(1, 14), TILE(1, 15),
         }[ANIMATE(4, 150)])
         .event<CollisionNode>(lambda grass_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
+            if (editor_is_editing()) return;
             if (!entity.is("player")) return;
-            *tilemap.tile(x, y) = 0;
+            tilemap.set(x, y, 0);
             *storage.get<int>("num_coins") += 1;
         })
     .close()
     .open<TileNode>() // tree stump
         .prop<Collision>(Collision_Solid)
         .event<TileTextureNode>(lambda grass_tree_stump_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
-            if (*tilemap.tile(x - 1, y) == 7) return TILE(2, 3);
-            if (*tilemap.tile(x + 1, y) == 7) return TILE(3, 3);
-            if (*tilemap.tile(x - 1, y) == 6) {
-                if (*tilemap.tile(x, y - 1) != 6 && *tilemap.tile(x, y - 1) != 1) return TILE(1, 1);
-                if (*tilemap.tile(x, y + 1) != 6 && *tilemap.tile(x, y + 1) != 1) return TILE(1, 5);
+            if (tilemap.get(x - 1, y) == 7) return TILE(2, 3);
+            if (tilemap.get(x + 1, y) == 7) return TILE(3, 3);
+            if (tilemap.get(x - 1, y) == 6) {
+                if (tilemap.get(x, y - 1) != 6 && tilemap.get(x, y - 1) != 1) return TILE(1, 1);
+                if (tilemap.get(x, y + 1) != 6 && tilemap.get(x, y + 1) != 1) return TILE(1, 5);
                 return TILE(1, 2);
             }
             else {
-                if (*tilemap.tile(x, y - 1) != 6 && *tilemap.tile(x, y - 1) != 1) return TILE(0, 1);
-                if (*tilemap.tile(x, y + 1) != 6 && *tilemap.tile(x, y + 1) != 1) return TILE(0, 5);
+                if (tilemap.get(x, y - 1) != 6 && tilemap.get(x, y - 1) != 1) return TILE(0, 1);
+                if (tilemap.get(x, y + 1) != 6 && tilemap.get(x, y + 1) != 1) return TILE(0, 5);
                 return TILE(0, 2);
             }
         })
@@ -98,8 +101,8 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
     .open<TileNode>() // tree branch
         .prop<Collision>(Collision_TopOnly)
         .event<TileTextureNode>(lambda grass_tree_branch_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
-            if (*tilemap.tile(x - 1, y) != 6 && *tilemap.tile(x - 1, y) != 7) return TILE(2, 2);
-            if (*tilemap.tile(x + 1, y) != 6 && *tilemap.tile(x + 1, y) != 7) return TILE(4, 2);
+            if (tilemap.get(x - 1, y) != 6 && tilemap.get(x - 1, y) != 7) return TILE(2, 2);
+            if (tilemap.get(x + 1, y) != 6 && tilemap.get(x + 1, y) != 7) return TILE(4, 2);
             return TILE(3, 2);
         })
     .close()
@@ -133,9 +136,7 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.0f) // scroll_speed_x
     .prop<float>(0.0f) // scroll_speed_y
-    .prop<int>(0) // width
-    .prop<int>(0) // height
-    .prop<Tile>(1) // oob_tile
+    .tilemap(0, 0, 1, nullptr)
 .close().open<TilemapNode>()
     .attach(tileset_grass_bg())
     .prop<float>(1.0f) // scale_x
@@ -143,10 +144,8 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_x
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.1f) // scroll_speed_x
-    .prop<float>(0.1f) // scroll_speed_y
-    .prop<int>(0) // width
-    .prop<int>(0) // height
-    .prop<Tile>(2) // oob_tile
+    .prop<float>(0.0f) // scroll_speed_y
+    .tilemap(0, 0, 2, nullptr)
 .close().open<TilemapNode>()
     .attach(tileset_grass_bg())
     .prop<float>(1.0f) // scale_x
@@ -154,10 +153,8 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_x
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.25f) // scroll_speed_x
-    .prop<float>(0.25f) // scroll_speed_y
-    .prop<int>(0) // width
-    .prop<int>(0) // height
-    .prop<Tile>(3) // oob_tile
+    .prop<float>(0.0f) // scroll_speed_y
+    .tilemap(0, 0, 3, nullptr)
 .close().open<TilemapNode>()
     .attach(tileset_grass_bg())
     .prop<float>(1.0f) // scale_x
@@ -165,8 +162,6 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_x
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.5f) // scroll_speed_x
-    .prop<float>(0.5f) // scroll_speed_y
-    .prop<int>(0) // width
-    .prop<int>(0) // height
-    .prop<Tile>(4) // oob_tile
+    .prop<float>(0.0f) // scroll_speed_y
+    .tilemap(0, 0, 4, nullptr)
 .close();

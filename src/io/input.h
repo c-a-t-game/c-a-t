@@ -13,8 +13,14 @@ const char** keybind_get_entries(int* count);
 bool keybind_down(const char* name);
 bool keybind_pressed(const char* name);
 bool keybind_released(const char* name);
+bool keybind_mouse_down(int button);
+bool keybind_mouse_pressed(int button);
+bool keybind_mouse_released(int button);
+float keybind_mouse_x();
+float keybind_mouse_y();
 
 bool keybind_check(int bind);
+int keybind_mouse();
 
 void keybind_update();
 

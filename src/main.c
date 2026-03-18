@@ -14,10 +14,9 @@
 #include "engine/engine.h"
 #include "jitc/jitc.h"
 
-LevelRootNode* current_level;
 jitc_context_t* jitc_context;
-bool compilation_failed = false;
-static uint64_t compile_time = 0;
+static bool compilation_failed = false;
+static bool editor_mode_enabled = false;
 
 static void compile_progress(const char* curr_file, int total, int compiled) {
     char progress[51];
@@ -31,7 +30,6 @@ static void recompile_file(const char* file) {
     printf("Reloading '%s'...", file);
     if (!jitc_parse_file(jitc_context, file)) jitc_report_error(jitc_context, stdout);
     else printf("%.2f ms\n", (get_micros() - start) / 1000.f);
-    compile_time += get_micros() - start;
 }
 
 void add_compile_job(const char* code, const char* filename) {
@@ -46,10 +44,15 @@ void add_compile_job(const char* code, const char* filename) {
     watch_file(strdup(path), recompile_file);
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc > 1) {
+        if (strcmp(argv[1], "--editor") == 0) editor_mode_enabled = true;
+    }
+
     jitc_context = jitc_create_context();
     load_assets();
     storage_init();
+    audio_init();
     if (compilation_failed) return 1;
     if (!jitc_build(jitc_context, compile_progress)) {
         jitc_report_error(jitc_context, stderr);
@@ -63,33 +66,9 @@ int main() {
     }
     entry_point();
 
-    Window* window = graphics_open(":3", 1152, 768);
-    graphics_set_active(window);
-    audio_init();
-
-    uint64_t last_micros = get_micros();
-    while (!graphics_should_close()) {
-        uint64_t curr_micros = get_micros();
-        float delta_time = (curr_micros - last_micros - compile_time) / 1000000.f * 60;
-        last_micros = curr_micros;
-        compile_time = 0;
-
-        graphics_start_frame(NULL);
-        Buffer* buffer = graphics_new_buffer(NULL, 384, 256);
-        graphics_set_buffer(NULL, buffer);
-
-        keybind_update();
-        engine_update(current_level, delta_time);
-        engine_render(current_level, 1152, 768);
-        engine_cleanup();
-
-        graphics_set_buffer(NULL, NULL);
-        graphics_blit(NULL, buffer, 0, 0, 1152, 768, 0, 0, 384, 256, GRAY(255));
-        graphics_end_frame(NULL);
-        graphics_destroy_buffer(buffer);
-
-        check_watched_files();
-    }
-    graphics_close(window);
     return 0;
+}
+
+bool editor_mode() {
+    return editor_mode_enabled;
 }

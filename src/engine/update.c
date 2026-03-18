@@ -43,7 +43,7 @@ static void engine_resolve_collision(EntityNode* entity, TilemapNode* tilemap, T
     int max_y = ceilf(ty) + 1;
     for (int y = min_y; y <= max_y; y++) {
         for (int x = min_x; x <= max_x; x++) {
-            TileNode* tile = (TileNode*)tileset->node.children[*engine_tile(tilemap, x, y)];
+            TileNode* tile = (TileNode*)tileset->node.children[engine_get_tile(tilemap, x, y)];
             bool solid = tile->collision == Collision_Solid;
             if (!engine_rect_intersect(fx, fy, tx, ty, x, y, x + 1, y + 1)) continue;
             if (axis == Axis_X) {

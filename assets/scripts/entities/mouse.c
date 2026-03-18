@@ -1,4 +1,5 @@
 #depends "scripts/engine.c"
+#depends "scripts/editor.c"
 
 Node* entity_squished_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
@@ -27,6 +28,8 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0.75) // width
     .prop<float>(0.75) // height
     .event<EntityUpdateNode>(lambda entity_mouse_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
+        if (editor_is_editing()) return;
+
         EntityNode* player = tilemap.find("player");
         if (!player) return;
 
@@ -39,6 +42,7 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
         entity.vel_y += 0.025 * delta_time;
     })
     .event<EntityCollisionNode>(lambda entity_mouse_collision(EntityNode* collidee, EntityNode* collider): void {
+        if (editor_is_editing()) return;
         if (!collider.is("player")) return;
         if (collider.vel_y > 0) {
             collider.vel_y = -0.3;

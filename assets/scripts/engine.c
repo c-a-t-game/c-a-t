@@ -50,6 +50,12 @@ typedef enum {
     Collision_Solid,
 } Collision;
 
+typedef enum {
+    MouseButton_Left   = 1 << 0,
+    MouseButton_Middle = 1 << 1,
+    MouseButton_Right  = 1 << 2,
+} MouseButton;
+
 typedef struct Node Node;
 struct Node {
     NodeType type;
@@ -79,12 +85,16 @@ extern("engine_attach_node") void __engine_attach_node(Node* parent, Node* child
 extern("engine_detach_node") void __engine_detach_node(Node* child);
 extern("engine_delete_node") void __engine_delete_node(Node* node);
 extern("engine_deep_copy") Node* __engine_copy_node(Node* node);
-extern("engine_tile") uint8_t* __engine_tile(TilemapNode* node, int x, int y);
+extern("engine_set_tile") void __engine_set_tile(TilemapNode* node, int x, int y, Tile tile);
+extern("engine_get_tile") uint8_t __engine_get_tile(TilemapNode* node, int x, int y);
 extern("engine_property") void* __engine_property(EntityNode* node, const char* name);
 extern("engine_find_entity") EntityNode* __engine_find_entity(LevelRootNode* level, const char* name);
 extern("engine_find_entity_on_tilemap") EntityNode* __engine_find_entity_on_tilemap(TilemapNode* tilemap, const char* name);
+extern("engine_update") void __engine_update(LevelRootNode* node, float delta_time);
+extern("engine_render") void __engine_render(LevelRootNode* node, float width, float height);
+extern("engine_cleanup") void __engine_cleanup();
+extern("engine_get_tileset") TilesetNode* __engine_get_tileset(TilemapNode* tilemap);
 
-extern("graphics_main_window") Window* __graphics_main_window();
 extern("graphics_open") Window* __graphics_open(const char* title, int width, int height);
 extern("graphics_close") void __graphics_close(Window* window);
 extern("graphics_focus") void __graphics_focus(Window* window);
@@ -112,6 +122,12 @@ extern("keybind_get_entries") const char** __keybind_get_entries(int* count);
 extern("keybind_down") bool __keybind_down(const char* name);
 extern("keybind_pressed") bool __keybind_pressed(const char* name);
 extern("keybind_released") bool __keybind_released(const char* name);
+extern("keybind_mouse_down") bool __keybind_mouse_down(int button);
+extern("keybind_mouse_pressed") bool __keybind_mouse_pressed(int button);
+extern("keybind_mouse_released") bool __keybind_mouse_released(int button);
+extern("keybind_mouse_x") float __keybind_mouse_x();
+extern("keybind_mouse_y") float __keybind_mouse_y();
+extern("keybind_update") void __keybind_update();
 
 extern("storage_get_slot") StorageSlot* __storage_get_slot(uint32_t index);
 extern("storage_add_slot") StorageSlot* __storage_add_slot();
@@ -124,9 +140,11 @@ extern("_get_asset") void* __get_asset(const char* name);
 extern("get_millis") uint64_t __get_millis();
 extern("get_micros") uint64_t __get_micros();
 
+extern("editor_mode") bool __editor_mode();
+
 typedef Node*(*Level)();
 
-extern("current_level") LevelRootNode* __curr_level_node;
+LevelRootNode* __curr_level_node;
 Level __curr_level_loader;
 
 typedef struct {
@@ -153,12 +171,14 @@ Storage* storage;
 
 uint64_t get_micros(Engine* this) -> __get_micros();
 uint64_t get_millis(Engine* this) -> __get_millis();
+bool editor_mode(Engine* this) -> __editor_mode();
 
 void attach(Node* this, Node* child) -> __engine_attach_node(this, child);
 void detach(Node* this) -> __engine_detach_node(this);
 void delete(Node* this) -> __engine_delete_node(this);
-void copy(Node* this) -> __engine_copy_node(this);
-uint8_t* tile(TilemapNode* this, int x, int y) -> __engine_tile(this, x, y);
+Node* copy(Node* this) -> __engine_copy_node(this);
+void set(TilemapNode* this, int x, int y, Tile tile) -> __engine_set_tile(this, x, y, tile);
+uint8_t get(TilemapNode* this, int x, int y) -> __engine_get_tile(this, x, y);
 <T> T* prop(EntityNode* this, const char* name) -> (T*)__engine_property(this, name);
 
 void load(Engine* this, Level level) {
@@ -168,11 +188,17 @@ void load(Engine* this, Level level) {
 }
 
 void reload(Engine* this) -> this.load(__curr_level_loader);
+LevelRootNode* level(Engine* this) -> __curr_level_node;
+TilesetNode* tileset(TilemapNode* this) -> __engine_get_tileset(this);
 
 EntityNode* find(LevelRootNode* this, const char* name) -> __engine_find_entity(this, name);
 EntityNode* find(TilemapNode* this, const char* name) -> __engine_find_entity_on_tilemap(this, name);
 
-Window* main(Graphics* this) -> __graphics_main_window();
+void update(LevelRootNode* this, float delta_time) -> __engine_update(this, delta_time);
+void render(LevelRootNode* this, float width, float height) -> __engine_render(this, width, height);
+void cleanup(Engine* this) -> __engine_cleanup();
+
+Window* main(Graphics* this) -> NULL;
 Window* open(Graphics* this, const char* title, int width, int height) -> __graphics_open(title, width, height);
 void close(Window* this) -> __graphics_close(this);
 void focus(Window* this) -> __graphics_focus(this);
@@ -200,6 +226,12 @@ const char** get_entries(Input* this, int* count) -> __keybind_get_entries(count
 bool down(Input* this, const char* name) -> __keybind_down(name);
 bool pressed(Input* this, const char* name) -> __keybind_pressed(name);
 bool released(Input* this, const char* name) -> __keybind_released(name);
+bool mouse_down(Input* this, int button) -> __keybind_mouse_down(button);
+bool mouse_pressed(Input* this, int button) -> __keybind_mouse_pressed(button);
+bool mouse_released(Input* this, int button) -> __keybind_mouse_released(button);
+float mouse_x(Input* this) -> __keybind_mouse_x();
+float mouse_y(Input* this) -> __keybind_mouse_y();
+void update(Input* this) -> __keybind_update();
 
 <T> T* get(Assets* this, const char* name) -> __get_asset(name);
 
@@ -264,6 +296,18 @@ NodeBuilder* exec(NodeBuilder* this, void(*func)(NodeBuilder* builder)) {
     this.curr_node.attach(child);
     this.curr_node = child;
     this.ptr = sizeof(Node);
+    return this;
+}
+
+NodeBuilder* tilemap(NodeBuilder* this, int width, int height, Tile oob_tile, Tile* tiles) {
+    Tile* data = tiles ? malloc(width * height) : NULL;
+    if (data) memcpy(data, tiles, width * height);
+    TilemapNode* node = this.curr_node;
+    node.start_x = node.start_y = 0;
+    node.end_x = width;
+    node.end_y = height;
+    node.oob_tile = oob_tile;
+    node.tiles = data;
     return this;
 }
 

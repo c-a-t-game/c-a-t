@@ -56,7 +56,8 @@ void engine_detach_node(Node* child);
 void engine_delete_node(Node* node);
 Node* engine_deep_copy(Node* node);
 
-uint8_t* engine_tile(TilemapNode* node, int x, int y);
+void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile);
+uint8_t engine_get_tile(TilemapNode* node, int x, int y);
 void* engine_property(EntityNode* node, const char* name);
 EntityNode* engine_find_entity(LevelRootNode* level, const char* name);
 EntityNode* engine_find_entity_on_tilemap(TilemapNode* tilemap, const char* name);

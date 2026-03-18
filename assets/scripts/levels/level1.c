@@ -1,6 +1,5 @@
 #depends "scripts/entities/player.c"
 #depends "scripts/entities/mouse.c"
-#depends "scripts/entities/hud.c"
 
 #depends "scripts/tilesets/grass.c"
 
@@ -35,12 +34,8 @@ Node* level1() -> engine.open<LevelRootNode>()
         .prop<float>(0.0f) // scroll_offset_y
         .prop<float>(1.0f) // scroll_speed_x
         .prop<float>(1.0f) // scroll_speed_y
-        .prop<int>(24) // width
-        .prop<int>(16) // height
-        .prop<Tile>(0) // oob_tile
-        .prop<Tile*>(level1_tiles) // tiles
+        .tilemap(24, 16, 0, level1_tiles)
         .attach(entity_player(1.5, 14))
-        .attach(entity_mouse(20, 7))
-        .attach(entity_hud())
-    .close().decorate(foliage_decorator)
+        //.attach(entity_mouse(20, 7))
+    .close()//.decorate(foliage_decorator)
 .build();

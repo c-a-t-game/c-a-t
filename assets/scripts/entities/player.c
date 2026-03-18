@@ -11,60 +11,70 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0.75) // height
     .prop<const char*>("player") // name
     .event<EntityUpdateNode>(lambda entity_player_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
-        int curr_dir = signum(entity.vel_x);
-        int dir = input.down("left") * -1 + input.down("right") * 1;
-        bool moving = dir != 0;
-        if (!moving) dir = -curr_dir;
-        float accel = 0.015 * dir;
-        if (curr_dir != dir) accel *= *entity.prop<bool>("touching_ground") ? 4 : moving ? 2 : 0.25;
-        entity.vel_x += accel * delta_time;
-        if (entity.vel_x < -0.2) entity.vel_x = -0.2;
-        if (entity.vel_x >  0.2) entity.vel_x =  0.2;
-        if (signum(entity.vel_x) != curr_dir && curr_dir != 0) entity.vel_x = 0;
-
-        entity.prop<float>("cam_offset");
-        if (moving && dir < 0) {
-            *entity.prop<bool>("facing_left") = true;
-            *entity.prop<float>("cam_offset") -= 0.1 * delta_time;
-            if (*entity.prop<float>("cam_offset") < -2) *entity.prop<float>("cam_offset") = -2;
+        if ((editor_is_editing() & 0xFF) && editor_noclip) {
+            float speed = input.down("shift") ? 0.3 : 0.1;
+            entity.vel_x = entity.vel_y = 0;
+            *entity.prop<float>("cam_offset") = 0;
+            if (input.down("left"))  entity.pos_x -= speed * delta_time;
+            if (input.down("right")) entity.pos_x += speed * delta_time;
+            if (input.down("up"))    entity.pos_y -= speed * delta_time;
+            if (input.down("down"))  entity.pos_y += speed * delta_time;
         }
-        if (moving && dir > 0) {
-            *entity.prop<bool>("facing_left") = false;
-            *entity.prop<float>("cam_offset") += 0.1 * delta_time;
-            if (*entity.prop<float>("cam_offset") > 2) *entity.prop<float>("cam_offset") = 2;
-        }
+        else {
+            entity.width = entity.height = 0.75;
 
+            int curr_dir = signum(entity.vel_x);
+            int dir = input.down("left") * -1 + input.down("right") * 1;
+            bool moving = dir != 0;
+            if (!moving) dir = -curr_dir;
+            float accel = 0.015 * dir;
+            if (curr_dir != dir) accel *= *entity.prop<bool>("touching_ground") ? 4 : moving ? 2 : 0.25;
+            entity.vel_x += accel * delta_time;
+            if (entity.vel_x < -0.2) entity.vel_x = -0.2;
+            if (entity.vel_x >  0.2) entity.vel_x =  0.2;
+            if (signum(entity.vel_x) != curr_dir && curr_dir != 0) entity.vel_x = 0;
+
+            entity.prop<float>("cam_offset");
+            if (moving && dir < 0) {
+                *entity.prop<bool>("facing_left") = true;
+                *entity.prop<float>("cam_offset") -= 0.1 * delta_time;
+                if (*entity.prop<float>("cam_offset") < -2) *entity.prop<float>("cam_offset") = -2;
+            }
+            if (moving && dir > 0) {
+                *entity.prop<bool>("facing_left") = false;
+                *entity.prop<float>("cam_offset") += 0.1 * delta_time;
+                if (*entity.prop<float>("cam_offset") > 2) *entity.prop<float>("cam_offset") = 2;
+            }
+
+            if (!*entity.prop<bool>("first_frame_flag")) {
+                *entity.prop<float>("jump_buffer_timer") = 999;
+                *entity.prop<bool>("first_frame_flag") = true;
+            }
+
+            entity.vel_y += 0.03 * delta_time;
+
+            *entity.prop<float>("jump_buffer_timer") += delta_time;
+            *entity.prop<float>("coyote_timer") += delta_time;
+
+            if (!input.down("jump")) *entity.prop<bool>("jumping") = false;
+            if (input.pressed("jump")) *entity.prop<float>("jump_buffer_timer") = 0;
+            if (*entity.prop<bool>("touching_ground")) {
+                *entity.prop<float>("coyote_timer") = 0;
+                *entity.prop<bool>("jumped") = false;
+            }
+            if (!*entity.prop<bool>("jumped") && *entity.prop<float>("coyote_timer") <= 5 && *entity.prop<float>("jump_buffer_timer") <= 5) {
+                *entity.prop<bool>("jumping") = *entity.prop<bool>("jumped") = true;
+                *entity.prop<float>("floor_y") = entity.pos_y;
+            }
+            if (*entity.prop<bool>("jumping")) {
+                if (*entity.prop<float>("floor_y") - entity.pos_y > 3 ||
+                    *entity.prop<Direction>("ver_collision") == Direction_Up
+                ) *entity.prop<bool>("jumping") = false;
+                else entity.vel_y = -0.3;
+            }
+        }
         *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 192;
         ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
-
-        if (!*entity.prop<bool>("first_frame_flag")) {
-            *entity.prop<float>("jump_buffer_timer") = 999;
-            *entity.prop<bool>("first_frame_flag") = true;
-        }
-
-        entity.vel_y += 0.03 * delta_time;
-
-        *entity.prop<float>("jump_buffer_timer") += delta_time;
-        *entity.prop<float>("coyote_timer") += delta_time;
-
-        if (!input.down("jump")) *entity.prop<bool>("jumping") = false;
-        if (input.pressed("jump")) *entity.prop<float>("jump_buffer_timer") = 0;
-        if (*entity.prop<bool>("touching_ground")) {
-            *entity.prop<float>("coyote_timer") = 0;
-            *entity.prop<bool>("jumped") = false;
-        }
-        if (!*entity.prop<bool>("jumped") && *entity.prop<float>("coyote_timer") <= 5 && *entity.prop<float>("jump_buffer_timer") <= 5) {
-            *entity.prop<bool>("jumping") = *entity.prop<bool>("jumped") = true;
-            *entity.prop<float>("floor_y") = entity.pos_y;
-        }
-        if (*entity.prop<bool>("jumping")) {
-            if (*entity.prop<float>("floor_y") - entity.pos_y > 3 ||
-                *entity.prop<Direction>("ver_collision") == Direction_Up
-            ) *entity.prop<bool>("jumping") = false;
-            else entity.vel_y = -0.3;
-        }
-
-        if (input.pressed("reload")) (*storage.get<int>("num_coins"))++;
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
@@ -72,6 +82,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
         else if (entity.vel_y <  0) sprite = 6;
         else if (entity.vel_x != 0) sprite = (int)(entity.pos_x * 1) % 2 + 4;
         else sprite = (int[]){ 0, 1, 2, 3, 2, 1 }[engine.get_millis() % (6 * 150) / 150];
+
+        editor_push_trail(entity.pos_x, entity.pos_y, sprite, *entity.prop<bool>("facing_left"));
 
         *srcx = sprite * 16;
         *srcy = 0;

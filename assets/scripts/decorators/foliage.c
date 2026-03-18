@@ -5,7 +5,7 @@ typedef enum {
 } FoliageVariants;
 
 Tile foliage_decorator(TilemapNode* tilemap, int x, int y) {
-    if (*tilemap.tile(x, y) != 1) return *tilemap.tile(x, y);
+    if (tilemap.get(x, y) != 1) return tilemap.get(x, y);
     if (rand() % 4 != 0) return 1;
 
     int min = 1, max = 3;
@@ -15,10 +15,10 @@ Tile foliage_decorator(TilemapNode* tilemap, int x, int y) {
     y--;
 
     for (int i = 0; i < size; i++) {
-        if (x < 0 || x >= tilemap.width || y < 0 || y >= tilemap.height) return 1;
+        if (x < tilemap.start_x || x >= tilemap.end_x || y < tilemap.start_y || y >= tilemap.end_y) return 1;
 
-        if (*tilemap.tile(x, y) != 0) return 1;
-        if (variant == Foliage_Bush && *tilemap.tile(x, y + 1) != 1) return 1;
+        if (tilemap.get(x, y) != 0) return 1;
+        if (variant == Foliage_Bush && tilemap.get(x, y + 1) != 1) return 1;
 
         if (variant == Foliage_Bush) x++;
         if (variant == Foliage_Tree) y--;
@@ -27,12 +27,12 @@ Tile foliage_decorator(TilemapNode* tilemap, int x, int y) {
     if (variant == Foliage_Bush) {
         x -= size;
         for (int i = 0; i < size; i++)
-            *tilemap.tile(x + i, y) = 3;
+            tilemap.set(x + i, y, 3);
     }
     if (variant == Foliage_Tree) {
         y += size;
         for (int i = 0; i < size; i++)
-            *tilemap.tile(x, y - i) = 2;
+            tilemap.set(x, y - i, 2);
     }
 
     return 1;

@@ -13,6 +13,7 @@ typedef struct {
 struct Window {
     SDL_Window* wnd;
     SDL_Renderer* rnd;
+    float dpi_scale;
     struct {
         TextureEntry* entries;
         int size, capacity;
@@ -44,15 +45,14 @@ static SDL_Texture* get_texture(Window* window, Texture* texture, SDL_Renderer* 
     return handle;
 }
 
-SDL_Renderer* graphics_get_renderer(SDL_Window* window, int requested_width) {
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
+void graphics_get_renderer(Window* w, int requested_width) {
+    w->rnd = SDL_CreateRenderer(w->wnd, NULL);
     int window_width;
-    SDL_GetWindowSize(window, &window_width, NULL);
-    float scale = window_width / (float)requested_width;
-    SDL_SetRenderScale(renderer, scale, scale);
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderVSync(renderer, 1);
-    return renderer;
+    SDL_GetWindowSize(w->wnd, &window_width, NULL);
+    w->dpi_scale = window_width / (float)requested_width;
+    SDL_SetRenderScale(w->rnd, w->dpi_scale, w->dpi_scale);
+    SDL_SetRenderDrawBlendMode(w->rnd, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderVSync(w->rnd, 1);
 }
 
 void graphics_destroy_renderer(SDL_Renderer* renderer) {
@@ -66,7 +66,7 @@ Window* graphics_open(const char* title, int width, int height) {
 
     Window* w = malloc(sizeof(Window));
     w->wnd = SDL_CreateWindow(title, width, height, 0);
-    w->rnd = graphics_get_renderer(w->wnd, width);
+    graphics_get_renderer(w, width);
     w->texture_map.capacity = 4;
     w->texture_map.size = 0;
     w->texture_map.entries = malloc(sizeof(TextureEntry) * w->texture_map.capacity);
@@ -93,6 +93,11 @@ void graphics_get_size(Window* w, int* width, int* height) {
 void graphics_get_pos(Window* w, int* x, int* y) {
     if (!w) w = curr_window;
     SDL_GetWindowPosition(w->wnd, x, y);
+}
+
+float graphics_get_dpi_scale(Window* w) {
+    if (!w) w = curr_window;
+    return w->dpi_scale;
 }
 
 void graphics_set_active(Window* w) {
