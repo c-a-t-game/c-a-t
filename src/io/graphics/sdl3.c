@@ -66,6 +66,7 @@ Window* graphics_open(const char* title, int width, int height) {
 
     Window* w = malloc(sizeof(Window));
     w->wnd = SDL_CreateWindow(title, width, height, 0);
+    SDL_HideCursor();
     graphics_get_renderer(w, width);
     w->texture_map.capacity = 4;
     w->texture_map.size = 0;

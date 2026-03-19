@@ -57,7 +57,7 @@ void editor_push_trail(float pos_x, float pos_y, int sprite, bool flipped) {
 void editor_play_button() {
     Texture* icons = assets.get<Texture>("images/hud/editor.png");
     ui_container(384 - 25, 256 - 25, 24, 24, 0x3F3F3FFF);
-    if (ui_icon_button(384 - 23, 256-23, 20, 20, false, editor_play_mode * 16, 48, 16, 16, icons)) {
+    if (ui_icon_button(384 - 23, 256-23, 20, 20, false, 16 + editor_play_mode * 16, 16, 16, 16, icons)) {
         editor_play_mode ^= 1;
         if (editor_play_mode) {
             __curr_level_node = editor_level.node.copy();
@@ -104,17 +104,17 @@ void editor_update() {
             gfx.main().draw(player_tex, x, y, w, h, trail.sprite * 16, 0, 16, 16, 0xFFFFFF7F);
         }
     }
-    
+
     float sel_x = input.mouse_x() / tilemap.scale_x / tileset.tile_width  + offset_x;
     float sel_y = input.mouse_y() / tilemap.scale_y / tileset.tile_height + offset_y;
     if (editor_mode == EditorMode_Tilemap) {
         gfx.main().draw(icons,
             (floorf(sel_x) - offset_x) * tileset.tile_width  * tilemap.scale_x,
             (floorf(sel_y) - offset_y) * tileset.tile_height * tilemap.scale_y,
-            16, 16, 32, 48, 16, 16, 0xFFFFFFFF
+            16, 16, 48, 16, 16, 16, 0xFFFFFFFF
         );
     }
-    
+
     bool cannot_edit = false;
     cannot_edit |= ui_container(384 - 25, 1+21*0, 24, 3+21*3, 0x3F3F3FFF);
     cannot_edit |= ui_container(384 - 25, 5+21*3, 24, 3+21*2, 0x3F3F3FFF);
@@ -128,7 +128,7 @@ void editor_update() {
     if (ui_icon_button(384 - 23, 11+21*5, 20, 20, false, 16 - editor_trail  * 16, 32, 16, 16, icons)) editor_trail ^= 1;
     if (ui_icon_button(384 - 23, 11+21*6, 20, 20, false, 48 - editor_noclip * 16, 32, 16, 16, icons)) editor_noclip ^= 1;
     editor_play_button();
-    
+
     if (input.pressed("editor_picker")) editor_picker ^= 1;
     if (editor_picker) {
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
@@ -153,14 +153,41 @@ void editor_update() {
             }
         }
     }
-    
+
     bool prev_editing = editor_editing;
-    if (!cannot_edit && input.mouse_pressed(MouseButton_Left))  editor_editing = true;
+    if (!cannot_edit) {
+        if (input.mouse_pressed(MouseButton_Left))  editor_editing = true;
+        if (input.mouse_pressed(MouseButton_Right)) {
+            player.pos_x = sel_x;
+            player.pos_y = sel_y;
+            player.vel_x = player.vel_y = 0;
+        }
+    }
     if (input.mouse_released(MouseButton_Left)) editor_editing = false;
     if (editor_editing) {
         if (editor_mode == EditorMode_Tilemap) {
-            if (editor_tool == EditorTool_Pencil) tilemap.set(floorf(sel_x), floorf(sel_y), editor_curr_tile);
+            if (editor_tool == EditorTool_Pencil) {
+                if (input.down("shift")) editor_curr_tile = tilemap.get(floorf(sel_x), floorf(sel_y));
+                else if (input.down("ctrl")) {} // bucket fill
+                else tilemap.set(floorf(sel_x), floorf(sel_y), editor_curr_tile);
+            }
             if (editor_tool == EditorTool_Eraser) tilemap.set(floorf(sel_x), floorf(sel_y), 0);
         }
     }
+
+    Texture* cursor = assets.get<Texture>("images/hud/cursors.png");
+    int cursor_icon = 0;
+    if (editor_tool == EditorTool_Pencil) {
+        if (input.down("shift")) cursor_icon = 1;
+        else if (input.down("ctrl")) cursor_icon = 2;
+        else cursor_icon = 0;
+    }
+    else if (editor_tool == EditorTool_Eraser) cursor_icon = 3;
+    else {
+        if (input.down("shift") && input.down("ctrl")) cursor_icon = 7;
+        else if (input.down("shift")) cursor_icon = 5;
+        else if (input.down("ctrl")) cursor_icon = 6;
+        else cursor_icon = 4;
+    }
+    gfx.main().draw(cursor, input.mouse_x() - 1, input.mouse_y() - 13, 14, 14, (cursor_icon % 4) * 14, (cursor_icon / 4) * 14, 14, 14, 0xFFFFFFFF);
 }
