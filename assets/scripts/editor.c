@@ -29,10 +29,15 @@ typedef struct {
     bool flipped;
 } EditorTrail;
 
+typedef Node*(*EntitySpawner)(float x, float y);
+
 EditorTrail editor_trail_data[EDITOR_TRAIL_CAPACITY];
 int editor_trail_tail, editor_trail_head, editor_trail_size;
 int editor_curr_tile;
+EntitySpawner editor_curr_obj;
 LevelRootNode* editor_level;
+
+Node* entity_mouse(float x, float y);
 
 EditorTrail* editor_trail_get(int index) -> &editor_trail_data[(editor_trail_tail + index) % EDITOR_TRAIL_CAPACITY];
 
@@ -129,17 +134,36 @@ void editor_update() {
     if (ui_icon_button(384 - 23, 11+21*6, 20, 20, false, 48 - editor_noclip * 16, 32, 16, 16, icons)) editor_noclip ^= 1;
     editor_play_button();
 
-    if (input.pressed("editor_picker")) editor_picker ^= 1;
+    if (input.pressed("editor_tile_picker")) {
+        editor_picker ^= 1;
+        if (editor_picker) {
+            editor_tool = EditorTool_Pencil;
+            editor_mode = EditorMode_Tilemap;
+        }
+    }
+    if (input.pressed("editor_obj_picker")) {
+        editor_picker ^= 1;
+        if (editor_picker) {
+            editor_tool = EditorTool_Pencil;
+            editor_mode = EditorMode_Object;
+        }
+    }
     if (editor_picker) {
-        gfx.main().rect(0, 0, 384, 256, 0x0000007F);
+        struct {
+            Texture* tex;
+            EntitySpawner spawner;
+        } objects[] = {{ assets.get<Texture>("images/entities/mouse.png"), entity_mouse }};
         int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
-        int num_tiles = sizeof(tiles) / sizeof(int);
-        int width = 3 + (num_tiles > 16 ? 16 : num_tiles) * 21;
-        int height = 3 + (num_tiles / 16 + 1) * 21;
+        gfx.main().rect(0, 0, 384, 256, 0x0000007F);
+        int num_tiles = sizeof(tiles) / sizeof(*tiles);
+        int num_objects = sizeof(objects) / sizeof(*objects);
+        int num_items = editor_mode == EditorMode_Tilemap ? num_tiles : num_objects;
+        int width = 3 + (num_items > 16 ? 16 : num_items) * 21;
+        int height = 3 + (num_items / 16 + 1) * 21;
         int panel_x = (384 - width) / 2;
         int panel_y = (256 - height) / 2;
         cannot_edit |= ui_container(panel_x, panel_y, width, height, 0x3F3F3FFF);
-        for (int tile = 0; tile < num_tiles; tile++) {
+        if (editor_mode == EditorMode_Tilemap) for (int tile = 0; tile < num_tiles; tile++) {
             int tex = tiles[tile];
             int tile_x = tile % 16;
             int tile_y = tile / 16;
@@ -147,8 +171,14 @@ void editor_update() {
             int tex_y = tex / 16;
             if (ui_icon_button(panel_x + 2+21*tile_x, panel_y + 2+21*tile_y, 20, 20, false, tex_x * 16, tex_y * 16, 16, 16, tileset.tileset)) {
                 editor_curr_tile = tile + 1;
-                editor_tool = EditorTool_Pencil;
-                editor_mode = EditorMode_Tilemap;
+                editor_picker = false;
+            }
+        }
+        else if (editor_mode == EditorMode_Object) for (int obj = 0; obj < num_objects; obj++) {
+            int obj_x = obj % 16;
+            int obj_y = obj / 16;
+            if (ui_icon_button(panel_x + 2+21*obj_x, panel_y + 2+21*obj_y, 20, 20, false, 0, 0, 16, 16, objects[obj].tex)) {
+                editor_curr_obj = objects[obj].spawner;
                 editor_picker = false;
             }
         }
@@ -167,8 +197,8 @@ void editor_update() {
     if (editor_editing) {
         if (editor_mode == EditorMode_Tilemap) {
             if (editor_tool == EditorTool_Pencil) {
-                if (input.down("shift")) editor_curr_tile = tilemap.get(floorf(sel_x), floorf(sel_y));
-                else if (input.down("ctrl")) {} // bucket fill
+                if (input.down("ctrl")) editor_curr_tile = tilemap.get(floorf(sel_x), floorf(sel_y));
+                else if (input.down("shift")) {} // bucket fill
                 else tilemap.set(floorf(sel_x), floorf(sel_y), editor_curr_tile);
             }
             if (editor_tool == EditorTool_Eraser) tilemap.set(floorf(sel_x), floorf(sel_y), 0);
@@ -178,8 +208,11 @@ void editor_update() {
     Texture* cursor = assets.get<Texture>("images/hud/cursors.png");
     int cursor_icon = 0;
     if (editor_tool == EditorTool_Pencil) {
-        if (input.down("shift")) cursor_icon = 1;
-        else if (input.down("ctrl")) cursor_icon = 2;
+        if (editor_mode == EditorMode_Tilemap) {
+            if (input.down("ctrl")) cursor_icon = 1;
+            else if (input.down("shift")) cursor_icon = 2;
+            else cursor_icon = 0;
+        }
         else cursor_icon = 0;
     }
     else if (editor_tool == EditorTool_Eraser) cursor_icon = 3;

@@ -12,7 +12,8 @@ void entry_point() {
     input.add("shift", 225);
     input.add("ctrl", 224);
 
-    input.add("editor_picker", 8);
+    input.add("editor_tile_picker", 8);
+    input.add("editor_obj_picker", 20);
     input.add("editor_select", 30);
     input.add("editor_pencil", 31);
     input.add("editor_eraser", 32);
