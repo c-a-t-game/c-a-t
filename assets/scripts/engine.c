@@ -81,6 +81,9 @@ typedef struct Input Input;
 typedef struct Storage Storage;
 typedef struct StorageSlot StorageSlot;
 
+typedef Node*(*Level)();
+typedef void(*FileWatchCallback)(const char* filename);
+
 extern("engine_attach_node") void __engine_attach_node(Node* parent, Node* child);
 extern("engine_detach_node") void __engine_detach_node(Node* child);
 extern("engine_delete_node") void __engine_delete_node(Node* node);
@@ -139,10 +142,10 @@ extern("_get_asset") void* __get_asset(const char* name);
 
 extern("get_millis") uint64_t __get_millis();
 extern("get_micros") uint64_t __get_micros();
+extern("watch_file") void __watch_file(const char* filename, FileWatchCallback callback);
+extern("check_watched_files") void __check_watched_files();
 
 extern("editor_mode") bool __editor_mode();
-
-typedef Node*(*Level)();
 
 LevelRootNode* __curr_level_node;
 Level __curr_level_loader;
@@ -171,6 +174,8 @@ Storage* storage;
 
 uint64_t get_micros(Engine* this) -> __get_micros();
 uint64_t get_millis(Engine* this) -> __get_millis();
+void watch_file(Engine* this, const char* filename, FileWatchCallback callback) -> __watch_file(filename, callback);
+void check_watched_files(Engine* this) -> __check_watched_files();
 bool editor_mode(Engine* this) -> __editor_mode();
 
 void attach(Node* this, Node* child) -> __engine_attach_node(this, child);

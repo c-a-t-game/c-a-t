@@ -17,8 +17,7 @@ void entry_point() {
     input.add("editor_select", 30);
     input.add("editor_pencil", 31);
     input.add("editor_eraser", 32);
-    input.add("editor_tilemap", 33);
-    input.add("editor_object", 34);
+    input.add("editor_mode_toggle", 33);
 
     if (storage.num_slots() == 0) storage.use(storage.add());
     else storage.load(0);
@@ -86,6 +85,8 @@ void entry_point() {
         w.end_frame();
 
         buf.destroy();
+        
+        engine.check_watched_files();
     }
     w.close();
 }

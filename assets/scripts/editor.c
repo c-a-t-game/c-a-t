@@ -14,7 +14,7 @@ enum {
     EditorTool_Eraser,
 } editor_tool = EditorTool_Selection;
 
-enum {
+preserve enum {
     EditorMode_Tilemap,
     EditorMode_Object,
 } editor_mode = EditorMode_Tilemap;
@@ -35,6 +35,7 @@ EditorTrail editor_trail_data[EDITOR_TRAIL_CAPACITY];
 int editor_trail_tail, editor_trail_head, editor_trail_size;
 int editor_curr_tile;
 EntitySpawner editor_curr_obj;
+EntityNode* editor_drag_obj;
 LevelRootNode* editor_level;
 
 Node* entity_mouse(float x, float y);
@@ -112,12 +113,21 @@ void editor_update() {
 
     float sel_x = input.mouse_x() / tilemap.scale_x / tileset.tile_width  + offset_x;
     float sel_y = input.mouse_y() / tilemap.scale_y / tileset.tile_height + offset_y;
+    EntityNode* sel_entity = nullptr;
     if (editor_mode == EditorMode_Tilemap) {
         gfx.main().draw(icons,
             (floorf(sel_x) - offset_x) * tileset.tile_width  * tilemap.scale_x,
             (floorf(sel_y) - offset_y) * tileset.tile_height * tilemap.scale_y,
             16, 16, 48, 16, 16, 16, 0xFFFFFFFF
         );
+    }
+    for (int i = 0; i < tilemap.node.children_size; i++) {
+        if (tilemap.node.children[i] && (int)tilemap.node.children[i].type == NodeType_Entity) {
+            EntityNode* entity = tilemap.node.children[i];
+            float x = entity.pos_x - fmax(entity.width,  0.5f) / 2;
+            float y = entity.pos_y - fmax(entity.height, 0.5f) / 2;
+            if (sel_x >= x && sel_y >= y && sel_x < x + entity.width && sel_y < y + entity.height) sel_entity = entity;
+        }
     }
 
     bool cannot_edit = false;
@@ -128,11 +138,13 @@ void editor_update() {
     if (ui_icon_button(384 - 23, 3+21*0, 20, 20, editor_tool == EditorTool_Selection, 0,  0,  16, 16, icons) || input.pressed("editor_select"))  editor_tool = EditorTool_Selection;
     if (ui_icon_button(384 - 23, 3+21*1, 20, 20, editor_tool == EditorTool_Pencil,    16, 0,  16, 16, icons) || input.pressed("editor_pencil"))  editor_tool = EditorTool_Pencil;
     if (ui_icon_button(384 - 23, 3+21*2, 20, 20, editor_tool == EditorTool_Eraser,    32, 0,  16, 16, icons) || input.pressed("editor_eraser"))  editor_tool = EditorTool_Eraser;
-    if (ui_icon_button(384 - 23, 7+21*3, 20, 20, editor_mode == EditorMode_Tilemap,   48, 0,  16, 16, icons) || input.pressed("editor_tilemap")) editor_mode = EditorMode_Tilemap;
-    if (ui_icon_button(384 - 23, 7+21*4, 20, 20, editor_mode == EditorMode_Object,    0,  16, 16, 16, icons) || input.pressed("editor_object"))  editor_mode = EditorMode_Object;
+    if (ui_icon_button(384 - 23, 7+21*3, 20, 20, editor_mode == EditorMode_Tilemap,   48, 0,  16, 16, icons)) editor_mode = EditorMode_Tilemap;
+    if (ui_icon_button(384 - 23, 7+21*4, 20, 20, editor_mode == EditorMode_Object,    0,  16, 16, 16, icons)) editor_mode = EditorMode_Object;
     if (ui_icon_button(384 - 23, 11+21*5, 20, 20, false, 16 - editor_trail  * 16, 32, 16, 16, icons)) editor_trail ^= 1;
     if (ui_icon_button(384 - 23, 11+21*6, 20, 20, false, 48 - editor_noclip * 16, 32, 16, 16, icons)) editor_noclip ^= 1;
     editor_play_button();
+    
+    if (input.pressed("editor_mode_toggle")) editor_mode = editor_mode == EditorMode_Tilemap ? EditorMode_Object : EditorMode_Tilemap;
 
     if (input.pressed("editor_tile_picker")) {
         editor_picker ^= 1;
@@ -152,7 +164,7 @@ void editor_update() {
         struct {
             Texture* tex;
             EntitySpawner spawner;
-        } objects[] = {{ assets.get<Texture>("images/entities/mouse.png"), entity_mouse }};
+        } objects[] = { assets.get<Texture>("images/entities/mouse.png"), entity_mouse };
         int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
         int num_tiles = sizeof(tiles) / sizeof(*tiles);
@@ -186,14 +198,26 @@ void editor_update() {
 
     bool prev_editing = editor_editing;
     if (!cannot_edit) {
-        if (input.mouse_pressed(MouseButton_Left))  editor_editing = true;
+        if (input.mouse_pressed(MouseButton_Left)) {
+            editor_editing = true;
+            if (editor_mode == EditorMode_Object) {
+                if (editor_tool == EditorTool_Pencil) if (editor_curr_obj) {
+                    editor_drag_obj = editor_curr_obj(sel_x, sel_y);
+                    tilemap.node.attach(editor_drag_obj);
+                }
+                if (editor_tool == EditorTool_Selection) editor_drag_obj = sel_entity;
+            }
+        }
         if (input.mouse_pressed(MouseButton_Right)) {
             player.pos_x = sel_x;
             player.pos_y = sel_y;
             player.vel_x = player.vel_y = 0;
         }
     }
-    if (input.mouse_released(MouseButton_Left)) editor_editing = false;
+    if (input.mouse_released(MouseButton_Left)) {
+        editor_editing = false;
+        editor_drag_obj = nullptr;
+    }
     if (editor_editing) {
         if (editor_mode == EditorMode_Tilemap) {
             if (editor_tool == EditorTool_Pencil) {
@@ -203,6 +227,17 @@ void editor_update() {
             }
             if (editor_tool == EditorTool_Eraser) tilemap.set(floorf(sel_x), floorf(sel_y), 0);
         }
+        if (editor_mode == EditorMode_Object) {
+            if (editor_tool == EditorTool_Eraser) if (sel_entity) {
+                sel_entity.node.delete();
+            }
+        }
+    }
+    if (editor_drag_obj) {
+        float grid_x = roundf(sel_x * 2) / 2;
+        float grid_y = roundf(sel_y * 2) / 2;
+        editor_drag_obj.pos_x = (int)input.down("shift") ? sel_x : grid_x;
+        editor_drag_obj.pos_y = (int)input.down("shift") ? sel_y : grid_y;
     }
 
     Texture* cursor = assets.get<Texture>("images/hud/cursors.png");
