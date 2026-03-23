@@ -67,7 +67,7 @@ void load_assets() {
         for (int j = 0; j < num_loaders; j++) {
             Loader* loader = &loaders[j];
             if (strcmp(ext, loader->ext) != 0) continue;
-            asset->data = loader->loader(asset->name, bytes ?: asset->raw, asset->length);
+            asset->data = loader->loader(asset->name, bytes ?: asset->raw, length);
         }
         free(bytes);
     }
