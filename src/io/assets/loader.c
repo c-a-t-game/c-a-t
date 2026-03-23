@@ -41,6 +41,20 @@ static int compare_str(const void* a, const void* b) {
     return strcmp(*(char**)a, *(char**)b);
 }
 
+static uint8_t* read_asset_file(const char* name, size_t* length) {
+    char filename[strlen(name) + 8];
+    sprintf(filename, "assets/%s", name);
+    FILE* f = fopen(filename, "r");
+    if (!f) return NULL;
+    fseek(f, 0, SEEK_END);
+    *length = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    uint8_t* bytes = malloc(*length);
+    fread(bytes, *length, 1, f);
+    fclose(f);
+    return bytes;
+}
+
 void load_assets() {
     int num_assets = sizeof(assets) / sizeof(Asset);
     int num_loaders = sizeof(loaders) / sizeof(Loader);
@@ -48,11 +62,14 @@ void load_assets() {
     for (int i = 0; i < sizeof(assets) / sizeof(Asset); i++) {
         Asset* asset = &assets[i];
         const char* ext = get_extension(asset->name);
+        size_t length = asset->length;
+        uint8_t* bytes = read_asset_file(asset->name, &length);
         for (int j = 0; j < num_loaders; j++) {
             Loader* loader = &loaders[j];
             if (strcmp(ext, loader->ext) != 0) continue;
-            asset->data = loader->loader(asset->name, asset->raw, asset->length);
+            asset->data = loader->loader(asset->name, bytes ?: asset->raw, asset->length);
         }
+        free(bytes);
     }
 }
 

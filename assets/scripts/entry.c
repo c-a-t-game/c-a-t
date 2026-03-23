@@ -77,7 +77,10 @@ void entry_point() {
         engine.cleanup();
 
         if (editor_is_editing()) editor_update();
-        else if (engine.editor_mode()) editor_play_button();
+        else if (engine.editor_mode()) {
+            editor_play_button();
+            gfx.main().draw(assets.get<Texture>("images/hud/cursors.png"), input.mouse_x() - 7, input.mouse_y() - 1, 14, 14, 28, 28, 14, 14, 0xFFFFFFFF);
+        }
         else ui_hud();
 
         w.set_buffer(nullptr);
