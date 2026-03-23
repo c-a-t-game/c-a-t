@@ -125,7 +125,7 @@ void editor_update() {
         if (tilemap.node.children[i] && (int)tilemap.node.children[i].type == NodeType_Entity) {
             EntityNode* entity = tilemap.node.children[i];
             float x = entity.pos_x - fmax(entity.width,  0.5f) / 2;
-            float y = entity.pos_y - fmax(entity.height, 0.5f) / 2;
+            float y = entity.pos_y - fmax(entity.height, 0.5f);
             if (sel_x >= x && sel_y >= y && sel_x < x + entity.width && sel_y < y + entity.height) sel_entity = entity;
         }
     }
@@ -164,7 +164,7 @@ void editor_update() {
         struct {
             Texture* tex;
             EntitySpawner spawner;
-        } objects[] = { assets.get<Texture>("images/entities/mouse.png"), entity_mouse };
+        } objects[] = {{ assets.get<Texture>("images/entities/mouse.png"), entity_mouse }};
         int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
         int num_tiles = sizeof(tiles) / sizeof(*tiles);
@@ -234,14 +234,20 @@ void editor_update() {
         }
     }
     if (editor_drag_obj) {
-        float grid_x = roundf(sel_x * 2) / 2;
-        float grid_y = roundf(sel_y * 2) / 2;
-        editor_drag_obj.pos_x = (int)input.down("shift") ? sel_x : grid_x;
-        editor_drag_obj.pos_y = (int)input.down("shift") ? sel_y : grid_y;
+        float x = sel_x, y = sel_y;
+        y += editor_drag_obj.height / 2;
+        if (!(int)input.down("shift")) {
+            x = roundf(x * 2) / 2;
+            y = roundf(y * 2) / 2;
+        }
+        editor_drag_obj.pos_x = x;
+        editor_drag_obj.pos_y = y;
     }
 
     Texture* cursor = assets.get<Texture>("images/hud/cursors.png");
     int cursor_icon = 0;
+    int origin_x = 1;
+    int origin_y = 13;
     if (editor_tool == EditorTool_Pencil) {
         if (editor_mode == EditorMode_Tilemap) {
             if (input.down("ctrl")) cursor_icon = 1;
@@ -251,11 +257,16 @@ void editor_update() {
         else cursor_icon = 0;
     }
     else if (editor_tool == EditorTool_Eraser) cursor_icon = 3;
-    else {
-        if (input.down("shift") && input.down("ctrl")) cursor_icon = 7;
+    else if (editor_tool == EditorTool_Selection) {
+        if (sel_entity) {
+            cursor_icon = editor_editing ? 9 : 8;
+            origin_x = 7;
+            origin_y = 1;
+        }
+        else if (input.down("shift") && input.down("ctrl")) cursor_icon = 7;
         else if (input.down("shift")) cursor_icon = 5;
         else if (input.down("ctrl")) cursor_icon = 6;
         else cursor_icon = 4;
     }
-    gfx.main().draw(cursor, input.mouse_x() - 1, input.mouse_y() - 13, 14, 14, (cursor_icon % 4) * 14, (cursor_icon / 4) * 14, 14, 14, 0xFFFFFFFF);
+    gfx.main().draw(cursor, input.mouse_x() - origin_x, input.mouse_y() - origin_y, 14, 14, (cursor_icon % 4) * 14, (cursor_icon / 4) * 14, 14, 14, 0xFFFFFFFF);
 }
