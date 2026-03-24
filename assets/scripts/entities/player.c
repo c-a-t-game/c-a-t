@@ -9,6 +9,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0) // vel_y
     .prop<float>(0.75) // width
     .prop<float>(0.75) // height
+    .prop<const char*>("entity_player") // func
     .prop<const char*>("player") // name
     .event<EntityUpdateNode>(lambda entity_player_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         if ((editor_is_editing() & 0xFF) && editor_noclip) {

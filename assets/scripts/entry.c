@@ -88,7 +88,7 @@ void entry_point() {
         w.end_frame();
 
         buf.destroy();
-        
+
         engine.check_watched_files();
     }
     w.close();

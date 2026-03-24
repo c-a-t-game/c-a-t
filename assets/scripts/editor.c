@@ -84,6 +84,48 @@ void editor_play_button() {
     }
 }
 
+void editor_export() {
+    LevelRootNode* level = engine.level();
+    EntityNode* player = level.find("player");
+    TilemapNode* tilemap = player.node.parent;
+    TilesetNode* tileset = tilemap.tileset();
+
+    int width = tilemap.end_x - tilemap.start_x, height = tilemap.end_y - tilemap.start_y;
+    printf("#depends \"scripts/entities/player.c\"\n");
+    printf("#depends \"scripts/entities/mouse.c\"\n");
+    printf("#depends \"scripts/tilesets/grass.c\"\n");
+    printf("#depends \"scripts/decorators/foliage.c\"\n");
+    printf("\n");
+    printf("Node* level() -> engine.open<LevelRootNode>()\n");
+    printf("    .exec(grass_bg)\n");
+    printf("    .open<TilemapNode>()\n");
+    printf("        .attach(tileset_grass())\n");
+    printf("        .prop<float>(1.0f) // scale_x\n");
+    printf("        .prop<float>(1.0f) // scale_y\n");
+    printf("        .prop<float>(%d.0f) // scroll_offset_x\n", tilemap.start_x);
+    printf("        .prop<float>(%d.0f) // scroll_offset_y\n", tilemap.start_y);
+    printf("        .prop<float>(1.0f) // scroll_speed_x\n");
+    printf("        .prop<float>(1.0f) // scroll_speed_y\n");
+    printf("        .tilemap(%d, %d, 0, (Tile[]){\n", width, height);
+    for (int y = 0; y < height; y++) {
+        printf("            ");
+        for (int x = 0; x < width; x++) {
+            int tile = tilemap.get(x, y);
+            printf("%d,", tile);
+        }
+        printf("\n");
+    }
+    printf("        })\n");
+    for (int i = 0; i < tilemap.node.children_size; i++) {
+        if (tilemap.node.children[i] && (int)tilemap.node.children[i].type == NodeType_Entity) {
+            EntityNode* entity = tilemap.node.children[i];
+            printf("        .attach(%s(%.1ff, %.1ff))\n", entity.func, entity.pos_x, entity.pos_y);
+        }
+    }
+    printf("    .close()\n");
+    printf(".build();\n");
+}
+
 void editor_init() {
     editor_level = __curr_level_node;
 }
@@ -135,6 +177,7 @@ void editor_update() {
     cannot_edit |= ui_container(384 - 25, 5+21*3, 24, 3+21*2, 0x3F3F3FFF);
     cannot_edit |= ui_container(384 - 25, 9+21*5, 24, 3+21*2, 0x3F3F3FFF);
     cannot_edit |= ui_container(384 - 25, 256 - 25, 24, 24, 0x3F3F3FFF);
+    cannot_edit |= ui_container(384 - 25, 256 - 50, 24, 24, 0x3F3F3FFF);
     if (ui_icon_button(384 - 23, 3+21*0, 20, 20, editor_tool == EditorTool_Selection, 0,  0,  16, 16, icons) || input.pressed("editor_select"))  editor_tool = EditorTool_Selection;
     if (ui_icon_button(384 - 23, 3+21*1, 20, 20, editor_tool == EditorTool_Pencil,    16, 0,  16, 16, icons) || input.pressed("editor_pencil"))  editor_tool = EditorTool_Pencil;
     if (ui_icon_button(384 - 23, 3+21*2, 20, 20, editor_tool == EditorTool_Eraser,    32, 0,  16, 16, icons) || input.pressed("editor_eraser"))  editor_tool = EditorTool_Eraser;
@@ -142,8 +185,9 @@ void editor_update() {
     if (ui_icon_button(384 - 23, 7+21*4, 20, 20, editor_mode == EditorMode_Object,    0,  16, 16, 16, icons)) editor_mode = EditorMode_Object;
     if (ui_icon_button(384 - 23, 11+21*5, 20, 20, false, 16 - editor_trail  * 16, 32, 16, 16, icons)) editor_trail ^= 1;
     if (ui_icon_button(384 - 23, 11+21*6, 20, 20, false, 48 - editor_noclip * 16, 32, 16, 16, icons)) editor_noclip ^= 1;
+    if (ui_icon_button(384 - 23, 256 - 48, 20, 20, false, 0, 48, 16, 16, icons)) editor_export();
     editor_play_button();
-    
+
     if (input.pressed("editor_mode_toggle")) editor_mode = editor_mode == EditorMode_Tilemap ? EditorMode_Object : EditorMode_Tilemap;
 
     if (input.pressed("editor_tile_picker")) {
@@ -161,12 +205,17 @@ void editor_update() {
         }
     }
     if (editor_picker) {
+        #define OBJECT(name) { \
+            assets.get<Texture>("images/entities/" __STR__(name) ".png"), \
+            __ID__(entity_, name) \
+        }
         struct {
             Texture* tex;
             EntitySpawner spawner;
-        } objects[] = {{ assets.get<Texture>("images/entities/mouse.png"), entity_mouse }};
-        int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
+        } objects[] = { OBJECT(mouse) };
+
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
+        int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
         int num_tiles = sizeof(tiles) / sizeof(*tiles);
         int num_objects = sizeof(objects) / sizeof(*objects);
         int num_items = editor_mode == EditorMode_Tilemap ? num_tiles : num_objects;
@@ -258,9 +307,10 @@ void editor_update() {
     }
     else if (editor_tool == EditorTool_Eraser) cursor_icon = 3;
     else if (editor_tool == EditorTool_Selection) {
+        origin_x = 7;
+        origin_y = 7;
         if (sel_entity) {
             cursor_icon = editor_editing ? 9 : 8;
-            origin_x = 7;
             origin_y = 1;
         }
         else if (input.down("shift") && input.down("ctrl")) cursor_icon = 7;

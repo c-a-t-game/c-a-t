@@ -24,6 +24,7 @@ NODE(Entity,
     float pos_x, pos_y;
     float vel_x, vel_y;
     float width, height;
+    const char* func;
     const char* name;
     float prev_pos_x, prev_pos_y;
     struct {

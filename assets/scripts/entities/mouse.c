@@ -8,6 +8,7 @@ Node* entity_squished_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0) // vel_y
     .prop<float>(0.75) // width
     .prop<float>(0.75) // height
+    .prop<const char*>("entity_squished_mouse") // func
     .event<EntityUpdateNode>(lambda entity_squished_mouse_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         if (*entity.prop<float>("timer") >= 60) entity.node.delete();
         *entity.prop<float>("timer") += delta_time;
@@ -27,6 +28,7 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0) // vel_y
     .prop<float>(0.75) // width
     .prop<float>(0.75) // height
+    .prop<const char*>("entity_mouse") // func
     .event<EntityUpdateNode>(lambda entity_mouse_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         if (editor_is_editing()) return;
 
