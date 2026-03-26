@@ -43,7 +43,7 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
         );
         entity.vel_y += 0.025 * delta_time;
     })
-    .event<EntityCollisionNode>(lambda entity_mouse_collision(EntityNode* collidee, EntityNode* collider): void {
+    .event<EntityCollisionNode>(lambda entity_mouse_collision(EntityNode* collidee, EntityNode* collider, TilemapNode* tilemap): void {
         if (editor_is_editing()) return;
         if (!collider.is("player")) return;
         if (collider.vel_y > 0) {

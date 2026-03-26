@@ -33,6 +33,7 @@ static bool engine_rect_intersect(
 }
 
 static void engine_resolve_collision(EntityNode* entity, TilemapNode* tilemap, TilesetNode* tileset, Axis axis) {
+    if (entity->width == 0 && entity->height == 0) return;
     float fx = entity->pos_x - entity->width / 2;
     float fy = entity->pos_y - entity->height;
     float tx = entity->pos_x + entity->width / 2;

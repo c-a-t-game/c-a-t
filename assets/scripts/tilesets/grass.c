@@ -2,7 +2,7 @@
 #depends "scripts/entities/crate_fragment.c"
 
 #define TILE(x, y) ((y)*16+(x))
-#define ANIMATE(frames, delay) ((int)engine.get_millis() % (uint64_t)((frames) * (delay)) / (delay))
+#define ANIMATE(frames, delay) (engine.get_millis() / (delay) % (frames))
 
 Node* tileset_grass() -> engine.open<TilesetNode>()
     .prop<Texture*>(assets.get<Texture>("images/tilesets/grass.png"))

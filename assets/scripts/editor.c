@@ -39,6 +39,8 @@ EntityNode* editor_drag_obj;
 LevelRootNode* editor_level;
 
 Node* entity_mouse(float x, float y);
+Node* entity_heart(float x, float y);
+Node* entity_coin(float x, float y);
 
 EditorTrail* editor_trail_get(int index) -> &editor_trail_data[(editor_trail_tail + index) % EDITOR_TRAIL_CAPACITY];
 
@@ -212,7 +214,7 @@ void editor_update() {
         struct {
             Texture* tex;
             EntitySpawner spawner;
-        } objects[] = { OBJECT(mouse) };
+        } objects[] = { OBJECT(mouse), OBJECT(heart), OBJECT(coin) };
 
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
         int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
