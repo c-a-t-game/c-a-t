@@ -73,15 +73,22 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 ) *entity.prop<bool>("jumping") = false;
                 else entity.vel_y = -0.3;
             }
+
+            float* scratch_timer = entity.prop<float>("scratch_timer");
+            *scratch_timer -= delta_time;
+            if (*scratch_timer < -15) *scratch_timer = -15;
+            if (input.pressed("attack") && *scratch_timer == -15) *scratch_timer = 12;
         }
         *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 192;
         ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
-        if      (entity.vel_y >  0) sprite = 7;
-        else if (entity.vel_y <  0) sprite = 6;
-        else if (entity.vel_x != 0) sprite = (int)(entity.pos_x * 1) % 2 + 4;
+        if      (*entity.prop<float>("scratch_timer") > 6) sprite = 9;
+        else if (*entity.prop<float>("scratch_timer") > 0) sprite = 10;
+        else if  (entity.vel_y >  0) sprite = 7;
+        else if  (entity.vel_y <  0) sprite = 6;
+        else if  (entity.vel_x != 0) sprite = (int)(entity.pos_x * 1) % 2 + 4;
         else sprite = (int[]){ 0, 1, 2, 3, 2, 1 }[engine.get_millis() % (6 * 150) / 150];
 
         editor_push_trail(entity.pos_x, entity.pos_y, sprite, *entity.prop<bool>("facing_left"));

@@ -1,4 +1,5 @@
 #depends "scripts/editor.c"
+#depends "scripts/entities/crate_fragment.c"
 
 #define TILE(x, y) ((y)*16+(x))
 #define ANIMATE(frames, delay) ((int)engine.get_millis() % (uint64_t)((frames) * (delay)) / (delay))
@@ -69,6 +70,13 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             TILE(0, 15), TILE(0, 15), TILE(0, 15), TILE(0, 15),
             TILE(0, 15), TILE(0, 14), TILE(0, 13), TILE(0, 14),
         }[ANIMATE(8, 150)])
+        .event<CollisionNode>(lambda grass_crate_collision(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
+            if (editor_is_editing()) return;
+            if (!entity.is("player")) return;
+            if (*entity.prop<float>("scratch_timer") <= 0) return;
+            tilemap.set(x, y, 0);
+            for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
+        })
     .close()
     .open<TileNode>() // coin
         .event<TileTextureNode>(lambda grass_coin_anim(): int -> (int[]){

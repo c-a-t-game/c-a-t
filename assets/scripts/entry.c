@@ -3,21 +3,30 @@
 #depends "scripts/engine.c"
 #depends "scripts/ui.c"
 
-void entry_point() {
-    input.add("left", 4);
-    input.add("right", 7);
-    input.add("up", 26);
-    input.add("down", 22);
-    input.add("jump", 44);
-    input.add("shift", 225);
-    input.add("ctrl", 224);
+#define KB_LETTER(l) ((l) - 'A' + 4)
+#define KB_NUMBER(n) ((n) - '1' + 30)
+#define KB_TAB 43
+#define KB_SPACE 44
+#define KB_CTRL 224
+#define KB_SHIFT 225
 
-    input.add("editor_tile_picker", 8);
-    input.add("editor_obj_picker", 20);
-    input.add("editor_select", 30);
-    input.add("editor_pencil", 31);
-    input.add("editor_eraser", 32);
-    input.add("editor_mode_toggle", 33);
+void entry_point() {
+    input.add("left", KB_LETTER('A'));
+    input.add("right", KB_LETTER('D'));
+    input.add("up", KB_LETTER('W'));
+    input.add("down", KB_LETTER('S'));
+    input.add("attack", KB_LETTER('L'));
+    input.add("jump", KB_SPACE);
+    input.add("shift", KB_SHIFT);
+    input.add("ctrl", KB_CTRL);
+
+    input.add("editor_tile_picker", KB_LETTER('E'));
+    input.add("editor_obj_picker", KB_LETTER('Q'));
+    input.add("editor_select", KB_NUMBER('1'));
+    input.add("editor_pencil", KB_NUMBER('2'));
+    input.add("editor_eraser", KB_NUMBER('3'));
+    input.add("editor_mode_toggle", KB_NUMBER('4'));
+    input.add("editor_play", KB_TAB);
 
     if (storage.num_slots() == 0) storage.use(storage.add());
     else storage.load(0);
