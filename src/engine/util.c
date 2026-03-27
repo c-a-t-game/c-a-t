@@ -10,10 +10,10 @@ static int compare_string(const void* a, const void* b) {
 void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile) {
     if (x < node->start_x || y < node->start_y || x >= node->end_x || y >= node->end_y || !node->tiles) {
         int growth_left = 0, growth_right = 0, growth_top = 0, growth_bottom = 0;
-        if (x < node->start_x) growth_left  = (node->start_x - x + 15) / 16 * 16;
-        if (y < node->start_y) growth_top   = (node->start_y - y + 15) / 16 * 16;
-        if (x >= node->end_x)  growth_right  = (x -  node->end_x + 15) / 16 * 16;
-        if (y >= node->end_y)  growth_bottom = (y -  node->end_y + 15) / 16 * 16;
+        if (x < node->start_x) growth_left  = (node->start_x - x + 16) / 16 * 16;
+        if (y < node->start_y) growth_top   = (node->start_y - y + 16) / 16 * 16;
+        if (x >= node->end_x)  growth_right  = (x -  node->end_x + 16) / 16 * 16;
+        if (y >= node->end_y)  growth_bottom = (y -  node->end_y + 16) / 16 * 16;
         int old_start_x = node->start_x, old_start_y = node->start_y, old_end_x = node->end_x, old_end_y = node->end_y;
         node->start_x -= growth_left;
         node->start_y -= growth_top;
@@ -26,7 +26,7 @@ void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile) {
         memset(new_tiles, node->oob_tile, size);
         if (node->tiles) for (int y = old_start_y; y < old_end_y; y++)
             for (int x = old_start_x; x < old_end_x; x++)
-                new_tiles[(y - old_start_y) * pitch + (x - old_start_x)] = node->tiles[(y - old_start_y) * old_pitch + (x - old_start_x)];
+                new_tiles[(y - node->start_y) * pitch + (x - node->start_x)] = node->tiles[(y - old_start_y) * old_pitch + (x - old_start_x)];
         free(node->tiles);
         node->tiles = new_tiles;
     }
