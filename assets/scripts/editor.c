@@ -7,6 +7,7 @@ bool editor_noclip = false;
 bool editor_trail = false;
 bool editor_picker = false;
 bool editor_editing = false;
+bool editor_toggle_play_mode = false;
 
 enum {
     EditorTool_Selection,
@@ -65,7 +66,8 @@ void editor_push_trail(float pos_x, float pos_y, int sprite, bool flipped) {
 void editor_play_button() {
     Texture* icons = assets.get<Texture>("images/hud/editor.png");
     ui_container(384 - 25, 256 - 25, 24, 24, 0x3F3F3FFF);
-    if (ui_icon_button(384 - 23, 256-23, 20, 20, false, 16 + editor_play_mode * 16, 16, 16, 16, icons) || input.pressed("editor_play")) {
+    if (ui_icon_button(384 - 23, 256-23, 20, 20, false, 16 + editor_play_mode * 16, 16, 16, 16, icons) || input.pressed("editor_play") || editor_toggle_play_mode) {
+        editor_toggle_play_mode = false;
         editor_play_mode ^= 1;
         if (editor_play_mode) {
             __curr_level_node = editor_level.node.copy();

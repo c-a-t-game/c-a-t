@@ -121,7 +121,7 @@ static void engine_update_entity(EntityNode* entity, TilemapNode* tilemap, Tiles
         ) for (int i = 0; i < entity->node.children_size; i++) {
             if (!entity->node.children[i]) continue;
             if (entity->node.children[i]->type != NodeType_EntityCollision) continue;
-            ((EntityCollisionNode*)entity->node.children[i])->func(entity, collider);
+            ((EntityCollisionNode*)entity->node.children[i])->func(entity, collider, tilemap);
             if (!tilemap->node.children[index]) return; // entity deleted
         }
     }

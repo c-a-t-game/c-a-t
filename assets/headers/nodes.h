@@ -53,7 +53,7 @@ NODE(EntityTexture,
 )
 
 NODE(EntityCollision,
-    void(*func)(EntityNode* collidee, EntityNode* collider);
+    void(*func)(EntityNode* collidee, EntityNode* collider, TilemapNode* tilemap);
 )
 
 NODE(Collision,

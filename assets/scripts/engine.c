@@ -149,6 +149,11 @@ extern("editor_mode") bool __editor_mode();
 
 LevelRootNode* __curr_level_node;
 Level __curr_level_loader;
+struct {
+    float progress, time;
+    int direction;
+    void(*func)();
+} __curr_transition;
 
 typedef struct {
     Node* curr_node;
@@ -177,6 +182,13 @@ uint64_t get_millis(Engine* this) -> __get_millis();
 void watch_file(Engine* this, const char* filename, FileWatchCallback callback) -> __watch_file(filename, callback);
 void check_watched_files(Engine* this) -> __check_watched_files();
 bool editor_mode(Engine* this) -> __editor_mode();
+void create_transition(Engine* this, void(*func)(), float time, int direction) {
+    if (__curr_transition.progress < 1) return;
+    __curr_transition.func = func;
+    __curr_transition.time = time;
+    __curr_transition.direction = direction;
+    __curr_transition.progress = 0;
+}
 
 void attach(Node* this, Node* child) -> __engine_attach_node(this, child);
 void detach(Node* this) -> __engine_detach_node(this);
@@ -185,6 +197,7 @@ Node* copy(Node* this) -> __engine_copy_node(this);
 void set(TilemapNode* this, int x, int y, Tile tile) -> __engine_set_tile(this, x, y, tile);
 uint8_t get(TilemapNode* this, int x, int y) -> __engine_get_tile(this, x, y);
 <T> T* prop(EntityNode* this, const char* name) -> (T*)__engine_property(this, name);
+<T> T* as(EntityNode* this) -> (T*)this;
 
 void load(Engine* this, Level level) {
     if (__curr_level_node) __curr_level_node.node.delete();

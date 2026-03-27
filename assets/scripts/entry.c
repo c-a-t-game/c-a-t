@@ -67,6 +67,8 @@ void entry_point() {
     }
     else engine.load(level1);
 
+    __curr_transition.progress = 1;
+
     Window* w = gfx.open(":3", 1152, 768);
     w.set_active();
 
@@ -85,6 +87,22 @@ void entry_point() {
         engine.level().render(384, 256);
         engine.cleanup();
 
+        float offset_x = 0, offset_y = 0;
+        if (__curr_transition.progress < 1) {
+            float prev_progress = __curr_transition.progress, x = -32, y = -32;
+            float t = __curr_transition.progress += delta_time / __curr_transition.time;
+            t = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) * (-2 * t + 2) * (-2 * t + 2) / 2; // cubic inout
+            if (prev_progress < 0.5 && __curr_transition.progress >= 0.5) {
+                void(*func)() = __curr_transition.func;
+                func();
+            }
+            if (__curr_transition.direction == Direction_Up)    y = -576 * t + 256, offset_y = t * -512 + (t < 0.5 ? 0 : +512);
+            if (__curr_transition.direction == Direction_Left)  x = -832 * t + 384, offset_x = t * -768 + (t < 0.5 ? 0 : +768);
+            if (__curr_transition.direction == Direction_Down)  y =  576 * t - 320, offset_y = t * +512 + (t < 0.5 ? 0 : -512);
+            if (__curr_transition.direction == Direction_Right) x =  832 * t - 448, offset_x = t * +768 + (t < 0.5 ? 0 : -768);
+            gfx.main().draw(assets.get<Texture>("images/transition.png"), x, y, 448, 320, 0, 0, 448, 320, 0xFFFFFFFF);
+        }
+
         if (editor_is_editing()) editor_update();
         else if (engine.editor_mode()) {
             editor_play_button();
@@ -93,7 +111,7 @@ void entry_point() {
         else ui_hud();
 
         w.set_buffer(nullptr);
-        w.blit(buf, 0, 0, 1152, 768, 0, 0, 384, 256, 0xFFFFFFFF);
+        w.blit(buf, offset_x * 3, offset_y * 3, 1152, 768, 0, 0, 384, 256, 0xFFFFFFFF);
         w.end_frame();
 
         buf.destroy();

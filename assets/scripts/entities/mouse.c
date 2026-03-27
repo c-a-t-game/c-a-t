@@ -1,5 +1,4 @@
-#depends "scripts/engine.c"
-#depends "scripts/editor.c"
+#depends "scripts/entities/player.c"
 
 Node* entity_squished_mouse(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
@@ -53,6 +52,7 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
             collidee.node.parent.attach(entity_squished_mouse(collidee.pos_x, collidee.pos_y));
             collidee.node.delete();
         }
+        else collider.as<Player>().damage(collider.pos_x < collidee.pos_x ? Direction_Right : Direction_Left);
     })
     .event<EntityTextureNode>(lambda entity_mouse_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         *srcx = 16 * (int)(engine.get_millis() % (200 * 2) / 200);

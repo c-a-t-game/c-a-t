@@ -48,3 +48,23 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
         collidee.node.delete();
     })
 .build();
+
+Node* entity_broken_heart(float x, float y, float speed) -> engine.open<EntityNode>()
+    .prop<float>(x) // pos_x
+    .prop<float>(y) // pos_y
+    .prop<float>(speed) // vel_x
+    .prop<float>(-0.25) // vel_y
+    .prop<float>(0) // width
+    .prop<float>(0) // height
+    .event<EntityUpdateNode>(lambda entity_broken_heart_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
+        *entity.prop<float>("timer") += delta_time;
+        if (*entity.prop<float>("timer") > 300) entity.node.delete();
+        entity.vel_y += 0.03 * delta_time;
+    })
+    .event<EntityTextureNode>(lambda entity_broken_heart_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
+        *srcx = (entity.vel_x > 0) * 16;
+        *srcy = 0;
+        *srcw = *srch = *w = *h = 16;
+        return assets.get<Texture>("images/entities/broken_heart.png");
+    })
+.build();

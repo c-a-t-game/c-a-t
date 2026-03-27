@@ -1,6 +1,9 @@
 #depends "scripts/engine.c"
+#depends "scripts/entities/heart.c"
 
 #define signum(x) ((x) == 0 ? 0 : (x) / fabsf(x))
+
+typedef struct Player Player;
 
 Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
@@ -20,6 +23,26 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             if (input.down("right")) entity.pos_x += speed * delta_time;
             if (input.down("up"))    entity.pos_y -= speed * delta_time;
             if (input.down("down"))  entity.pos_y += speed * delta_time;
+        }
+        else if (*entity.prop<bool>("hurt")) {
+            entity.vel_y += 0.03 * delta_time;
+            if (*entity.prop<bool>("touching_ground")) {
+                if (*storage.get<int>("num_hearts") == 0) {
+                    if (engine.editor_mode()) {
+                        editor_toggle_play_mode = true;
+                        *entity.prop<bool>("hurt") = false;
+                    }
+                    else {
+                        engine.create_transition(engine.reload, 60, Direction_Left);
+                        entity.vel_x = 0;
+                    }
+                }
+                else {
+                    (*storage.get<int>("num_hearts"))--;
+                    *entity.prop<float>("invincibility_frames") = 300;
+                    *entity.prop<bool>("hurt") = false;
+                }
+            }
         }
         else {
             entity.width = entity.height = 0.75;
@@ -56,6 +79,9 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
 
             *entity.prop<float>("jump_buffer_timer") += delta_time;
             *entity.prop<float>("coyote_timer") += delta_time;
+            *entity.prop<float>("invincibility_frames") -= delta_time;
+            if (*entity.prop<float>("invincibility_frames") < 0 || editor_is_editing())
+                *entity.prop<float>("invincibility_frames") = 0;
 
             if (!input.down("jump")) *entity.prop<bool>("jumping") = false;
             if (input.pressed("jump")) *entity.prop<float>("jump_buffer_timer") = 0;
@@ -84,7 +110,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
-        if      (*entity.prop<float>("scratch_timer") > 6) sprite = 9;
+        if      (*entity.prop<bool>("hurt")) sprite = 8;
+        else if (*entity.prop<float>("scratch_timer") > 6) sprite = 9;
         else if (*entity.prop<float>("scratch_timer") > 0) sprite = 10;
         else if  (entity.vel_y >  0) sprite = 7;
         else if  (entity.vel_y <  0) sprite = 6;
@@ -96,8 +123,31 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
         *srcx = sprite * 16;
         *srcy = 0;
 
+        bool visible = (int)*entity.prop<float>("invincibility_frames") % 2 == 0;
         *w = *entity.prop<bool>("facing_left") ? -16 : 16;
         *srcw = *srch = *h = 16;
-        return assets.get<Texture>("images/entities/player.png");
+        return visible ? assets.get<Texture>("images/entities/player.png") : nullptr;
     })
 .build();
+
+void damage(Player* this, int dir) {
+    EntityNode* entity = (EntityNode*)this;
+    if (*entity.prop<bool>("hurt")) return;
+    if (*entity.prop<float>("invincibility_frames") > 0) return;
+    *entity.prop<bool>("hurt") = true;
+    *entity.prop<bool>("touching_ground") = false;
+    entity.vel_y = -0.3;
+    entity.pos_y -= 0.1;
+    if (dir == Direction_Right) {
+        *entity.prop<bool>("facing_left") = false;
+        entity.vel_x = -0.15;
+    }
+    if (dir == Direction_Left) {
+        *entity.prop<bool>("facing_left") = true;
+        entity.vel_x = 0.15;
+    }
+    if (*storage.get<int>("num_hearts") != 0) {
+        entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, -0.1));
+        entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, +0.1));
+    }
+}
