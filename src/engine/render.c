@@ -27,11 +27,9 @@ static void engine_render_entity(EntityNode* entity, TilesetNode* tileset, float
     if (isnan(sh)) sh = tex->height;
     if (isnan(w)) w = tex->width;
     if (isnan(h)) h = tex->height;
-    graphics_draw(NULL, tex,
-        ((entity->pos_x - offset_x) * tileset->tile_width  - w / 2) * tilemap->scale_x,
-        ((entity->pos_y - offset_y) * tileset->tile_height - h)     * tilemap->scale_y,
-        w * tilemap->scale_x, h * tilemap->scale_y, sx, sy, sw, sh, GRAY(255)
-    );
+    float x = ((entity->pos_x - offset_x) * tileset->tile_width  - w / 2)                * tilemap->scale_x;
+    float y = ((entity->pos_y - offset_y) * tileset->tile_height - (h < 0 ? h / 4 : h)) * tilemap->scale_y;
+    graphics_draw(NULL, tex, x, y, w * tilemap->scale_x, h * tilemap->scale_y, sx, sy, sw, sh, GRAY(255));
 }
 
 static void engine_render_tile(TilemapNode* tilemap, TilesetNode* tileset, float x, float y, float offset_x, float offset_y) {

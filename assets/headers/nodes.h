@@ -56,6 +56,10 @@ NODE(EntityCollision,
     void(*func)(EntityNode* collidee, EntityNode* collider, TilemapNode* tilemap);
 )
 
+NODE(EntityDamage,
+    void(*func)(EntityNode* entity, EntityNode* source, TilemapNode* tilemap);
+)
+
 NODE(Collision,
     void(*func)(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction);
 )

@@ -197,7 +197,15 @@ Node* copy(Node* this) -> __engine_copy_node(this);
 void set(TilemapNode* this, int x, int y, Tile tile) -> __engine_set_tile(this, x, y, tile);
 uint8_t get(TilemapNode* this, int x, int y) -> __engine_get_tile(this, x, y);
 <T> T* prop(EntityNode* this, const char* name) -> (T*)__engine_property(this, name);
-<T> T* as(EntityNode* this) -> (T*)this;
+
+void damage(EntityNode* this, EntityNode* source) {
+    for (int i = 0; i < this.node.children_size; i++) {
+        if (this.node.children[i] && (int)this.node.children[i].type == NodeType_EntityDamage) {
+            void(*func)(EntityNode*, EntityNode*, TilemapNode*) = ((EntityDamageNode*)this.node.children[i]).func;
+            func(this, source, this.node.parent);
+        }
+    }
+}
 
 void load(Engine* this, Level level) {
     if (__curr_level_node) __curr_level_node.node.delete();

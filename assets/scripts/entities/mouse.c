@@ -49,10 +49,13 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
             collider.vel_y = -0.3;
             *collider.prop<bool>("jumping") = true;
             *collider.prop<float>("floor_y") = collider.pos_y;
-            collidee.node.parent.attach(entity_squished_mouse(collidee.pos_x, collidee.pos_y));
-            collidee.node.delete();
+            collidee.damage(collider);
         }
-        else collider.as<Player>().damage(collider.pos_x < collidee.pos_x ? Direction_Right : Direction_Left);
+        else collider.damage(collidee);
+    })
+    .event<EntityDamageNode>(lambda entity_mouse_damage(EntityNode* entity, EntityNode* source, TilemapNode* tilemap): void {
+        entity.node.parent.attach(entity_squished_mouse(entity.pos_x, entity.pos_y));
+        entity.node.delete();
     })
     .event<EntityTextureNode>(lambda entity_mouse_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         *srcx = 16 * (int)(engine.get_millis() % (200 * 2) / 200);

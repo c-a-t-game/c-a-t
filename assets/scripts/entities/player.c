@@ -1,9 +1,8 @@
 #depends "scripts/engine.c"
 #depends "scripts/entities/heart.c"
+#depends "scripts/entities/crate_fragment.c"
 
 #define signum(x) ((x) == 0 ? 0 : (x) / fabsf(x))
-
-typedef struct Player Player;
 
 Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
@@ -103,10 +102,55 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             float* scratch_timer = entity.prop<float>("scratch_timer");
             *scratch_timer -= delta_time;
             if (*scratch_timer < -15) *scratch_timer = -15;
-            if (input.pressed("attack") && *scratch_timer == -15) *scratch_timer = 12;
+            if (input.pressed("attack") && *scratch_timer == -15) {
+                TilemapNode* tilemap = entity.node.parent;
+                void(*break_crate)(EntityNode*, float, float) = lambda(EntityNode* entity, float off_x, float off_y): void {
+                    TilemapNode* tilemap = entity.node.parent;
+                    int x = entity.pos_x + off_x;
+                    int y = entity.pos_y + off_y;
+                    if (tilemap.get(x, y) == 4) {
+                        tilemap.set(x, y, 0);
+                        for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
+                    }
+                };
+                break_crate(entity, 0, 0.5);
+                break_crate(entity, *entity.prop<bool>("facing_left") ? -0.5 : 0.5, -0.1);
+                for (int i = 0; i < tilemap.node.children_size; i++) {
+                    if (tilemap.node.children[i] && (int)tilemap.node.children[i].type == NodeType_Entity && tilemap.node.children[i] != entity) {
+                        EntityNode* scratchee /* this fuckass name lmfao */ = tilemap.node.children[i];
+                        float max_dist = fmax(fabsf(scratchee.vel_x) * 30, fmax(fabsf(entity.vel_x) * 15, 1.5));
+                        float dist = sqrtf(
+                            (scratchee.pos_x - entity.pos_x) * (scratchee.pos_x - entity.pos_x) +
+                            (scratchee.pos_y - entity.pos_y) * (scratchee.pos_y - entity.pos_y)
+                        );
+                        if (dist < max_dist) scratchee.damage(entity);
+                    }
+                }
+                *scratch_timer = 12;
+            }
         }
         *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 192;
         ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
+    })
+    .event<EntityDamageNode>(lambda entity_player_damage(EntityNode* entity, EntityNode* source, TilemapNode* tilemap): void {
+        if (*entity.prop<bool>("hurt")) return;
+        if (*entity.prop<float>("invincibility_frames") > 0) return;
+        *entity.prop<bool>("hurt") = true;
+        *entity.prop<bool>("touching_ground") = false;
+        entity.vel_y = -0.3;
+        entity.pos_y -= 0.1;
+        if (entity.pos_x < source.pos_x) {
+            *entity.prop<bool>("facing_left") = false;
+            entity.vel_x = -0.15;
+        }
+        else {
+            *entity.prop<bool>("facing_left") = true;
+            entity.vel_x = 0.15;
+        }
+        if (*storage.get<int>("num_hearts") != 0) {
+            entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, -0.1));
+            entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, +0.1));
+        }
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
@@ -129,25 +173,3 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
         return visible ? assets.get<Texture>("images/entities/player.png") : nullptr;
     })
 .build();
-
-void damage(Player* this, int dir) {
-    EntityNode* entity = (EntityNode*)this;
-    if (*entity.prop<bool>("hurt")) return;
-    if (*entity.prop<float>("invincibility_frames") > 0) return;
-    *entity.prop<bool>("hurt") = true;
-    *entity.prop<bool>("touching_ground") = false;
-    entity.vel_y = -0.3;
-    entity.pos_y -= 0.1;
-    if (dir == Direction_Right) {
-        *entity.prop<bool>("facing_left") = false;
-        entity.vel_x = -0.15;
-    }
-    if (dir == Direction_Left) {
-        *entity.prop<bool>("facing_left") = true;
-        entity.vel_x = 0.15;
-    }
-    if (*storage.get<int>("num_hearts") != 0) {
-        entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, -0.1));
-        entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, +0.1));
-    }
-}

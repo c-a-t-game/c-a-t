@@ -40,6 +40,7 @@ EntityNode* editor_drag_obj;
 LevelRootNode* editor_level;
 
 Node* entity_mouse(float x, float y);
+Node* entity_turtle(float x, float y);
 Node* entity_heart(float x, float y);
 Node* entity_coin(float x, float y);
 
@@ -216,7 +217,7 @@ void editor_update() {
         struct {
             Texture* tex;
             EntitySpawner spawner;
-        } objects[] = { OBJECT(mouse), OBJECT(heart), OBJECT(coin) };
+        } objects[] = { OBJECT(mouse), OBJECT(turtle), OBJECT(heart), OBJECT(coin) };
 
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
         int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
