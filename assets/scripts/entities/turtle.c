@@ -1,4 +1,17 @@
 #depends "scripts/entities/player.c"
+#depends "scripts/entities/crate_fragment.c"
+
+Node* entity_turtle_shell_fragment(float x, float y, float mul) -> engine.open<EntityNode>()
+    .prop<float>(x) // pos_x
+    .prop<float>(y) // pos_y
+    .prop<float>(frng( 0.2, 0.05) * mul) // vel_x
+    .prop<float>(frng(-0.4, -0.2))       // vel_y
+    .prop<float>(0.5) // width
+    .prop<float>(0.5) // height
+    .event<EntityUpdateNode>(lambda(EntityNode* entity): void -> *entity.prop<Texture*>("texture") = assets.get<Texture>("images/entities/turtle_shell_fragment.png"))
+    .event<EntityUpdateNode>(entity_crate_fragment_update)
+    .event<EntityTextureNode>(entity_crate_fragment_texture)
+.build();
 
 Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
@@ -9,6 +22,9 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
     .prop<float>(0.75) // height
     .event<EntityUpdateNode>(lambda entity_turtle_shell_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         if (*entity.prop<Direction>("last_hor_collision") != Direction_None) {
+            for (int i = 0; i < 4; i++) {
+                entity.node.parent.attach(entity_turtle_shell_fragment(entity.pos_x, entity.pos_y, *entity.prop<Direction>("last_hor_collision") == Direction_Left ? 1 : -1));
+            }
             entity.node.delete();
         }
         *entity.prop<float>("intangible") -= delta_time;
@@ -25,10 +41,11 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
             collider.damage(collidee);
     })
     .event<EntityDamageNode>(lambda entity_turtle_shell_damage(EntityNode* entity, EntityNode* source, TilemapNode* tilemap): void {
-        Direction cur_dir = entity.vel_x > 0 ? Direction_Right : Direction_Left;
-        Direction dmg_dir = entity.pos_x < source.pos_x;
-        if (cur_dir == dmg_dir) entity.vel_x *= 2;
+        if (*entity.prop<float>("intangible") > 0) return;
+        if (entity.vel_x == 0) entity.vel_x = entity.pos_x < source.pos_x ? -0.15 : 0.15;
+        else if (entity.vel_x < 0 == entity.pos_x < source.pos_x) entity.vel_x *= 2;
         else entity.vel_x = 0;
+        entity.vel_y = -0.2;
     })
     .event<EntityTextureNode>(lambda entity_turtle_shell_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         *srcx = ((int)(entity.pos_x * 1) % 3 + 3) * 16;
