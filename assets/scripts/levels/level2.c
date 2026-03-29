@@ -3,10 +3,7 @@
 #depends "scripts/tilesets/grass.c"
 #depends "scripts/decorators/foliage.c"
 
-#depends "scripts/levels/level2.c"
-
-Node* level1() -> engine.open<LevelRootNode>()
-    .prop<Level>(level2) // next_level
+Node* level2() -> engine.open<LevelRootNode>()
     .exec(grass_bg)
     .open<TilemapNode>()
         .attach(tileset_grass())
@@ -21,10 +18,10 @@ Node* level1() -> engine.open<LevelRootNode>()
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

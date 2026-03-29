@@ -1,4 +1,5 @@
 NODE(LevelRoot,
+    Node*(*next_level)();
     float cam_x, cam_y;
 )
 

@@ -14,6 +14,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<const char*>("entity_player") // func
     .prop<const char*>("player") // name
     .event<EntityUpdateNode>(lambda entity_player_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
+        *entity.prop<int>("draw_priority") = 999;
         if ((editor_is_editing() & 0xFF) && editor_noclip) {
             float speed = input.down("shift") ? 0.3 : 0.1;
             entity.vel_x = entity.vel_y = 0;
@@ -22,6 +23,21 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             if (input.down("right")) entity.pos_x += speed * delta_time;
             if (input.down("up"))    entity.pos_y -= speed * delta_time;
             if (input.down("down"))  entity.pos_y += speed * delta_time;
+        }
+        else if (*entity.prop<bool>("napping")) {
+            if (*entity.prop<float>("nap_timer") > 120) {
+                if (engine.editor_mode()) {
+                    editor_toggle_play_mode = true;
+                    *entity.prop<bool>("napping") = false;
+                    *entity.prop<float>("nap_timer") = 0;
+                }
+                else {
+                    LevelRootNode* level = entity.node.parent.parent;
+                    __curr_level_loader = level.next_level;
+                    engine.create_transition(engine.reload, 60, Direction_Left);
+                }
+            }
+            *entity.prop<float>("nap_timer") += delta_time;
         }
         else if (*entity.prop<bool>("hurt")) {
             entity.vel_y += 0.03 * delta_time;
@@ -154,13 +170,14 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
-        if      (*entity.prop<bool>("hurt")) sprite = 8;
+        if      (*entity.prop<bool>("napping")) sprite = (int[]){ 11, 12 }[engine.get_millis() / 300 % 2];
+        else if (*entity.prop<bool>("hurt")) sprite = 8;
         else if (*entity.prop<float>("scratch_timer") > 6) sprite = 9;
         else if (*entity.prop<float>("scratch_timer") > 0) sprite = 10;
         else if  (entity.vel_y >  0) sprite = 7;
         else if  (entity.vel_y <  0) sprite = 6;
         else if  (entity.vel_x != 0) sprite = (int)(entity.pos_x * 1) % 2 + 4;
-        else sprite = (int[]){ 0, 1, 2, 3, 2, 1 }[engine.get_millis() % (6 * 150) / 150];
+        else sprite = (int[]){ 0, 1, 2, 3, 2, 1 }[engine.get_millis() / 150 % 6];
 
         editor_push_trail(entity.pos_x, entity.pos_y, sprite, *entity.prop<bool>("facing_left"));
 

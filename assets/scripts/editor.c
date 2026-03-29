@@ -39,10 +39,17 @@ EntitySpawner editor_curr_obj;
 EntityNode* editor_drag_obj;
 LevelRootNode* editor_level;
 
-Node* entity_mouse(float x, float y);
-Node* entity_turtle(float x, float y);
-Node* entity_heart(float x, float y);
-Node* entity_coin(float x, float y);
+#define OBJECTS(X) \
+    X(mouse) X(turtle) X(heart) X(coin) \
+    X(level_end) X(level_start)
+
+#define OBJECT_FUNC(name) Node* __ID__(entity_, name)(float x, float y);
+#define OBJECT_DEF(name) { \
+    assets.get<Texture>("images/entities/" __STR__(name) ".png"), \
+    __ID__(entity_, name) \
+},
+
+OBJECTS(OBJECT_FUNC)
 
 EditorTrail* editor_trail_get(int index) -> &editor_trail_data[(editor_trail_tail + index) % EDITOR_TRAIL_CAPACITY];
 
@@ -121,12 +128,15 @@ void editor_export() {
         printf("\n");
     }
     printf("        })\n");
+    EntityNode* start = player;
     for (int i = 0; i < tilemap.node.children_size; i++) {
-        if (tilemap.node.children[i] && (int)tilemap.node.children[i].type == NodeType_Entity) {
+        if (tilemap.node.children[i] && (int)tilemap.node.children[i].type == NodeType_Entity && tilemap.node.children[i] != player) {
             EntityNode* entity = tilemap.node.children[i];
+            if (entity.name && strcmp(entity.name, "start") == 0) start = entity;
             printf("        .attach(%s(%.1ff, %.1ff))\n", entity.func, entity.pos_x, entity.pos_y);
         }
     }
+    printf("        .attach(%s(%.1ff, %.1ff))\n", player.func, start.pos_x, start.pos_y);
     printf("    .close()\n");
     printf(".build();\n");
 }
@@ -210,14 +220,10 @@ void editor_update() {
         }
     }
     if (editor_picker) {
-        #define OBJECT(name) { \
-            assets.get<Texture>("images/entities/" __STR__(name) ".png"), \
-            __ID__(entity_, name) \
-        }
         struct {
             Texture* tex;
             EntitySpawner spawner;
-        } objects[] = { OBJECT(mouse), OBJECT(turtle), OBJECT(heart), OBJECT(coin) };
+        } objects[] = { OBJECTS(OBJECT_DEF) };
 
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
         int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
