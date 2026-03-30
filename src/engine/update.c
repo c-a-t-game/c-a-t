@@ -32,63 +32,73 @@ static bool engine_rect_intersect(
     return x2a > x1b && x2b > x1a && y2a > y1b && y2b > y1a;
 }
 
-static void engine_resolve_collision(EntityNode* entity, TilemapNode* tilemap, TilesetNode* tileset, Axis axis) {
+static void engine_update_position(EntityNode* entity, TilemapNode* tilemap, TilesetNode* tileset, Axis axis, float delta_time) {
     if (entity->width == 0 && entity->height == 0) return;
-    float fx = entity->pos_x - entity->width / 2;
-    float fy = entity->pos_y - entity->height;
-    float tx = entity->pos_x + entity->width / 2;
-    float ty = entity->pos_y;
-    int min_x = floorf(fx) - 1;
-    int min_y = floorf(fy) - 1;
-    int max_x = ceilf(fx) + 1;
-    int max_y = ceilf(ty) + 1;
-    for (int y = min_y; y <= max_y; y++) {
-        for (int x = min_x; x <= max_x; x++) {
-            TileNode* tile = (TileNode*)tileset->node.children[engine_get_tile(tilemap, x, y)];
-            bool solid = tile->collision == Collision_Solid;
-            if (!engine_rect_intersect(fx, fy, tx, ty, x, y, x + 1, y + 1)) continue;
-            if (axis == Axis_X) {
-                if (entity->vel_x == 0) (void)0;
-                else if (entity->vel_x > 0) {
-                    if (solid) {
-                        entity->pos_x = x - entity->width / 2;
-                        *(Direction*)engine_property(entity, "hor_collision") = Direction_Right;
+    float delta = axis == Axis_X ? entity->vel_x * delta_time : entity->vel_y * delta_time;
+    int steps = ceilf(fabsf(delta));
+    for (int step = 0; step < steps; step++) {
+        *(axis == Axis_X ? &entity->pos_x : &entity->pos_y) += delta / steps;
+
+        float fx = entity->pos_x - entity->width / 2;
+        float fy = entity->pos_y - entity->height;
+        float tx = entity->pos_x + entity->width / 2;
+        float ty = entity->pos_y;
+        int min_x = floorf(fx) - 1;
+        int min_y = floorf(fy) - 1;
+        int max_x = ceilf(tx) + 1;
+        int max_y = ceilf(ty) + 1;
+        for (int y = min_y; y <= max_y; y++) {
+            for (int x = min_x; x <= max_x; x++) {
+                TileNode* tile = (TileNode*)tileset->node.children[engine_get_tile(tilemap, x, y)];
+                bool solid = tile->collision == Collision_Solid;
+                if (!engine_rect_intersect(fx, fy, tx, ty, x, y, x + 1, y + 1)) continue;
+                if (axis == Axis_X) {
+                    if (entity->vel_x == 0) (void)0;
+                    else if (entity->vel_x > 0) {
+                        if (solid) {
+                            entity->pos_x = x - entity->width / 2;
+                            *(Direction*)engine_property(entity, "hor_collision") = Direction_Right;
+                        }
+                        engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Left);
+                        engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Right);
                     }
-                    engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Left);
-                    engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Right);
-                }
-                else if (entity->vel_x < 0) {
-                    if (solid) {
-                        entity->pos_x = x + 1 + entity->width / 2;
-                        *(Direction*)engine_property(entity, "hor_collision") = Direction_Left;
+                    else if (entity->vel_x < 0) {
+                        if (solid) {
+                            entity->pos_x = x + 1 + entity->width / 2;
+                            *(Direction*)engine_property(entity, "hor_collision") = Direction_Left;
+                        }
+                        engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Right);
+                        engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Left);
                     }
-                    engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Right);
-                    engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Left);
-                }
-                if (solid) entity->vel_x = 0;
-            }
-            if (axis == Axis_Y) {
-                solid = tile->collision == Collision_Solid || (tile->collision == Collision_TopOnly && entity->vel_y > 0 && entity->prev_pos_y <= y);
-                if (entity->vel_y == 0) (void)0;
-                else if (entity->vel_y > 0) {
                     if (solid) {
-                        entity->pos_y = y;
-                        *(Direction*)engine_property(entity, "ver_collision") = Direction_Down;
+                        entity->vel_x = 0;
+                        return;
                     }
-                    engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Up);
-                    engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Down);
                 }
-                else if (entity->vel_y < 0) {
+                if (axis == Axis_Y) {
+                    solid = tile->collision == Collision_Solid || (tile->collision == Collision_TopOnly && entity->vel_y > 0 && entity->prev_pos_y <= y);
+                    if (entity->vel_y == 0) (void)0;
+                    else if (entity->vel_y > 0) {
+                        if (solid) {
+                            entity->pos_y = y;
+                            *(Direction*)engine_property(entity, "ver_collision") = Direction_Down;
+                        }
+                        engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Up);
+                        engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Down);
+                    }
+                    else if (entity->vel_y < 0) {
+                        if (solid) {
+                            entity->pos_y = y + 1 + entity->height;
+                            *(Direction*)engine_property(entity, "ver_collision") = Direction_Up;
+                        }
+                        engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Down);
+                        engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Up);
+                    }
                     if (solid) {
-                        entity->pos_y = y + 1 + entity->height;
-                        *(Direction*)engine_property(entity, "ver_collision") = Direction_Up;
+                        *(bool*)engine_property(entity, "touching_ground") = entity->vel_y >= 0;
+                        entity->vel_y = 0;
+                        return;
                     }
-                    engine_collision_event((Node*)tile,   entity, tilemap, tile, x, y, Direction_Down);
-                    engine_collision_event((Node*)entity, entity, tilemap, tile, x, y, Direction_Up);
-                }
-                if (solid) {
-                    *(bool*)engine_property(entity, "touching_ground") = entity->vel_y >= 0;
-                    entity->vel_y = 0;
                 }
             }
         }
@@ -104,10 +114,8 @@ static void engine_update_entity(EntityNode* entity, TilemapNode* tilemap, Tiles
     }
     *(bool*)engine_property(entity, "touching_ground") = false;
     *(Direction*)engine_property(entity, "hor_collision") = *(Direction*)engine_property(entity, "ver_collision") = Direction_None;
-    entity->pos_y += entity->vel_y * delta_time;
-    engine_resolve_collision(entity, tilemap, tileset, Axis_Y);
-    entity->pos_x += entity->vel_x * delta_time;
-    engine_resolve_collision(entity, tilemap, tileset, Axis_X);
+    engine_update_position(entity, tilemap, tileset, Axis_Y, delta_time);
+    engine_update_position(entity, tilemap, tileset, Axis_X, delta_time);
     for (int i = 0; i < tilemap->node.children_size; i++) {
         if (!tilemap->node.children[i]) continue;
         if (tilemap->node.children[i]->type != NodeType_Entity) continue;
