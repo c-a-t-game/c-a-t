@@ -118,7 +118,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             float* scratch_timer = entity.prop<float>("scratch_timer");
             *scratch_timer -= delta_time;
             if (*scratch_timer < -15) *scratch_timer = -15;
-            if (input.pressed("attack") && *scratch_timer == -15) {
+            if (input.pressed("attack") && *scratch_timer == -15 && !editor_is_editing()) {
                 TilemapNode* tilemap = entity.node.parent;
                 void(*break_crate)(EntityNode*, float, float) = lambda(EntityNode* entity, float off_x, float off_y): void {
                     TilemapNode* tilemap = entity.node.parent;

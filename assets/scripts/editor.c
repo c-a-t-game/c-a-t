@@ -103,12 +103,8 @@ void editor_export() {
     TilesetNode* tileset = tilemap.tileset();
 
     int width = tilemap.end_x - tilemap.start_x, height = tilemap.end_y - tilemap.start_y;
-    printf("#depends \"scripts/entities/player.c\"\n");
-    printf("#depends \"scripts/entities/mouse.c\"\n");
-    printf("#depends \"scripts/tilesets/grass.c\"\n");
-    printf("#depends \"scripts/decorators/foliage.c\"\n");
-    printf("\n");
     printf("Node* level() -> engine.open<LevelRootNode>()\n");
+    printf("    .prop<Level>(level) // next_level\n");
     printf("    .exec(grass_bg)\n");
     printf("    .open<TilemapNode>()\n");
     printf("        .attach(tileset_grass())\n");
@@ -288,7 +284,7 @@ void editor_update() {
             if (editor_tool == EditorTool_Eraser) tilemap.set(floorf(sel_x), floorf(sel_y), 0);
         }
         if (editor_mode == EditorMode_Object) {
-            if (editor_tool == EditorTool_Eraser) if (sel_entity) {
+            if (editor_tool == EditorTool_Eraser) if (sel_entity && !sel_entity.is("player")) {
                 sel_entity.node.delete();
             }
         }

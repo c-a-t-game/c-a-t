@@ -77,6 +77,7 @@ void entry_point() {
         uint64_t curr_micros = engine.get_micros();
         float delta_time = (curr_micros - last_micros) / 1000000.f * 60;
         last_micros = curr_micros;
+        if (delta_time > 60) delta_time = 60;
 
         w.start_frame();
         Buffer* buf = w.new_buffer(384, 256);

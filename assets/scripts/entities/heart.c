@@ -25,9 +25,9 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
             if (!*entity.prop<bool>("bounced")) {
                 *entity.prop<bool>("bounced") = true;
                 *entity.prop<float>("intangible") = 30;
-                entity.vel_y = -0.4;
+                entity.vel_y = -0.48;
             }
-            entity.vel_y += 0.03;
+            entity.vel_y += 0.02;
             *entity.prop<float>("intangible") -= delta_time;
         }
     })

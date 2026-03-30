@@ -33,7 +33,11 @@ static bool engine_rect_intersect(
 }
 
 static void engine_update_position(EntityNode* entity, TilemapNode* tilemap, TilesetNode* tileset, Axis axis, float delta_time) {
-    if (entity->width == 0 && entity->height == 0) return;
+    if (entity->width == 0 && entity->height == 0) {
+        if (axis == Axis_X) entity->pos_x += entity->vel_x * delta_time;
+        else entity->pos_y += entity->vel_y * delta_time;
+        return;
+    }
     float delta = axis == Axis_X ? entity->vel_x * delta_time : entity->vel_y * delta_time;
     int steps = ceilf(fabsf(delta));
     for (int step = 0; step < steps; step++) {
