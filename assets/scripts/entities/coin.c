@@ -7,6 +7,7 @@ Node* entity_coin(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0) // vel_y
     .prop<float>(0) // width
     .prop<float>(0) // height
+    .prop<const char*>("entity_coin") // func
     .event<EntityUpdateNode>(lambda(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         *entity.prop<Texture*>("texture") = assets.get<Texture>("images/entities/coin.png");
         *entity.prop<char*>("target_storage") = "num_coins";

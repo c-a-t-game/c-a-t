@@ -9,6 +9,7 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(0) // vel_y
     .prop<float>(0) // width
     .prop<float>(0) // height
+    .prop<const char*>("entity_heart") // func
     .event<EntityUpdateNode>(lambda(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         *entity.prop<Texture*>("texture") = assets.get<Texture>("images/entities/heart.png");
         *entity.prop<char*>("target_storage") = "num_hearts";
@@ -25,9 +26,9 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
             if (!*entity.prop<bool>("bounced")) {
                 *entity.prop<bool>("bounced") = true;
                 *entity.prop<float>("intangible") = 30;
-                entity.vel_y = -0.48;
+                entity.vel_y = -0.3;
             }
-            entity.vel_y += 0.02;
+            entity.vel_y += 0.02 * delta_time;
             *entity.prop<float>("intangible") -= delta_time;
         }
     })

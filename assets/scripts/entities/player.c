@@ -144,6 +144,15 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 }
                 *scratch_timer = 12;
             }
+            if (entity.pos_y > tilemap.end_y + 4) {
+                if (engine.editor_mode()) {
+                    editor_toggle_play_mode = true;
+                    editor_noclip = true;
+                    entity.pos_y = tilemap.end_y - 2;
+                }
+                else engine.create_transition(engine.reload, 60, Direction_Left);
+            }
+            *entity.prop<bool>("squashed") = false;
         }
         *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 192;
         ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
