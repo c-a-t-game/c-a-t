@@ -25,11 +25,15 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             };
 
             if (tilemap.get(x, y - 1) == 6) {
-                if (tilemap.get(x - 1, y - 1) != 6) return TILE(0, 3);
+                int offset = 0;
+                while (tilemap.get(x - ++offset, y - 1) == 6);
+                if (offset % 2 == 1) return TILE(0, 3);
                 return TILE(1, 3);
             }
             if (tilemap.get(x, y + 1) == 6) {
-                if (tilemap.get(x - 1, y + 1) != 6) return TILE(0, 4);
+                int offset = 0;
+                while (tilemap.get(x - ++offset, y + 1) == 6);
+                if (offset % 2 == 1) return TILE(0, 4);
                 return TILE(1, 4);
             }
 
@@ -87,7 +91,9 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
         .event<TileTextureNode>(lambda grass_tree_stump_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
             if (tilemap.get(x - 1, y) == 7) return TILE(2, 3);
             if (tilemap.get(x + 1, y) == 7) return TILE(3, 3);
-            if (tilemap.get(x - 1, y) == 6) {
+            int offset = 0;
+            while (tilemap.get(x - ++offset, y) == 6);
+            if (offset % 2 == 0) {
                 if (tilemap.get(x, y - 1) != 6 && tilemap.get(x, y - 1) != 1) return TILE(1, 1);
                 if (tilemap.get(x, y + 1) != 6 && tilemap.get(x, y + 1) != 1) return TILE(1, 5);
                 return TILE(1, 2);

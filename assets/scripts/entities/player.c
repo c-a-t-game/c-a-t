@@ -146,7 +146,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             }
             if (entity.pos_y > tilemap.end_y + 4) {
                 if (engine.editor_mode()) {
-                    editor_toggle_play_mode = true;
+                    if (!editor_is_editing()) editor_toggle_play_mode = true;
                     editor_noclip = true;
                     entity.pos_y = tilemap.end_y - 2;
                 }
