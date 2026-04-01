@@ -23,6 +23,7 @@ static void compile_progress(const char* curr_file, int total, int compiled) {
     memset(progress, 0, 51);
     memset(progress, '=', compiled * 50 / total);
     printf("%3d%% [%-50s] %s\n", compiled * 100 / total, progress, curr_file ?: "Done");
+    fflush(stdout);
 }
 
 static void recompile_file(const char* file) {
@@ -43,6 +44,15 @@ void add_compile_job(const char* code, const char* filename) {
     strcat(path, filename);
     watch_file(strdup(path), recompile_file);
 }
+
+#ifdef _WIN32
+#define main game_entrypoint
+
+float fabsf(float x) {
+    return x < 0 ? -x : x;
+}
+
+#endif
 
 int main(int argc, char** argv) {
     if (argc > 1) {
@@ -69,6 +79,6 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-bool editor_mode() {
+bool check_editor_mode() {
     return editor_mode_enabled;
 }

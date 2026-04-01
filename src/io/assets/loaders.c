@@ -4,6 +4,16 @@
 
 #include "main.h"
 
+#ifdef _WIN32
+#include <stdlib.h>
+static char* strndup(const char* src, size_t max_len) {
+    char* dup = malloc(strnlen(src, max_len) + 1);
+    strncpy(dup, src, max_len);
+    dup[max_len] = 0;
+    return dup;
+}
+#endif
+
 static const char* get_basename(const char* filename) {
     for (int i = strlen(filename) - 1; i >= 0; i--) {
         if (filename[i] == '/') return filename + i + 1;
