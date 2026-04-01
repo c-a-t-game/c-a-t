@@ -96,8 +96,8 @@ LDFLAGS="$LDFLAGS$(pkgconf --libs $PKGCONF)"
         echo -n "$BUILD_DIR/${i%%.*}.o "
     done)"
     if [ "$OS" == "windows" ]; then
-        echo -e "\t$COMPILER \$^ $LDFLAGS -shared -o $WINDOWS_DLL"
-        echo -e "\t$COMPILER win-launcher.c -L. -l:$WINDOWS_DLL $CFLAGS $LDFLAGS -static -o \$@"
+        echo -e "\t$COMPILER \$^ $LDFLAGS -static -shared -o $WINDOWS_DLL"
+        echo -e "\t$COMPILER win-launcher.c -L. -l:$WINDOWS_DLL $CFLAGS $LDFLAGS -o \$@"
     else
         echo -e "\t$COMPILER \$^ $LDFLAGS -o \$@"
     fi
