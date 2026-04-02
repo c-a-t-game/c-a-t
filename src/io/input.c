@@ -149,8 +149,3 @@ bool keybind_mouse_pressed(int button) {
 bool keybind_mouse_released(int button) {
     return !(curr_mouse & button) && (prev_mouse & button);
 }
-
-float keybind_mouse_x() { return 0; }
-float keybind_mouse_y() { return 0; }
-bool keybind_check(int bind) { return false; }
-int keybind_mouse() { return 0; }

@@ -140,7 +140,6 @@ extern("storage_num_slots") uint32_t __storage_num_slots();
 
 extern("_get_asset") void* __get_asset(const char* name);
 
-extern("get_millis") uint64_t __get_millis();
 extern("get_micros") uint64_t __get_micros();
 extern("watch_file") void __watch_file(const char* filename, FileWatchCallback callback);
 extern("check_watched_files") void __check_watched_files();
@@ -178,7 +177,7 @@ Storage* storage;
 }
 
 uint64_t get_micros(Engine* this) -> __get_micros();
-uint64_t get_millis(Engine* this) -> __get_millis();
+uint64_t get_millis(Engine* this) -> __get_micros() / 1000;
 void watch_file(Engine* this, const char* filename, FileWatchCallback callback) -> __watch_file(filename, callback);
 void check_watched_files(Engine* this) -> __check_watched_files();
 bool editor_mode(Engine* this) -> __editor_mode();

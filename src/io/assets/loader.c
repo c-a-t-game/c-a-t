@@ -4,6 +4,12 @@
 #include <string.h>
 #include <stdio.h>
 
+#ifdef _WIN32
+#define BINARY "b"
+#else
+#define BINARY
+#endif
+
 typedef struct {
     const char* name;
     int length;
@@ -44,7 +50,7 @@ static int compare_str(const void* a, const void* b) {
 static uint8_t* read_asset_file(const char* name, size_t* length) {
     char filename[strlen(name) + 8];
     sprintf(filename, "assets/%s", name);
-    FILE* f = fopen(filename, "r");
+    FILE* f = fopen(filename, "r" BINARY);
     if (!f) return NULL;
     fseek(f, 0, SEEK_END);
     *length = ftell(f);
