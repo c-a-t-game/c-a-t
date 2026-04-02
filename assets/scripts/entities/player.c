@@ -134,12 +134,17 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 for (int i = 0; i < tilemap.node.children_size; i++) {
                     if (tilemap.node.children[i] && (int)tilemap.node.children[i].type == NodeType_Entity && tilemap.node.children[i] != entity) {
                         EntityNode* scratchee /* this fuckass name lmfao */ = tilemap.node.children[i];
-                        float max_dist = fmax(fabsf(scratchee.vel_x) * 30, fmax(fabsf(entity.vel_x) * 15, 1.5));
-                        float dist = sqrtf(
-                            (scratchee.pos_x - entity.pos_x) * (scratchee.pos_x - entity.pos_x) +
-                            (scratchee.pos_y - entity.pos_y) * (scratchee.pos_y - entity.pos_y)
-                        );
-                        if (dist < max_dist) scratchee.damage(entity);
+                        if (
+                            ( *entity.prop<bool>("facing_left") && scratchee.pos_x < entity.pos_x) ||
+                            (!*entity.prop<bool>("facing_left") && scratchee.pos_x > entity.pos_y)
+                        ) {
+                            float max_dist = fmax(fabsf(entity.vel_x) * 15, 1.75);
+                            float dist = sqrtf(
+                                (scratchee.pos_x - entity.pos_x) * (scratchee.pos_x - entity.pos_x) +
+                                (scratchee.pos_y - entity.pos_y) * (scratchee.pos_y - entity.pos_y)
+                            );
+                            if (dist < max_dist) scratchee.damage(entity);
+                        }
                     }
                 }
                 *scratch_timer = 12;
@@ -155,6 +160,10 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             *entity.prop<bool>("squashed") = false;
         }
         *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 192;
+        if (!editor_is_editing()) {
+            if (*entity.prop<float>("cam_target") > tilemap.end_x * 16 - 384) *entity.prop<float>("cam_target") = tilemap.end_x * 16 - 384;
+            if (*entity.prop<float>("cam_target") < tilemap.start_x * 16)     *entity.prop<float>("cam_target") = tilemap.start_x * 16;
+        }
         ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
     })
     .event<EntityDamageNode>(lambda entity_player_damage(EntityNode* entity, EntityNode* source, TilemapNode* tilemap): void {

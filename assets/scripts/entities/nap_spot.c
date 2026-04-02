@@ -9,6 +9,7 @@ Node* entity_level_end(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(1) // width
     .prop<float>(1) // height
     .prop<const char*>("entity_level_end") // func
+    .prop<const char*>("end") // name
     .event<EntityUpdateNode>(lambda entity_level_end_update(EntityNode* entity, TilemapNode* tilemap): void {
         *entity.prop<int>("num_coins") = 0;
         for (int y = tilemap.start_y; y < tilemap.end_y; y++) {
@@ -24,6 +25,8 @@ Node* entity_level_end(float x, float y) -> engine.open<EntityNode>()
                     (*entity.prop<int>("num_coins"))++;
             }
         }
+        if (*entity.prop<int>("max_coins") < *entity.prop<int>("num_coins"))
+            *entity.prop<int>("max_coins") = *entity.prop<int>("num_coins");
     })
     .event<EntityCollisionNode>(lambda entity_level_end_collision(EntityNode* collidee, EntityNode* collider, TilemapNode* tilemap): void {
         if (editor_is_editing() || editor_toggle_play_mode) return;

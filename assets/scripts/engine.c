@@ -330,14 +330,14 @@ NodeBuilder* exec(NodeBuilder* this, void(*func)(NodeBuilder* builder)) {
     return this;
 }
 
-NodeBuilder* tilemap(NodeBuilder* this, int width, int height, Tile oob_tile, Tile* tiles) {
+NodeBuilder* tilemap(NodeBuilder* this, int width, int height, Tile(*oob_tile_provider)(TilemapNode* tilemap, int x, int y), Tile* tiles) {
     Tile* data = tiles ? malloc(width * height) : NULL;
     if (data) memcpy(data, tiles, width * height);
     TilemapNode* node = this.curr_node;
     node.start_x = node.start_y = 0;
     node.end_x = width;
     node.end_y = height;
-    node.oob_tile = oob_tile;
+    node.oob_tile_provider = oob_tile_provider;
     node.tiles = data;
     return this;
 }

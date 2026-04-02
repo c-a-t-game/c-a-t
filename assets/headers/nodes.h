@@ -8,7 +8,8 @@ NODE(Tilemap,
     float scroll_offset_x, scroll_offset_y;
     float scroll_speed_x, scroll_speed_y;
     int start_x, start_y, end_x, end_y;
-    uint8_t oob_tile, *tiles;
+    uint8_t* tiles;
+    uint8_t(*oob_tile_provider)(void* tilemap, int x, int y);
 )
 
 NODE(Tileset,

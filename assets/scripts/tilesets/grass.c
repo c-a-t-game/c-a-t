@@ -4,6 +4,20 @@
 #define TILE(x, y) ((y)*16+(x))
 #define ANIMATE(frames, delay) (engine.get_millis() / (delay) % (frames))
 
+Tile grass_oob_provider(TilemapNode* tilemap, int x, int y) {
+    int ground_x = x, ground_y = y;
+    if (ground_x < tilemap.start_x) ground_x = tilemap.start_x;
+    if (ground_x >= tilemap.end_x) ground_x = tilemap.end_x - 1;
+    if (ground_y < tilemap.start_y) ground_y = tilemap.start_y;
+    if (ground_y >= tilemap.end_y) ground_y = tilemap.end_y - 1;
+    if (tilemap.get(ground_x, ground_y) == 1) return 1;
+    if (x >= tilemap.start_x && x < tilemap.end_x) {
+        if (y < tilemap.start_y && tilemap.get(x, tilemap.start_y) == 6) return 6;
+        if (y >= tilemap.end_y && tilemap.get(x, tilemap.end_y - 1) == 6) return 6;
+    }
+    return 0;
+}
+
 Node* tileset_grass() -> engine.open<TilesetNode>()
     .prop<Texture*>(assets.get<Texture>("images/tilesets/grass.png"))
     .prop<int>(16) // tile_width
@@ -165,7 +179,7 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.0f) // scroll_speed_x
     .prop<float>(0.0f) // scroll_speed_y
-    .tilemap(0, 0, 1, nullptr)
+    .tilemap(0, 0, (lambda(): int -> 1), nullptr)
 .close().open<TilemapNode>()
     .attach(tileset_grass_bg())
     .prop<float>(1.0f) // scale_x
@@ -174,7 +188,7 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.1f) // scroll_speed_x
     .prop<float>(0.0f) // scroll_speed_y
-    .tilemap(0, 0, 2, nullptr)
+    .tilemap(0, 0, (lambda(): int -> 2), nullptr)
 .close().open<TilemapNode>()
     .attach(tileset_grass_bg())
     .prop<float>(1.0f) // scale_x
@@ -183,7 +197,7 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.25f) // scroll_speed_x
     .prop<float>(0.0f) // scroll_speed_y
-    .tilemap(0, 0, 3, nullptr)
+    .tilemap(0, 0, (lambda(): int -> 3), nullptr)
 .close().open<TilemapNode>()
     .attach(tileset_grass_bg())
     .prop<float>(1.0f) // scale_x
@@ -192,5 +206,5 @@ void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
     .prop<float>(0.0f) // scroll_offset_y
     .prop<float>(0.5f) // scroll_speed_x
     .prop<float>(0.0f) // scroll_speed_y
-    .tilemap(0, 0, 4, nullptr)
+    .tilemap(0, 0, (lambda(): int -> 4), nullptr)
 .close();

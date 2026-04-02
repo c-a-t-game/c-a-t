@@ -23,7 +23,7 @@ void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile) {
         int old_pitch = old_end_x - old_start_x;
         size_t size = (node->end_x - node->start_x) * (node->end_y - node->start_y);
         uint8_t* new_tiles = malloc(size);
-        memset(new_tiles, node->oob_tile, size);
+        memset(new_tiles, 0, size);
         if (node->tiles) for (int y = old_start_y; y < old_end_y; y++)
             for (int x = old_start_x; x < old_end_x; x++)
                 new_tiles[(y - node->start_y) * pitch + (x - node->start_x)] = node->tiles[(y - old_start_y) * old_pitch + (x - old_start_x)];
@@ -35,7 +35,7 @@ void engine_set_tile(TilemapNode* node, int x, int y, uint8_t tile) {
 }
 
 uint8_t engine_get_tile(TilemapNode* node, int x, int y) {
-    if (x < node->start_x || y < node->start_y || x >= node->end_x || y >= node->end_y || !node->tiles) return node->oob_tile;
+    if (x < node->start_x || y < node->start_y || x >= node->end_x || y >= node->end_y || !node->tiles) return node->oob_tile_provider(node, x, y);
     int pitch = node->end_x - node->start_x;
     return node->tiles[(y - node->start_y) * pitch + (x - node->start_x)];
 }
