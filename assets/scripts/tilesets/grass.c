@@ -77,7 +77,7 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
     .close()
     .open<TileNode>() // coin
         .event<TileTextureNode>(lambda grass_coin_anim(): int -> (int[]){
-            TILE(1, 12), TILE(1, 13), TILE(1, 14), TILE(1, 15),
+            TILE(1, 15), TILE(1, 14), TILE(1, 13), TILE(1, 12),
         }[ANIMATE(4, 150)])
         .event<CollisionNode>(lambda grass_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
             if (editor_is_editing()) return;
@@ -111,6 +111,16 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             if (tilemap.get(x - 1, y) != 6 && tilemap.get(x - 1, y) != 7) return TILE(2, 2);
             if (tilemap.get(x + 1, y) != 6 && tilemap.get(x + 1, y) != 7) return TILE(4, 2);
             return TILE(3, 2);
+        })
+    .close()
+    .open<TileNode>() // purple coin
+        .event<TileTextureNode>(lambda grass_purple_coin_anim(): int -> (int[]){
+            TILE(1, 11), TILE(1, 10), TILE(1, 9), TILE(1, 8),
+        }[ANIMATE(4, 150)])
+        .event<CollisionNode>(lambda grass_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
+            if (editor_is_editing()) return;
+            if (!entity.is("player")) return;
+            tilemap.set(x, y, 0);
         })
     .close()
 .build();

@@ -40,7 +40,7 @@ EntityNode* editor_drag_obj;
 LevelRootNode* editor_level;
 
 #define OBJECTS(X) \
-    X(mouse) X(turtle) X(heart) X(coin) \
+    X(mouse) X(turtle) X(heart) X(coin) X(purple_coin) \
     X(level_end) X(level_start)
 
 #define OBJECT_FUNC(name) Node* __ID__(entity_, name)(float x, float y);
@@ -222,7 +222,7 @@ void editor_update() {
         } objects[] = { OBJECTS(OBJECT_DEF) };
 
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
-        int tiles[] = { 0, 226, 244, 240, 225, 17, 35 };
+        int tiles[] = { 0, 226, 244, 240, 225, 17, 35, 161 };
         int num_tiles = sizeof(tiles) / sizeof(*tiles);
         int num_objects = sizeof(objects) / sizeof(*objects);
         int num_items = editor_mode == EditorMode_Tilemap ? num_tiles : num_objects;

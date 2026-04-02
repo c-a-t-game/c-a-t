@@ -3,6 +3,7 @@
 typedef Tile(*Decorator)(TilemapNode* tilemap, int x, int y);
 
 NodeBuilder* decorate(NodeBuilder* this, Decorator decorator) {
+    if (engine.editor_mode()) return this;
     if (!this.curr_node || this.curr_node.children_size == 0) return this;
     TilemapNode* tilemap = this.curr_node.children[this.curr_node.children_size - 1];
     for (int y = tilemap.start_y; y < tilemap.end_y; y++) {

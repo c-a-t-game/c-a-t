@@ -45,7 +45,8 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
         if (!collider.is("player")) return;
         if (tilemap.get(collider.pos_x, collider.pos_y - EPSILON) == 4) return;
         if (*collidee.prop<float>("intangible") > 0) return;
-        *storage.get<int>(*collidee.prop<char*>("target_storage")) += 1;
+        if (*collidee.prop<char*>("target_storage"))
+            *storage.get<int>(*collidee.prop<char*>("target_storage")) += 1;
         collidee.node.delete();
     })
 .build();

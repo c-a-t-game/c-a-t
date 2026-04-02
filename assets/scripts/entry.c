@@ -39,7 +39,6 @@ void entry_point() {
     
     float scale = pick_scale();
     input.set_mouse_scale(scale);
-    printf("%f\n", scale);
 
     if (storage.num_slots() == 0) storage.use(storage.add());
     else storage.load(0);
