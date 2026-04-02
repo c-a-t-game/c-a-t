@@ -144,7 +144,7 @@ extern("get_micros") uint64_t __get_micros();
 extern("watch_file") void __watch_file(const char* filename, FileWatchCallback callback);
 extern("check_watched_files") void __check_watched_files();
 
-extern("editor_mode") bool __editor_mode();
+extern("check_editor_mode") bool __editor_mode();
 
 LevelRootNode* __curr_level_node;
 Level __curr_level_loader;

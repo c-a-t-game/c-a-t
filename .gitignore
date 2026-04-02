@@ -2,5 +2,7 @@
 bin/
 src/io/assets/data.h
 cat
+cat.exe
+cat.dll
 saves.bin
 assets/images

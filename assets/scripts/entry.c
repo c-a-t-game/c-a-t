@@ -32,37 +32,7 @@ void entry_point() {
     else storage.load(0);
 
     if (engine.editor_mode()) {
-        engine.load(lambda(): Node* -> engine.open<LevelRootNode>()
-            .exec(grass_bg)
-            .open<TilemapNode>()
-                .attach(tileset_grass())
-                .prop<float>(1.0f) // scale_x
-                .prop<float>(1.0f) // scale_y
-                .prop<float>(0.0f) // scroll_offset_x
-                .prop<float>(0.0f) // scroll_offset_y
-                .prop<float>(1.0f) // scroll_speed_x
-                .prop<float>(1.0f) // scroll_speed_y
-                .tilemap(16, 16, 0, (Tile[]){
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                })
-                .attach(entity_player(0.5, 15))
-            .close()
-        .build());
+        engine.load(level1);
         editor_init();
     }
     else engine.load(level1);

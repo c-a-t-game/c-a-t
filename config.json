@@ -35,7 +35,8 @@
       "JITC_DEBUG_GDB": "1"
     },
     "windows": {
-      "BUILD_TARGET": "cat.exe"
+      "BUILD_TARGET": "cat.exe",
+      "WINDOWS_DLL": "cat.dll"
     }
   },
   "flags": {
@@ -49,7 +50,8 @@
     },
     "windows": {
       "pkgconf": "--static",
-      "ldflags": "-static"
+      "cflags": "-fno-builtin",
+      "ldflags": "-ldl"
     }
   }
 }

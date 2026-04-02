@@ -45,10 +45,11 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
     .event<EntityCollisionNode>(lambda entity_mouse_collision(EntityNode* collidee, EntityNode* collider, TilemapNode* tilemap): void {
         if (editor_is_editing()) return;
         if (!collider.is("player")) return;
-        if (collider.vel_y > 0) {
-            collider.vel_y = -0.3;
+        if (collider.vel_y > 0 || *collider.prop<bool>("squashed")) {
+            *collider.prop<bool>("squashed") = true;
             *collider.prop<bool>("jumping") = true;
             *collider.prop<float>("floor_y") = collider.pos_y;
+            collider.vel_y = -0.3;
             collidee.damage(collider);
         }
         else collider.damage(collidee);
