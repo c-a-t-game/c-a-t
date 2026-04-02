@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 
+static float mouse_scale = 1;
+
 typedef struct {
     const char* name;
     int* keybinds;
@@ -148,4 +150,12 @@ bool keybind_mouse_pressed(int button) {
 
 bool keybind_mouse_released(int button) {
     return !(curr_mouse & button) && (prev_mouse & button);
+}
+
+void keybind_set_mouse_scale(float scale) {
+    mouse_scale = scale;
+}
+
+float keybind_get_mouse_scale() {
+    return mouse_scale;
 }

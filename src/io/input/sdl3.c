@@ -7,13 +7,13 @@
 float keybind_mouse_x() {
     float x;
     SDL_GetMouseState(&x, NULL);
-    return x / 3 / graphics_get_dpi_scale(NULL);
+    return x / keybind_get_mouse_scale() / graphics_get_dpi_scale(NULL);
 }
 
 float keybind_mouse_y() {
     float y;
     SDL_GetMouseState(NULL, &y);
-    return y / 3 / graphics_get_dpi_scale(NULL);
+    return y / keybind_get_mouse_scale() / graphics_get_dpi_scale(NULL);
 }
 
 int keybind_mouse() {

@@ -19,6 +19,9 @@ bool keybind_mouse_released(int button);
 float keybind_mouse_x();
 float keybind_mouse_y();
 
+void keybind_set_mouse_scale(float scale);
+float keybind_get_mouse_scale();
+
 bool keybind_check(int bind);
 int keybind_mouse();
 

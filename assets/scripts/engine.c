@@ -103,6 +103,7 @@ extern("graphics_close") void __graphics_close(Window* window);
 extern("graphics_focus") void __graphics_focus(Window* window);
 extern("graphics_get_size") void __graphics_get_size(Window* window, int* width, int* height);
 extern("graphics_get_pos") void __graphics_get_pos(Window* window, int* x, int* y);
+extern("graphics_screen_size") void __graphics_screen_size(int* x, int* y);
 extern("graphics_set_active") void __graphics_set_active(Window* window);
 extern("graphics_start_frame") void __graphics_start_frame(Window* window);
 extern("graphics_end_frame") void __graphics_end_frame(Window* window);
@@ -131,6 +132,8 @@ extern("keybind_mouse_released") bool __keybind_mouse_released(int button);
 extern("keybind_mouse_x") float __keybind_mouse_x();
 extern("keybind_mouse_y") float __keybind_mouse_y();
 extern("keybind_update") void __keybind_update();
+extern("keybind_get_mouse_scale") float __keybind_get_mouse_scale();
+extern("keybind_set_mouse_scale") void __keybind_set_mouse_scale(float scale);
 
 extern("storage_get_slot") StorageSlot* __storage_get_slot(uint32_t index);
 extern("storage_add_slot") StorageSlot* __storage_add_slot();
@@ -229,6 +232,7 @@ void close(Window* this) -> __graphics_close(this);
 void focus(Window* this) -> __graphics_focus(this);
 void get_size(Window* this, int* width, int* height) -> __graphics_get_size(this, width, height);
 void get_pos(Window* this, int* x, int* y) -> __graphics_get_pos(this, x, y);
+void get_size(Graphics* this, int* x, int* y) -> __graphics_screen_size(x, y);
 void set_active(Window* this) -> __graphics_set_active(this);
 void start_frame(Window* this) -> __graphics_start_frame(this);
 void end_frame(Window* this) -> __graphics_end_frame(this);
@@ -257,6 +261,8 @@ bool mouse_released(Input* this, int button) -> __keybind_mouse_released(button)
 float mouse_x(Input* this) -> __keybind_mouse_x();
 float mouse_y(Input* this) -> __keybind_mouse_y();
 void update(Input* this) -> __keybind_update();
+float get_mouse_scale(Input* this) -> __keybind_get_mouse_scale();
+void set_mouse_scale(Input* this, float scale) -> __keybind_set_mouse_scale(scale);
 
 <T> T* get(Assets* this, const char* name) -> __get_asset(name);
 

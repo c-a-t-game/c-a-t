@@ -10,6 +10,15 @@
 #define KB_CTRL 224
 #define KB_SHIFT 225
 
+float pick_scale() {
+    int w, h;
+    gfx.get_size(&w, &h);
+    w = w * 3/4, h = h * 3/4;
+    int scale_w = w / 384;
+    int scale_h = h / 256;
+    return scale_w < scale_h ? scale_w : scale_h;
+}
+
 void entry_point() {
     input.add("left", KB_LETTER('A'));
     input.add("right", KB_LETTER('D'));
@@ -27,6 +36,10 @@ void entry_point() {
     input.add("editor_eraser", KB_NUMBER('3'));
     input.add("editor_mode_toggle", KB_NUMBER('4'));
     input.add("editor_play", KB_TAB);
+    
+    float scale = pick_scale();
+    input.set_mouse_scale(scale);
+    printf("%f\n", scale);
 
     if (storage.num_slots() == 0) storage.use(storage.add());
     else storage.load(0);
@@ -39,7 +52,7 @@ void entry_point() {
 
     __curr_transition.progress = 1;
 
-    Window* w = gfx.open(":3", 1152, 768);
+    Window* w = gfx.open(":3", 384 * scale, 256 * scale);
     w.set_active();
 
     uint64_t last_micros = engine.get_micros();
@@ -82,7 +95,7 @@ void entry_point() {
         else ui_hud();
 
         w.set_buffer(nullptr);
-        w.blit(buf, offset_x * 3, offset_y * 3, 1152, 768, 0, 0, 384, 256, 0xFFFFFFFF);
+        w.blit(buf, offset_x * scale, offset_y * scale, 384 * scale, 256 * scale, 0, 0, 384, 256, 0xFFFFFFFF);
         w.end_frame();
 
         buf.destroy();

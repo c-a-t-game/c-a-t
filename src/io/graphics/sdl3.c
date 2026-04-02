@@ -45,6 +45,13 @@ static SDL_Texture* get_texture(Window* window, Texture* texture, SDL_Renderer* 
     return handle;
 }
 
+static void init_video() {
+    static bool inited = false;
+    if (inited) return;
+    inited = true;
+    SDL_Init(SDL_INIT_VIDEO);
+}
+
 void graphics_get_renderer(Window* w, int requested_width) {
     w->rnd = SDL_CreateRenderer(w->wnd, NULL);
     int window_width;
@@ -60,9 +67,7 @@ void graphics_destroy_renderer(SDL_Renderer* renderer) {
 }
 
 Window* graphics_open(const char* title, int width, int height) {
-    static bool initialized = false;
-    if (!initialized) SDL_Init(SDL_INIT_VIDEO);
-    initialized = true;
+    init_video();
 
     Window* w = malloc(sizeof(Window));
     w->wnd = SDL_CreateWindow(title, width, height, 0);
@@ -94,6 +99,14 @@ void graphics_get_size(Window* w, int* width, int* height) {
 void graphics_get_pos(Window* w, int* x, int* y) {
     if (!w) w = curr_window;
     SDL_GetWindowPosition(w->wnd, x, y);
+}
+
+void graphics_screen_size(int* x, int* y) {
+    init_video();
+
+    const SDL_DisplayMode* dm = SDL_GetCurrentDisplayMode(SDL_GetDisplays(NULL)[0]);
+    *x = dm->w;
+    *y = dm->h;
 }
 
 float graphics_get_dpi_scale(Window* w) {

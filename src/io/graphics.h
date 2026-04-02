@@ -42,6 +42,7 @@ void graphics_close(Window* window);
 void graphics_focus(Window* window);
 void graphics_get_size(Window* window, int* width, int* height);
 void graphics_get_pos(Window* window, int* x, int* y);
+void graphics_screen_size(int* x, int* y);
 float graphics_get_dpi_scale(Window* window);
 void graphics_set_active(Window* window);
 void graphics_start_frame(Window* window);
