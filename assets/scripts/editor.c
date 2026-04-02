@@ -35,6 +35,7 @@ typedef Node*(*EntitySpawner)(float x, float y);
 EditorTrail editor_trail_data[EDITOR_TRAIL_CAPACITY];
 int editor_trail_tail, editor_trail_head, editor_trail_size;
 int editor_curr_tile;
+int editor_curr_obj_index;
 EntitySpawner editor_curr_obj;
 EntityNode* editor_drag_obj;
 LevelRootNode* editor_level;
@@ -50,6 +51,7 @@ LevelRootNode* editor_level;
 },
 
 OBJECTS(OBJECT_FUNC)
+int editor_tiles[9] = { 0, 226, 244, 240, 225, 17, 35, 82, 161 };
 
 EditorTrail* editor_trail_get(int index) -> &editor_trail_data[(editor_trail_tail + index) % EDITOR_TRAIL_CAPACITY];
 
@@ -215,15 +217,13 @@ void editor_update() {
             editor_mode = EditorMode_Object;
         }
     }
+    struct {
+        Texture* tex;
+        EntitySpawner spawner;
+    } objects[] = { OBJECTS(OBJECT_DEF) };
     if (editor_picker) {
-        struct {
-            Texture* tex;
-            EntitySpawner spawner;
-        } objects[] = { OBJECTS(OBJECT_DEF) };
-
         gfx.main().rect(0, 0, 384, 256, 0x0000007F);
-        int tiles[] = { 0, 226, 244, 240, 225, 17, 35, 161 };
-        int num_tiles = sizeof(tiles) / sizeof(*tiles);
+        int num_tiles = sizeof(editor_tiles) / sizeof(*editor_tiles);
         int num_objects = sizeof(objects) / sizeof(*objects);
         int num_items = editor_mode == EditorMode_Tilemap ? num_tiles : num_objects;
         int width = 3 + (num_items > 16 ? 16 : num_items) * 21;
@@ -232,7 +232,7 @@ void editor_update() {
         int panel_y = (256 - height) / 2;
         cannot_edit |= ui_container(panel_x, panel_y, width, height, 0x3F3F3FFF);
         if (editor_mode == EditorMode_Tilemap) for (int tile = 0; tile < num_tiles; tile++) {
-            int tex = tiles[tile];
+            int tex = editor_tiles[tile];
             int tile_x = tile % 16;
             int tile_y = tile / 16;
             int tex_x = tex % 16;
@@ -247,6 +247,7 @@ void editor_update() {
             int obj_y = obj / 16;
             if (ui_icon_button(panel_x + 2+21*obj_x, panel_y + 2+21*obj_y, 20, 20, false, 0, 0, 16, 16, objects[obj].tex)) {
                 editor_curr_obj = objects[obj].spawner;
+                editor_curr_obj_index = obj;
                 editor_picker = false;
             }
         }
@@ -307,7 +308,7 @@ void editor_update() {
     if (editor_tool == EditorTool_Pencil) {
         if (editor_mode == EditorMode_Tilemap) {
             if (input.down("ctrl")) cursor_icon = 1;
-            else if (input.down("shift")) cursor_icon = 2;
+            //else if (input.down("shift")) cursor_icon = 2;
             else cursor_icon = 0;
         }
         else cursor_icon = 0;
@@ -324,6 +325,17 @@ void editor_update() {
         else if (input.down("shift")) cursor_icon = 5;
         else if (input.down("ctrl")) cursor_icon = 6;
         else cursor_icon = 4;
+    }
+    if (editor_tool == EditorTool_Pencil) {
+        if (editor_mode == EditorMode_Tilemap) {
+            int tile = editor_tiles[editor_curr_tile - 1];
+            int tex_x = tile % 16;
+            int tex_y = tile / 16;
+            gfx.main().draw(tileset.tileset, input.mouse_x() - 8, input.mouse_y() - 8, 16, 16, tex_x * 16, tex_y * 16, 16, 16, 0xFFFFFFFF);
+        }
+        if (editor_mode == EditorMode_Object && !input.mouse_down(MouseButton_Left)) {
+            gfx.main().draw(objects[editor_curr_obj_index].tex, input.mouse_x() - 8, input.mouse_y() - 8, 16, 16, 0, 0, 16, 16, 0xFFFFFFFF);
+        }
     }
     gfx.main().draw(cursor, input.mouse_x() - origin_x, input.mouse_y() - origin_y, 14, 14, (cursor_icon % 4) * 14, (cursor_icon / 4) * 14, 14, 14, 0xFFFFFFFF);
 }

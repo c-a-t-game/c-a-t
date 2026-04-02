@@ -94,11 +94,15 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             int offset = 0;
             while (tilemap.get(x - ++offset, y) == 6);
             if (offset % 2 == 0) {
+                if (tilemap.get(x, y - 1) == 8) return TILE(3, 6);
+                if (tilemap.get(x, y + 1) == 8) return TILE(3, 4);
                 if (tilemap.get(x, y - 1) != 6 && tilemap.get(x, y - 1) != 1) return TILE(1, 1);
                 if (tilemap.get(x, y + 1) != 6 && tilemap.get(x, y + 1) != 1) return TILE(1, 5);
                 return TILE(1, 2);
             }
             else {
+                if (tilemap.get(x, y - 1) == 8) return TILE(2, 6);
+                if (tilemap.get(x, y + 1) == 8) return TILE(2, 4);
                 if (tilemap.get(x, y - 1) != 6 && tilemap.get(x, y - 1) != 1) return TILE(0, 1);
                 if (tilemap.get(x, y + 1) != 6 && tilemap.get(x, y + 1) != 1) return TILE(0, 5);
                 return TILE(0, 2);
@@ -113,11 +117,19 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
             return TILE(3, 2);
         })
     .close()
+    .open<TileNode>() // tree hole
+        .prop<Collision>(Collision_None)
+        .event<TileTextureNode>(lambda grass_tree_hole_autotiler(TilemapNode* tilemap, TileNode* tile, int x, int y): int {
+            int offset = 0;
+            while (tilemap.get(x - ++offset, y) == 8);
+            return offset % 2 == 0 ? TILE(3, 5) : TILE(2, 5);
+        })
+    .close()
     .open<TileNode>() // purple coin
         .event<TileTextureNode>(lambda grass_purple_coin_anim(): int -> (int[]){
             TILE(1, 11), TILE(1, 10), TILE(1, 9), TILE(1, 8),
         }[ANIMATE(4, 150)])
-        .event<CollisionNode>(lambda grass_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
+        .event<CollisionNode>(lambda grass_purple_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
             if (editor_is_editing()) return;
             if (!entity.is("player")) return;
             tilemap.set(x, y, 0);

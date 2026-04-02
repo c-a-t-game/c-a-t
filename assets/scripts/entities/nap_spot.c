@@ -13,7 +13,7 @@ Node* entity_level_end(float x, float y) -> engine.open<EntityNode>()
         *entity.prop<int>("num_coins") = 0;
         for (int y = tilemap.start_y; y < tilemap.end_y; y++) {
             for (int x = tilemap.start_x; x < tilemap.end_x; x++) {
-                if (tilemap.get(x, y) == 8)
+                if (tilemap.get(x, y) == 9)
                     (*entity.prop<int>("num_coins"))++;
             }
         }

@@ -69,5 +69,5 @@ Node* level1() -> engine.open<LevelRootNode>()
         .attach(entity_mouse(206.0f, 8.0f))
         .attach(entity_level_end(211.5f, 7.0f))
         .attach(entity_player(2.5f, 12.0f))
-    .close()
+    .close().decorate(foliage_decorator)
 .build();

@@ -44,10 +44,10 @@ void entry_point() {
     else storage.load(0);
 
     if (engine.editor_mode()) {
-        engine.load(level1);
+        engine.load(level2);
         editor_init();
     }
-    else engine.load(level1);
+    else engine.load(level2);
 
     __curr_transition.progress = 1;
 
