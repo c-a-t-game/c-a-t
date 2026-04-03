@@ -1,14 +1,7 @@
-#depends "scripts/entities/player.c"
-#depends "scripts/entities/mouse.c"
-#depends "scripts/entities/turtle.c"
-#depends "scripts/entities/coin.c"
-#depends "scripts/entities/heart.c"
-#depends "scripts/entities/nap_spot.c"
-#depends "scripts/tilesets/upside_down.c"
-#depends "scripts/decorators/foliage.c"
+#depends "scripts/levels/level4.c"
 
 Node* level3() -> engine.open<LevelRootNode>()
-    .prop<Level>(level3) // next_level
+    .prop<Level>(level4) // next_level
     .exec(upside_down_bg)
     .open<TilemapNode>()
         .attach(tileset_upside_down())
@@ -36,13 +29,13 @@ Node* level3() -> engine.open<LevelRootNode>()
             6,6,6,6,6,6,0,0,0,0,0,0,0,0,6,6,6,6,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,4,4,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,6,6,0,0,0,0,0,0,0,6,6,0,0,0,0,6,6,0,0,0,7,7,7,7,7,6,6,0,0,0,0,6,6,7,0,0,7,7,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,0,0,0,10,8,8,0,4,6,6,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
             6,6,6,6,6,6,0,0,0,0,0,0,0,0,6,6,6,6,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,6,6,0,0,0,0,6,6,0,0,0,0,0,0,0,0,6,6,0,0,0,0,6,6,0,0,0,0,0,6,6,0,0,0,0,0,0,0,0,0,0,0,0,7,7,7,7,7,7,7,7,7,7,7,6,6,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
         })
-        .attach(entity_mouse(15.0f, 8.0f))
         .attach(entity_level_start(3.0f, 12.0f))
+        .attach(entity_level_end(174.0f, 9.0f))
+        .attach(entity_mouse(15.0f, 8.0f))
         .attach(entity_mouse(61.5f, 11.0f))
         .attach(entity_mouse(60.0f, 11.0f))
         .attach(entity_coin(71.5f, 15.0f))
         .attach(entity_mouse(58.5f, 11.0f))
-        .attach(entity_level_end(174.0f, 9.0f))
         .attach(entity_coin(25.5f, 10.0f))
         .attach(entity_coin(26.5f, 10.0f))
         .attach(entity_turtle(75.0f, 10.0f))

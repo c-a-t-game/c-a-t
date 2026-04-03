@@ -51,7 +51,7 @@ LevelRootNode* editor_level;
 },
 
 OBJECTS(OBJECT_FUNC)
-int editor_tiles[10] = { 0, 226, 244, 240, 225, 17, 35, 82, 161, 192 };
+int editor_tiles[] = { 0, 226, 244, 240, 225, 17, 35, 82, 161, 192, 144 };
 
 EditorTrail* editor_trail_get(int index) -> &editor_trail_data[(editor_trail_tail + index) % EDITOR_TRAIL_CAPACITY];
 

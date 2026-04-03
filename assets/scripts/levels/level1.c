@@ -1,11 +1,3 @@
-#depends "scripts/entities/player.c"
-#depends "scripts/entities/mouse.c"
-#depends "scripts/entities/nap_spot.c"
-#depends "scripts/entities/coin.c"
-#depends "scripts/entities/heart.c"
-#depends "scripts/tilesets/grass.c"
-#depends "scripts/decorators/foliage.c"
-
 #depends "scripts/levels/level2.c"
 
 Node* level1() -> engine.open<LevelRootNode>()
@@ -37,8 +29,9 @@ Node* level1() -> engine.open<LevelRootNode>()
             1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,6,6,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,7,7,7,7,7,7,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
             1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
         })
-        .attach(entity_mouse(194.0f, 8.0f))
         .attach(entity_level_start(2.5f, 12.0f))
+        .attach(entity_level_end(211.5f, 7.0f))
+        .attach(entity_mouse(194.0f, 8.0f))
         .attach(entity_coin(33.5f, 11.0f))
         .attach(entity_coin(34.5f, 11.0f))
         .attach(entity_mouse(47.5f, 13.0f))
@@ -67,7 +60,6 @@ Node* level1() -> engine.open<LevelRootNode>()
         .attach(entity_mouse(209.0f, 7.0f))
         .attach(entity_mouse(207.5f, 7.0f))
         .attach(entity_mouse(206.0f, 8.0f))
-        .attach(entity_level_end(211.5f, 7.0f))
         .attach(entity_player(2.5f, 12.0f))
     .close().decorate(foliage_decorator)
 .build();

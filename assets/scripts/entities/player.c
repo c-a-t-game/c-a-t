@@ -4,6 +4,17 @@
 
 #define signum(x) ((x) == 0 ? 0 : (x) / fabsf(x))
 
+Node* entity_wrap_controller() -> engine.open<EntityNode>()
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<const char*>("entity_wrap_controller")
+    .prop<const char*>("wrap_controller")
+.build();
+
 Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
     .prop<float>(y) // pos_y
@@ -149,7 +160,15 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 }
                 *scratch_timer = 12;
             }
-            if (entity.pos_y > tilemap.end_y + 4) {
+            if (tilemap.find("wrap_controller")) {
+                if (entity.pos_y > tilemap.end_y + entity.height) entity.pos_y = tilemap.start_y - entity.height;
+                else if (entity.pos_y < tilemap.start_y - entity.height) {
+                    float prev_y = entity.pos_y;
+                    entity.pos_y = tilemap.end_y + entity.height;
+                    *entity.prop<float>("floor_y") += entity.pos_y - prev_y - entity.height;
+                }
+            }
+            else if (entity.pos_y > tilemap.end_y + 4) {
                 if (engine.editor_mode()) {
                     if (!editor_is_editing()) editor_toggle_play_mode = true;
                     editor_noclip = true;

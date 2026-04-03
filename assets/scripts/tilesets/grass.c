@@ -161,6 +161,14 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
             *entity.prop<bool>("nobreak") = true;
         })
+    .close()
+    .open<TileNode>() // enemy stopper
+        .event<TileTextureNode>(lambda grass_enemy_stopper_texture(): int -> editor_is_editing() ? TILE(0, 9) : -1)
+        .event<CollisionNode>(lambda grass_enemy_stopper_collision(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, int direction): void {
+            if (direction != Direction_Left && direction != Direction_Right) return;
+            if (entity.is("player")) return;
+            *entity.prop<Direction>("last_hor_collision") = direction == Direction_Left ? Direction_Right : Direction_Left;
+        })
     .close();
 
 void tileset_grass_bg_data(NodeBuilder* builder) -> builder
