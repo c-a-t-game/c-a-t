@@ -136,7 +136,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                         EntityNode* scratchee /* this fuckass name lmfao */ = tilemap.node.children[i];
                         if (
                             ( *entity.prop<bool>("facing_left") && scratchee.pos_x < entity.pos_x) ||
-                            (!*entity.prop<bool>("facing_left") && scratchee.pos_x > entity.pos_y)
+                            (!*entity.prop<bool>("facing_left") && scratchee.pos_x > entity.pos_x)
                         ) {
                             float max_dist = fmax(fabsf(entity.vel_x) * 15, 1.75);
                             float dist = sqrtf(

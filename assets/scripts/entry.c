@@ -1,4 +1,4 @@
-#depends "scripts/levels/level1.c"
+#depends "scripts/levels/level3.c"
 
 #depends "scripts/engine.c"
 #depends "scripts/ui.c"
@@ -44,10 +44,10 @@ void entry_point() {
     else storage.load(0);
 
     if (engine.editor_mode()) {
-        engine.load(level2);
+        engine.load(level3);
         editor_init();
     }
-    else engine.load(level2);
+    else engine.load(level3);
 
     __curr_transition.progress = 1;
 

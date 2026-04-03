@@ -20,12 +20,17 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
     .prop<float>(-0.2) // vel_y
     .prop<float>(0.75) // width
     .prop<float>(0.75) // height
+    .prop<const char*>("entity_turtle_shell") // func
+    .prop<const char*>("shell") // name
     .event<EntityUpdateNode>(lambda entity_turtle_shell_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
-        if (*entity.prop<Direction>("last_hor_collision") != Direction_None) {
-            for (int i = 0; i < 4; i++) {
-                entity.node.parent.attach(entity_turtle_shell_fragment(entity.pos_x, entity.pos_y, *entity.prop<Direction>("last_hor_collision") == Direction_Left ? 1 : -1));
+        if (*entity.prop<Direction>("hor_collision") != Direction_None) {
+            if (*entity.prop<bool>("nobreak")) *entity.prop<bool>("nobreak") = false;
+            else {
+                for (int i = 0; i < 4; i++) {
+                    entity.node.parent.attach(entity_turtle_shell_fragment(entity.pos_x, entity.pos_y, *entity.prop<Direction>("last_hor_collision") == Direction_Left ? 1 : -1));
+                }
+                entity.node.delete();
             }
-            entity.node.delete();
         }
         *entity.prop<float>("intangible") -= delta_time;
         if (*entity.prop<float>("intangible") < 0) *entity.prop<float>("intangible") = 0;
@@ -37,7 +42,7 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
             *collidee.prop<float>("intangible") = 30;
             collidee.vel_x = (collidee.pos_x < collider.pos_x ? -1 : 1) * 0.15;
         }
-        else if (*collidee.prop<float>("intangible") == 0)
+        else if (*collidee.prop<float>("intangible") == 0 || !collider.is("player"))
             collider.damage(collidee);
     })
     .event<EntityDamageNode>(lambda entity_turtle_shell_damage(EntityNode* entity, EntityNode* source, TilemapNode* tilemap): void {

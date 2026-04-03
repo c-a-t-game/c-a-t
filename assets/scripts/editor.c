@@ -34,7 +34,7 @@ typedef Node*(*EntitySpawner)(float x, float y);
 
 EditorTrail editor_trail_data[EDITOR_TRAIL_CAPACITY];
 int editor_trail_tail, editor_trail_head, editor_trail_size;
-int editor_curr_tile;
+int editor_curr_tile = 1;
 int editor_curr_obj_index;
 EntitySpawner editor_curr_obj;
 EntityNode* editor_drag_obj;
@@ -51,7 +51,7 @@ LevelRootNode* editor_level;
 },
 
 OBJECTS(OBJECT_FUNC)
-int editor_tiles[9] = { 0, 226, 244, 240, 225, 17, 35, 82, 161 };
+int editor_tiles[10] = { 0, 226, 244, 240, 225, 17, 35, 82, 161, 192 };
 
 EditorTrail* editor_trail_get(int index) -> &editor_trail_data[(editor_trail_tail + index) % EDITOR_TRAIL_CAPACITY];
 
@@ -116,7 +116,7 @@ void editor_export() {
     printf("        .prop<float>(%d.0f) // scroll_offset_y\n", tilemap.start_y);
     printf("        .prop<float>(1.0f) // scroll_speed_x\n");
     printf("        .prop<float>(1.0f) // scroll_speed_y\n");
-    printf("        .tilemap(%d, %d, 0, (Tile[]){\n", width, height);
+    printf("        .tilemap(%d, %d, grass_oob_provider, (Tile[]){\n", width, height);
     for (int y = 0; y < height; y++) {
         printf("            ");
         for (int x = 0; x < width; x++) {
@@ -308,7 +308,7 @@ void editor_update() {
     if (editor_tool == EditorTool_Pencil) {
         if (editor_mode == EditorMode_Tilemap) {
             if (input.down("ctrl")) cursor_icon = 1;
-            //else if (input.down("shift")) cursor_icon = 2;
+            else if (input.down("shift")) cursor_icon = 2;
             else cursor_icon = 0;
         }
         else cursor_icon = 0;

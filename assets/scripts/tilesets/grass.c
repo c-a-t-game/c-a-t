@@ -18,8 +18,7 @@ Tile grass_oob_provider(TilemapNode* tilemap, int x, int y) {
     return 0;
 }
 
-Node* tileset_grass() -> engine.open<TilesetNode>()
-    .prop<Texture*>(assets.get<Texture>("images/tilesets/grass.png"))
+void tileset_grass_data(NodeBuilder* builder) -> builder
     .prop<int>(16) // tile_width
     .prop<int>(16) // tile_height
     .prop<int>(16) // tiles_per_row
@@ -93,7 +92,7 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
         .event<TileTextureNode>(lambda grass_coin_anim(): int -> (int[]){
             TILE(1, 15), TILE(1, 14), TILE(1, 13), TILE(1, 12),
         }[ANIMATE(4, 150)])
-        .event<CollisionNode>(lambda grass_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
+        .event<CollisionNode>(lambda grass_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, int direction): void {
             if (editor_is_editing()) return;
             if (!entity.is("player")) return;
             tilemap.set(x, y, 0);
@@ -143,16 +142,28 @@ Node* tileset_grass() -> engine.open<TilesetNode>()
         .event<TileTextureNode>(lambda grass_purple_coin_anim(): int -> (int[]){
             TILE(1, 11), TILE(1, 10), TILE(1, 9), TILE(1, 8),
         }[ANIMATE(4, 150)])
-        .event<CollisionNode>(lambda grass_purple_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, Direction direction): void {
+        .event<CollisionNode>(lambda grass_purple_coin_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, int direction): void {
             if (editor_is_editing()) return;
             if (!entity.is("player")) return;
             tilemap.set(x, y, 0);
         })
     .close()
-.build();
+    .open<TileNode>() // turtle crate
+        .prop<Collision>(Collision_Solid)
+        .event<TileTextureNode>(lambda grass_turtle_crate_anim(): int -> (int[]){
+            TILE(0, 12), TILE(0, 12), TILE(0, 12), TILE(0, 12),
+            TILE(0, 12), TILE(0, 11), TILE(0, 10), TILE(0, 11),
+        }[ANIMATE(8, 150)])
+        .event<CollisionNode>(lambda grass_turtle_crate_collision(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, int direction): void {
+            if (direction != Direction_Left && direction != Direction_Right) return;
+            if (!entity.is("shell")) return;
+            tilemap.set(x, y, 0);
+            for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
+            *entity.prop<bool>("nobreak") = true;
+        })
+    .close();
 
-Node* tileset_grass_bg() -> engine.open<TilesetNode>()
-    .prop<Texture*>(assets.get<Texture>("images/tilesets/grass_bg.png"))
+void tileset_grass_bg_data(NodeBuilder* builder) -> builder
     .prop<int>(512) // tile_width
     .prop<int>(256) // tile_height
     .prop<int>(2) // tiles_per_row
@@ -168,7 +179,16 @@ Node* tileset_grass_bg() -> engine.open<TilesetNode>()
     .close()
     .open<TileNode>()
         .event<TileTextureNode>(lambda(): int -> 3)
-    .close()
+    .close();
+
+Node* tileset_grass() -> engine.open<TilesetNode>()
+    .prop<Texture*>(assets.get<Texture>("images/tilesets/grass.png"))
+    .exec(tileset_grass_data)
+.build();
+
+Node* tileset_grass_bg() -> engine.open<TilesetNode>()
+    .prop<Texture*>(assets.get<Texture>("images/tilesets/grass_bg.png"))
+    .exec(tileset_grass_bg_data)
 .build();
 
 void grass_bg(NodeBuilder* builder) -> builder.open<TilemapNode>()
