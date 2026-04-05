@@ -169,6 +169,17 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             if (entity.is("player")) return;
             *entity.prop<Direction>("last_hor_collision") = direction == Direction_Left ? Direction_Right : Direction_Left;
         })
+    .close()
+    .open<TileNode>() // clock
+        .event<TileTextureNode>(lambda grass_clock_anim(): int -> (int[]){
+            TILE(3, 11), TILE(3, 10), TILE(3, 9), TILE(3, 8)
+        }[ANIMATE(4, 150)])
+        .event<CollisionNode>(lambda grass_clock_collect(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, int direction): void {
+            if (editor_is_editing()) return;
+            if (!entity.is("player")) return;
+            tilemap.set(x, y, 0);
+            *entity.prop<float>("time_until_death") = 600;
+        })
     .close();
 
 void tileset_grass_bg_data(NodeBuilder* builder) -> builder

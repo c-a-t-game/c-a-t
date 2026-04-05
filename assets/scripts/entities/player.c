@@ -100,6 +100,22 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 *entity.prop<float>("jump_buffer_timer") = 999;
                 *entity.prop<bool>("first_frame_flag") = true;
             }
+            
+            if (*entity.prop<float>("time_until_death") > 0) {
+                if (editor_is_editing()) {
+                    *entity.prop<float>("time_until_death") = 0;
+                    *entity.prop<bool>("death_timer_enabled") = false;
+                }
+                *entity.prop<float>("time_until_death") -= delta_time;
+                *entity.prop<bool>("death_timer_enabled") = true;
+            }
+            if (*entity.prop<bool>("death_timer_enabled") && *entity.prop<float>("time_until_death") <= 0) {
+                *storage.get<int>("num_hearts") = 0;
+                *entity.prop<bool>("hurt") = true;
+                *entity.prop<bool>("touching_ground") = false;
+                *entity.prop<bool>("death_timer_enabled") = false;
+                entity.vel_y = -0.3;
+            }
 
             entity.vel_y += 0.03 * delta_time;
 

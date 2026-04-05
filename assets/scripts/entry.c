@@ -1,7 +1,9 @@
-#depends "scripts/levels/level3.c"
+#depends "scripts/levels/level4.c"
 
 #depends "scripts/engine.c"
 #depends "scripts/ui.c"
+
+#depends "scripts/tilesets/cave.c"
 
 #define KB_LETTER(l) ((l) - 'A' + 4)
 #define KB_NUMBER(n) ((n) - '1' + 30)
@@ -44,10 +46,40 @@ void entry_point() {
     else storage.load(0);
 
     if (engine.editor_mode()) {
-        engine.load(level4);
+        engine.load(lambda(): Node* -> engine.open<LevelRootNode>()
+            .exec(grass_bg)
+            .open<TilemapNode>()
+                .attach(tileset_grass())
+                .prop<float>(1.0f) // scale_x
+                .prop<float>(1.0f) // scale_y
+                .prop<float>(0.0f) // scroll_offset_x
+                .prop<float>(0.0f) // scroll_offset_y
+                .prop<float>(1.0f) // scroll_speed_x
+                .prop<float>(1.0f) // scroll_speed_y
+                .tilemap(16, 16, grass_oob_provider, (Tile[]){
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                })
+                .attach(entity_player(0.5f, 15.0f))
+            .close()
+        .build());
         editor_init();
     }
-    else engine.load(level4);
+    else engine.load(level5);
 
     __curr_transition.progress = 1;
 
@@ -87,11 +119,13 @@ void entry_point() {
         }
 
         if (editor_is_editing()) editor_update();
-        else if (engine.editor_mode()) {
-            editor_play_button();
-            gfx.main().draw(assets.get<Texture>("images/hud/cursors.png"), input.mouse_x() - 7, input.mouse_y() - 1, 14, 14, 28, 28, 14, 14, 0xFFFFFFFF);
+        else {
+            if (engine.editor_mode()) {
+                editor_play_button();
+                gfx.main().draw(assets.get<Texture>("images/hud/cursors.png"), input.mouse_x() - 7, input.mouse_y() - 1, 14, 14, 28, 28, 14, 14, 0xFFFFFFFF);
+            }
+            ui_hud();
         }
-        else ui_hud();
 
         w.set_buffer(nullptr);
         w.blit(buf, offset_x * scale, offset_y * scale, 384 * scale, 256 * scale, 0, 0, 384, 256, 0xFFFFFFFF);

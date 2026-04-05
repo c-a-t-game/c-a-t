@@ -77,10 +77,18 @@ void ui_hud() {
     ui_hud_number(numbers, 16, 6, *storage.get<int>("num_hearts"));
     ui_hud_number(numbers, 16, 20, *storage.get<int>("num_coins"));
     EntityNode* end = engine.level().find("end");
-    if (!end) return;
-    int max_coins = *end.prop<int>("max_coins");
-    int remaining = *end.prop<int>("num_coins");
-    for (int i = 0; i < max_coins; i++) {
-        gfx.main().draw(icons, 384 - 4 - 14 * (i + 1), 4, 12, 12, 24 + (i < remaining) * 12, 0, 12, 12, 0xFFFFFFFF);
+    EntityNode* player = engine.level().find("player");
+    if (end) {
+        int max_coins = *end.prop<int>("max_coins");
+        int remaining = *end.prop<int>("num_coins");
+        for (int i = 0; i < max_coins; i++) {
+            gfx.main().draw(icons, 384 - 4 - 14 * (i + 1), 4, 12, 12, 24 + (i < remaining) * 12, 0, 12, 12, 0xFFFFFFFF);
+        }
+    }
+    if (player && *player.prop<bool>("death_timer_enabled")) {
+        Texture* clock = assets.get<Texture>("images/hud/clock.png");
+        float remaining = *player.prop<float>("time_until_death");
+        float percent = remaining / 600;
+        gfx.main().draw(clock, 384 - 4 - clock.width, 4, clock.width * percent, clock.height, 0, 0, clock.width * percent, clock.height, 0xFFFFFFFF);
     }
 }
