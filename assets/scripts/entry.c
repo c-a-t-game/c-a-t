@@ -47,9 +47,9 @@ void entry_point() {
 
     if (engine.editor_mode()) {
         engine.load(lambda(): Node* -> engine.open<LevelRootNode>()
-            .exec(grass_bg)
+            .exec(cave_bg)
             .open<TilemapNode>()
-                .attach(tileset_grass())
+                .attach(tileset_cave())
                 .prop<float>(1.0f) // scale_x
                 .prop<float>(1.0f) // scale_y
                 .prop<float>(0.0f) // scroll_offset_x
@@ -79,7 +79,7 @@ void entry_point() {
         .build());
         editor_init();
     }
-    else engine.load(level5);
+    else engine.load(level6);
 
     __curr_transition.progress = 1;
 

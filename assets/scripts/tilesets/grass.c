@@ -180,6 +180,10 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             tilemap.set(x, y, 0);
             *entity.prop<float>("time_until_death") = 600;
         })
+    .close()
+    .open<TileNode>() // bomb block
+        .prop<Collision>(Collision_Solid)
+        .event<TileTextureNode>(lambda(): int -> TILE(0, 8))
     .close();
 
 void tileset_grass_bg_data(NodeBuilder* builder) -> builder

@@ -22,7 +22,6 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
         else entity.width = entity.height = 0;
         if (tilemap.get(entity.pos_x, entity.pos_y - EPSILON) != 4) {
             entity.width = entity.height = 1;
-            float* intangible = entity.prop<float>("intangible");
             if (!*entity.prop<bool>("bounced")) {
                 *entity.prop<bool>("bounced") = true;
                 *entity.prop<float>("intangible") = 30;

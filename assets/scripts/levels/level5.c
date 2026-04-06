@@ -1,14 +1,7 @@
-#depends "scripts/entities/player.c"
-#depends "scripts/entities/mouse.c"
-#depends "scripts/entities/turtle.c"
-#depends "scripts/entities/coin.c"
-#depends "scripts/entities/heart.c"
-#depends "scripts/entities/nap_spot.c"
-#depends "scripts/tilesets/upside_down.c"
-#depends "scripts/decorators/foliage.c"
+#depends "scripts/levels/level6.c"
 
 Node* level5() -> engine.open<LevelRootNode>()
-    .prop<Level>(level5) // next_level
+    .prop<Level>(level6) // next_level
     .exec(grass_bg)
     .open<TilemapNode>()
         .attach(tileset_grass())

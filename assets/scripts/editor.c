@@ -41,7 +41,7 @@ EntityNode* editor_drag_obj;
 LevelRootNode* editor_level;
 
 #define OBJECTS(X) \
-    X(mouse) X(turtle) X(heart) X(coin) X(purple_coin) X(clock) \
+    X(mouse) X(turtle) X(heart) X(coin) X(purple_coin) X(clock) X(bomb) \
     X(level_end) X(level_start)
 
 #define OBJECT_FUNC(name) Node* __ID__(entity_, name)(float x, float y);
@@ -51,7 +51,7 @@ LevelRootNode* editor_level;
 },
 
 OBJECTS(OBJECT_FUNC)
-int editor_tiles[] = { 0, 226, 244, 240, 225, 17, 35, 82, 161, 192, 144, 179 };
+int editor_tiles[] = { 0, 226, 244, 240, 225, 17, 35, 82, 161, 192, 144, 179, 128 };
 
 EditorTrail* editor_trail_get(int index) -> &editor_trail_data[(editor_trail_tail + index) % EDITOR_TRAIL_CAPACITY];
 
