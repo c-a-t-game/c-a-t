@@ -15,6 +15,25 @@ Node* entity_wrap_controller() -> engine.open<EntityNode>()
     .prop<const char*>("wrap_controller")
 .build();
 
+Node* entity_darkness_controller() -> engine.open<EntityNode>()
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<float>(0)
+    .prop<const char*>("entity_darkness_controller")
+    .event<EntityUpdateNode>(lambda entity_darkness_controller_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
+        EntityNode* player = tilemap.find("player");
+        entity.pos_x = player.pos_x;
+        entity.pos_y = player.pos_y;
+    })
+    .event<EntityTextureNode>(lambda entity_darkness_controller_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h, float* off_x, float* off_y): Texture* {
+        *off_y = 280;
+        return assets.get<Texture>("images/darkness.png");
+    })
+.build();
+
 Node* entity_player(float x, float y) -> engine.open<EntityNode>()
     .prop<float>(x) // pos_x
     .prop<float>(y) // pos_y

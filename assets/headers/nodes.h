@@ -51,7 +51,7 @@ NODE(EntityUpdate,
 )
 
 NODE(EntityTexture,
-    Texture*(*func)(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h);
+    Texture*(*func)(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h, float* off_x, float* off_y);
 )
 
 NODE(EntityCollision,

@@ -14,11 +14,11 @@ static void engine_get_tilemap_offsets(TilemapNode* tilemap, TilesetNode* tilese
 static void engine_render_entity(EntityNode* entity, TilesetNode* tileset, float offset_x, float offset_y) {
     TilemapNode* tilemap = (TilemapNode*)entity->node.parent;
     Texture* tex = NULL;
-    float sx = NAN, sy = NAN, sw = NAN, sh = NAN, w = NAN, h = NAN;
+    float sx = NAN, sy = NAN, sw = NAN, sh = NAN, w = NAN, h = NAN, off_x = 0, off_y = 0;
     for (int i = 0; i < entity->node.children_size && !tex; i++) {
         if (!entity->node.children[i]) continue;
         if (entity->node.children[i]->type != NodeType_EntityTexture) continue;
-        tex = ((EntityTextureNode*)entity->node.children[i])->func(entity, tilemap, &sx, &sy, &sw, &sh, &w, &h);
+        tex = ((EntityTextureNode*)entity->node.children[i])->func(entity, tilemap, &sx, &sy, &sw, &sh, &w, &h, &off_x, &off_y);
     }
     if (!tex) return;
     if (isnan(sx)) sx = 0;
@@ -27,9 +27,9 @@ static void engine_render_entity(EntityNode* entity, TilesetNode* tileset, float
     if (isnan(sh)) sh = tex->height;
     if (isnan(w)) w = tex->width;
     if (isnan(h)) h = tex->height;
-    float x = ((entity->pos_x - offset_x) * tileset->tile_width  - w / 2)                * tilemap->scale_x;
+    float x = ((entity->pos_x - offset_x) * tileset->tile_width  -  w / 2)                * tilemap->scale_x;
     float y = ((entity->pos_y - offset_y) * tileset->tile_height - (h < 0 ? h / 4 : h)) * tilemap->scale_y;
-    graphics_draw(NULL, tex, x, y, w * tilemap->scale_x, h * tilemap->scale_y, sx, sy, sw, sh, GRAY(255));
+    graphics_draw(NULL, tex, x + off_x, y + off_y, w * tilemap->scale_x, h * tilemap->scale_y, sx, sy, sw, sh, GRAY(255));
 }
 
 static void engine_render_tile(TilemapNode* tilemap, TilesetNode* tileset, float x, float y, float offset_x, float offset_y) {
