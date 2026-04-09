@@ -97,6 +97,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             if (!entity.is("player")) return;
             tilemap.set(x, y, 0);
             *storage.get<int>("num_coins") += 1;
+            sound_get_coin().play_oneshot();
         })
     .close()
     .open<TileNode>() // tree stump
@@ -146,6 +147,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             if (editor_is_editing()) return;
             if (!entity.is("player")) return;
             tilemap.set(x, y, 0);
+            sound_get_coin().play_oneshot();
         })
     .close()
     .open<TileNode>() // turtle crate
@@ -160,6 +162,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             tilemap.set(x, y, 0);
             for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
             *entity.prop<bool>("nobreak") = true;
+            sound_break().play_oneshot();
         })
     .close()
     .open<TileNode>() // enemy stopper
@@ -179,6 +182,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             if (!entity.is("player")) return;
             tilemap.set(x, y, 0);
             *entity.prop<float>("time_until_death") = 600;
+            sound_get_heart().play_oneshot();
         })
     .close()
     .open<TileNode>() // bomb block

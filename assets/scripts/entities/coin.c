@@ -11,6 +11,7 @@ Node* entity_coin(float x, float y) -> engine.open<EntityNode>()
     .event<EntityUpdateNode>(lambda(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         *entity.prop<Texture*>("texture") = assets.get<Texture>("images/entities/coin.png");
         *entity.prop<char*>("target_storage") = "num_coins";
+        *entity.prop<AudioSource*>("audio") = sound_get_coin();
     })
     .event<EntityUpdateNode>(entity_heart_update)
     .event<EntityTextureNode>(entity_heart_texture)
@@ -27,6 +28,7 @@ Node* entity_purple_coin(float x, float y) -> engine.open<EntityNode>()
     .prop<const char*>("entity_purple_coin") // func
     .event<EntityUpdateNode>(lambda(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         *entity.prop<Texture*>("texture") = assets.get<Texture>("images/entities/purple_coin.png");
+        *entity.prop<AudioSource*>("audio") = sound_get_coin();
     })
     .event<EntityUpdateNode>(entity_heart_update)
     .event<EntityTextureNode>(entity_heart_texture)

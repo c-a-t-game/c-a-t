@@ -17,6 +17,7 @@ Node* entity_clock(float x, float y) -> engine.open<EntityNode>()
     .event<EntityCollisionNode>(lambda entity_clock_collision(EntityNode* collidee, EntityNode* collider, TilemapNode* node): void {
         if (editor_is_editing()) return;
         if (!collider.is("player")) return;
+        sound_get_heart().play_oneshot();
         *collider.prop<float>("time_until_death") = 600;
     })
 .build();

@@ -117,6 +117,14 @@ extern("graphics_set_buffer") void __graphics_set_buffer(Window* window, Buffer*
 extern("graphics_destroy_buffer") void __graphics_destroy_buffer(Buffer* buffer);
 extern("graphics_should_close") bool __graphics_should_close();
 
+extern("audio_stop") void __audio_stop(AudioInstance* instance);
+extern("audio_pause") void __audio_pause(AudioInstance* instance);
+extern("audio_resume") void __audio_resume(AudioInstance* instance);
+extern("audio_seek") void __audio_seek(AudioInstance* instance, float sec);
+extern("audio_rate") void __audio_rate(AudioInstance* instance, float factor);
+extern("audio_play_oneshot") void __audio_play_oneshot(AudioSource* audio);
+extern("audio_play") AudioInstance* __audio_play(AudioSource* audio);
+
 extern("keybind_add_entry") void __keybind_add_entry(const char* name);
 extern("keybind_remove_entry") void __keybind_remove_entry(const char* name);
 extern("keybind_add") void __keybind_add(const char* name, int keybind);
@@ -184,12 +192,13 @@ uint64_t get_millis(Engine* this) -> __get_micros() / 1000;
 void watch_file(Engine* this, const char* filename, FileWatchCallback callback) -> __watch_file(filename, callback);
 void check_watched_files(Engine* this) -> __check_watched_files();
 bool editor_mode(Engine* this) -> __editor_mode();
-void create_transition(Engine* this, void(*func)(), float time, int direction) {
-    if (__curr_transition.progress < 1) return;
+bool create_transition(Engine* this, void(*func)(), float time, int direction) {
+    if (__curr_transition.progress < 1) return false;
     __curr_transition.func = func;
     __curr_transition.time = time;
     __curr_transition.direction = direction;
     __curr_transition.progress = 0;
+    return true;
 }
 
 void attach(Node* this, Node* child) -> __engine_attach_node(this, child);
@@ -245,6 +254,14 @@ Buffer* new_buffer(Window* this, int width, int height) -> __graphics_new_buffer
 void set_buffer(Window* this, Buffer* buffer) -> __graphics_set_buffer(this, buffer);
 void destroy(Buffer* this) -> __graphics_destroy_buffer(this);
 bool should_close(Graphics* this) -> __graphics_should_close();
+
+void stop(AudioInstance* this) -> __audio_stop(this);
+void pause(AudioInstance* this) -> __audio_pause(this);
+void resume(AudioInstance* this) -> __audio_resume(this);
+void seek(AudioInstance* this, float sec) -> __audio_seek(this, sec);
+void rate(AudioInstance* this, float factor) -> __audio_rate(this, factor);
+void play_oneshot(AudioSource* this) -> __audio_play_oneshot(this);
+AudioInstance* create(AudioSource* this) -> __audio_play(this);
 
 void add_entry(Input* this, const char* name) -> __keybind_add_entry(name);
 void remove_entry(Input* this, const char* name) -> __keybind_remove_entry(name);

@@ -1,4 +1,4 @@
-#depends "scripts/levels/level4.c"
+#depends "scripts/levels/level1.c"
 
 #depends "scripts/engine.c"
 #depends "scripts/ui.c"
@@ -38,7 +38,7 @@ void entry_point() {
     input.add("editor_eraser", KB_NUMBER('3'));
     input.add("editor_mode_toggle", KB_NUMBER('4'));
     input.add("editor_play", KB_TAB);
-    
+
     float scale = pick_scale();
     input.set_mouse_scale(scale);
 
@@ -79,7 +79,7 @@ void entry_point() {
         .build());
         editor_init();
     }
-    else engine.load(level7);
+    else engine.load(level1);
 
     __curr_transition.progress = 1;
 

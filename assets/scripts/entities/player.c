@@ -2,6 +2,8 @@
 #depends "scripts/entities/heart.c"
 #depends "scripts/entities/crate_fragment.c"
 
+#depends "scripts/audio/sounds.c"
+
 #define signum(x) ((x) == 0 ? 0 : (x) / fabsf(x))
 
 Node* entity_wrap_controller() -> engine.open<EntityNode>()
@@ -64,7 +66,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 else {
                     LevelRootNode* level = entity.node.parent.parent;
                     __curr_level_loader = level.next_level;
-                    engine.create_transition(engine.reload, 60, Direction_Left);
+                    if (engine.create_transition(engine.reload, 60, Direction_Left))
+                        sound_transition().play_oneshot();
                 }
             }
             *entity.prop<float>("nap_timer") += delta_time;
@@ -78,7 +81,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                         *entity.prop<bool>("hurt") = false;
                     }
                     else {
-                        engine.create_transition(engine.reload, 60, Direction_Left);
+                        if (engine.create_transition(engine.reload, 60, Direction_Left))
+                            sound_transition().play_oneshot();
                         entity.vel_x = 0;
                     }
                 }
@@ -119,7 +123,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 *entity.prop<float>("jump_buffer_timer") = 999;
                 *entity.prop<bool>("first_frame_flag") = true;
             }
-            
+
             if (*entity.prop<float>("time_until_death") > 0) {
                 if (editor_is_editing()) {
                     *entity.prop<float>("time_until_death") = 0;
@@ -151,6 +155,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 *entity.prop<bool>("jumped") = false;
             }
             if (!*entity.prop<bool>("jumped") && *entity.prop<float>("coyote_timer") <= 5 && *entity.prop<float>("jump_buffer_timer") <= 5) {
+                sound_jump().play_oneshot();
                 *entity.prop<bool>("jumping") = *entity.prop<bool>("jumped") = true;
                 *entity.prop<float>("floor_y") = entity.pos_y;
             }
@@ -173,6 +178,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                     if (tilemap.get(x, y) == 4) {
                         tilemap.set(x, y, 0);
                         for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
+                        sound_break().play_oneshot();
                     }
                 };
                 break_crate(entity, 0, 0.5);
@@ -209,7 +215,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                     editor_noclip = true;
                     entity.pos_y = tilemap.end_y - 2;
                 }
-                else engine.create_transition(engine.reload, 60, Direction_Left);
+                else if (engine.create_transition(engine.reload, 60, Direction_Left))
+                    sound_transition().play_oneshot();
             }
             *entity.prop<bool>("squashed") = false;
         }
@@ -239,6 +246,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, -0.1));
             entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, +0.1));
         }
+        sound_get_hurt().play_oneshot();
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;
