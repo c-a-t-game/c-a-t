@@ -1,7 +1,7 @@
 #depends "scripts/levels/level7.c"
 
 Node* level6() -> engine.open<LevelRootNode>()
-    .prop<Level>(level6) // next_level
+    .prop<Level>(level7) // next_level
     .exec(cave_bg)
     .open<TilemapNode>()
         .attach(tileset_cave())

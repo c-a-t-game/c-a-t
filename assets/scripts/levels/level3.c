@@ -65,6 +65,7 @@ Node* level3() -> engine.open<LevelRootNode>()
         .attach(entity_mouse(145.0f, 8.0f))
         .attach(entity_mouse(165.0f, 6.0f))
         .attach(entity_heart(157.5f, 15.0f))
+        .attach(entity_key_l(73.5f, 9.0f))
         .attach(entity_player(3.0f, 12.0f))
     .close()
 .build();

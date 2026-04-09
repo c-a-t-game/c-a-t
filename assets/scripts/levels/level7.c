@@ -5,6 +5,7 @@
 #depends "scripts/entities/heart.c"
 #depends "scripts/entities/nap_spot.c"
 #depends "scripts/entities/bomb.c"
+#depends "scripts/entities/key.c"
 #depends "scripts/tilesets/cave.c"
 #depends "scripts/tilesets/upside_down.c"
 #depends "scripts/decorators/foliage.c"
@@ -39,10 +40,10 @@ Node* level7() -> engine.open<LevelRootNode>()
             1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,
         })
         .attach(entity_level_start(9.5f, 15.0f))
+        .attach(entity_level_end(79.5f, 15.0f))
         .attach(entity_heart(43.5f, 6.0f))
         .attach(entity_mouse(57.0f, 12.0f))
         .attach(entity_heart(70.5f, 7.0f))
-        .attach(entity_level_end(79.5f, 15.0f))
         .attach(entity_mouse(91.5f, 5.0f))
         .attach(entity_mouse(90.0f, 5.0f))
         .attach(entity_mouse(131.5f, 7.0f))
