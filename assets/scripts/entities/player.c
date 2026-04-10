@@ -112,7 +112,14 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             if (*entity.prop<bool>("touching_ground")) {
                 if (input.pressed("left"))  tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y, +0.2, 0));
                 if (input.pressed("right")) tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y, -0.2, 0));
+
+                int curr_x = entity.pos_x;
+                if (*entity.prop<int>("prev_x") != curr_x) {
+                    *entity.prop<int>("prev_x") = curr_x;
+                    (curr_x % 2 == 0 ? sound_step1 : sound_step2)().play_oneshot();
+                }
             }
+
 
             entity.prop<float>("cam_offset");
             if (moving && dir < 0) {

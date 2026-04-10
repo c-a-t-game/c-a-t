@@ -64,6 +64,7 @@ Node* entity_bomb(float x, float y) -> engine.open<EntityNode>()
         entity.vel_x = entity.pos_x < source.pos_x ? -0.15 : 0.15;
         entity.vel_y = -0.2;
         *entity.prop<bool>("just_scratched") = true;
+        sound_kick().play_oneshot();
     })
     .event<EntityTextureNode>(lambda entity_bomb_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         if (tilemap.get(entity.pos_x, entity.pos_y - EPSILON) == 4 && !editor_is_editing()) return nullptr;

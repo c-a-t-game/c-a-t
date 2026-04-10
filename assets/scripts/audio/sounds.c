@@ -43,3 +43,11 @@ AudioSource* sound_transition() -> audio.create(lambda synth_transition(Synthesi
     .noise(0.5, note("C7")).volume_slide(0, 0.125)
     .noise(0.5, note("C7")).volume_slide(0.125, 0)
 .finish());
+
+AudioSource* sound_step1() -> audio.create(lambda synth_step1(Synthesizer* synth): bool -> synth
+    .noise(0.05, note("C7")).volume_slide(0.125, 0)
+.finish());
+
+AudioSource* sound_step2() -> audio.create(lambda synth_step2(Synthesizer* synth): bool -> synth
+    .noise(0.05, note("F#6")).volume_slide(0.125, 0)
+.finish());
