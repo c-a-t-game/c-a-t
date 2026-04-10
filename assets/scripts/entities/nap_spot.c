@@ -35,6 +35,7 @@ Node* entity_level_end(float x, float y) -> engine.open<EntityNode>()
         *collider.prop<bool>("napping") = true;
         collider.pos_x = collidee.pos_x;
         collider.pos_y = collidee.pos_y;
+        collider.vel_x = collider.vel_y = 0;
     })
     .event<EntityTextureNode>(lambda entity_nap_spot_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         *w = *srcw = 32;
