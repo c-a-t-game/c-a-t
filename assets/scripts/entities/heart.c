@@ -1,5 +1,6 @@
 #depends "scripts/editor.c"
 #depends "scripts/audio/sounds.c"
+#depends "scripts/screenshake.c"
 
 #define EPSILON (0.01)
 
@@ -15,6 +16,7 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
         *entity.prop<Texture*>("texture") = assets.get<Texture>("images/entities/heart.png");
         *entity.prop<char*>("target_storage") = "num_hearts";
         *entity.prop<AudioSource*>("audio") = sound_get_heart();
+        *entity.prop<float>("screenshake") = 16;
     })
     .event<EntityUpdateNode>(lambda entity_heart_update(EntityNode* entity, TilemapNode* tilemap, float delta_time): void {
         if (editor_is_editing()) {
@@ -51,6 +53,7 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
         if (collidee.prop<AudioSource*>("audio"))
             collidee.prop<AudioSource*>("audio").play_oneshot();
         collidee.node.delete();
+        screenshake += *collidee.prop<float>("screenshake");
     })
 .build();
 

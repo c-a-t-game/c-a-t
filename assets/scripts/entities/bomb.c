@@ -28,6 +28,7 @@ Node* entity_bomb(float x, float y) -> engine.open<EntityNode>()
             else entity.vel_x = 0;
         }
         if (*entity.prop<float>("bomb_timer") >= 600) {
+            screenshake += 30;
             sound_explosion().play_oneshot();
             int orig_x = floorf(entity.pos_x);
             int orig_y = floorf(entity.pos_y - entity.height / 2);

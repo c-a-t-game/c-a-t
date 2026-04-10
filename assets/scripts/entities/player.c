@@ -1,4 +1,5 @@
 #depends "scripts/engine.c"
+#depends "scripts/screenshake.c"
 #depends "scripts/entities/heart.c"
 #depends "scripts/entities/crate_fragment.c"
 
@@ -179,6 +180,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                         tilemap.set(x, y, 0);
                         for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
                         sound_break().play_oneshot();
+                        screenshake += 15;
                     }
                 };
                 break_crate(entity, 0, 0.5);
@@ -225,7 +227,11 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             if (*entity.prop<float>("cam_target") > tilemap.end_x * 16 - 384) *entity.prop<float>("cam_target") = tilemap.end_x * 16 - 384;
             if (*entity.prop<float>("cam_target") < tilemap.start_x * 16)     *entity.prop<float>("cam_target") = tilemap.start_x * 16;
         }
-        ((LevelRootNode*)tilemap.node.parent).cam_x += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
+        float ss_x, ss_y;
+        process_screenshake(&ss_x, &ss_y, delta_time);
+        *entity.prop<float>("cam_x") += (*entity.prop<float>("cam_target") - ((LevelRootNode*)tilemap.node.parent).cam_x) / 10 * delta_time;
+        engine.level().cam_x = *entity.prop<float>("cam_x") + ss_x;
+        engine.level().cam_y = *entity.prop<float>("cam_y") + ss_y;
     })
     .event<EntityDamageNode>(lambda entity_player_damage(EntityNode* entity, EntityNode* source, TilemapNode* tilemap): void {
         if (*entity.prop<bool>("hurt")) return;
@@ -247,6 +253,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, +0.1));
         }
         sound_get_hurt().play_oneshot();
+        screenshake += 30;
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         int sprite = 0;

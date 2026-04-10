@@ -31,6 +31,7 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
                 }
                 entity.node.delete();
                 sound_break().play_oneshot();
+                screenshake += 16;
             }
         }
         *entity.prop<float>("intangible") -= delta_time;
@@ -43,6 +44,7 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
             *collidee.prop<float>("intangible") = 30;
             collidee.vel_x = (collidee.pos_x < collider.pos_x ? -1 : 1) * 0.15;
             sound_kick().play_oneshot();
+            screenshake += 8;
         }
         else if (*collidee.prop<float>("intangible") == 0 || !collider.is("player"))
             collider.damage(collidee);
@@ -54,6 +56,7 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
         else entity.vel_x = 0;
         entity.vel_y = -0.2;
         sound_kick().play_oneshot();
+        screenshake += 8;
     })
     .event<EntityTextureNode>(lambda entity_turtle_shell_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         *srcx = ((int)(entity.pos_x * 1) % 3 + 3) * 16;
@@ -95,6 +98,7 @@ Node* entity_turtle(float x, float y) -> engine.open<EntityNode>()
         entity.node.parent.attach(shell);
         entity.node.delete();
         sound_stomp().play_oneshot();
+        screenshake += 8;
     })
     .event<EntityTextureNode>(lambda entity_turtle_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         *srcx = 16 * (int)(engine.get_millis() % (200 * 2) / 200);
