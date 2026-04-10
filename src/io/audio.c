@@ -5,7 +5,8 @@
 
 struct AudioInstance {
     void* data;
-    bool playing;
+    bool paused;
+    bool done;
     bool oneshot;
     bool do_free;
     AudioSource* source;
@@ -22,10 +23,10 @@ void audio_update(AudioSample* out, int samples) {
     memset(out, 0, sizeof(AudioSample) * samples);
     for (int i = 0; i < instances_size; i++) {
         if (!instances[i].data) continue;
-        if (!instances[i].playing) continue;
+        if (instances[i].paused) continue;
         AudioSample buf[samples];
         if (instances[i].do_free || (
-            !instances[i].source->play(instances[i].source->context, instances[i].data, buf, samples)
+            (instances[i].done = !instances[i].source->play(instances[i].source->context, instances[i].data, buf, samples))
             && instances[i].oneshot
         )) {
             instances[i].source->free(instances[i].source->context, instances[i].data);
@@ -46,11 +47,11 @@ void audio_stop(AudioInstance* instance) {
 }
 
 void audio_pause(AudioInstance* instance) {
-    instance->playing = false;
+    instance->paused = true;
 }
 
 void audio_resume(AudioInstance* instance) {
-    instance->playing = true;
+    instance->paused = false;
 }
 
 void audio_seek(AudioInstance* instance, float sec) {
@@ -59,6 +60,18 @@ void audio_seek(AudioInstance* instance, float sec) {
 
 void audio_rate(AudioInstance* instance, float factor) {
     instance->source->rate(instance->source->context, instance->data, factor);
+}
+
+bool audio_is_paused(AudioInstance* instance) {
+    return instance->paused;
+}
+
+bool audio_is_playing(AudioInstance* instance) {
+    return !instance->done && !instance->paused;
+}
+
+bool audio_is_done(AudioInstance* instance) {
+    return instance->done;
 }
 
 void audio_play_oneshot(AudioSource* source) {
@@ -81,7 +94,8 @@ AudioInstance* audio_play(AudioSource* source) {
     }
     instance->data = source->init(source->context);
     instance->source = source;
-    instance->playing = true;
+    instance->paused = false;
+    instance->done = false;
     instance->oneshot = false;
     instance->do_free = false;
     return instance;

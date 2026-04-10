@@ -85,6 +85,8 @@ void entry_point() {
 
     Window* w = gfx.open(":3", 384 * scale, 256 * scale);
     w.set_active();
+    
+    AudioInstance* music = assets.get<AudioSource>("distantvoid.ogg").create();
 
     uint64_t last_micros = engine.get_micros();
     while (!gfx.should_close()) {
@@ -92,6 +94,8 @@ void entry_point() {
         float delta_time = (curr_micros - last_micros) / 1000000.f * 60;
         last_micros = curr_micros;
         if (delta_time > 60) delta_time = 60;
+        
+        if (music.is_done()) music.seek(0);
 
         w.start_frame();
         Buffer* buf = w.new_buffer(384, 256);

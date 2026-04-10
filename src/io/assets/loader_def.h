@@ -1,6 +1,7 @@
 LOADER(png)
 LOADER(glsl)
 LOADER(wav)
+LOADER(ogg)
 LOADER(txt)
 LOADER(c)
 LOADER(h)
