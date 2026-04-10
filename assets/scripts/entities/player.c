@@ -157,6 +157,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             }
             if (!*entity.prop<bool>("jumped") && *entity.prop<float>("coyote_timer") <= 5 && *entity.prop<float>("jump_buffer_timer") <= 5) {
                 sound_jump().play_oneshot();
+                *entity.prop<float>("squish") -= 15;
                 *entity.prop<bool>("jumping") = *entity.prop<bool>("jumped") = true;
                 *entity.prop<float>("floor_y") = entity.pos_y;
             }
@@ -221,6 +222,18 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                     sound_transition().play_oneshot();
             }
             *entity.prop<bool>("squashed") = false;
+
+            float* squish = entity.prop<float>("squish");
+            if (*squish < -1) *squish = -1;
+            if (*squish > +1) *squish = +1;
+            if (*squish < 0) {
+                *squish += delta_time;
+                if (*squish > 0) *squish = 0;
+            }
+            if (*squish > 0) {
+                *squish -= delta_time;
+                if (*squish < 0) *squish = 0;
+            }
         }
         *entity.prop<float>("cam_target") = (entity.pos_x + *entity.prop<float>("cam_offset")) * 16 - 192;
         if (!editor_is_editing()) {
@@ -274,6 +287,19 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
         bool visible = (int)*entity.prop<float>("invincibility_frames") % 2 == 0;
         *w = *entity.prop<bool>("facing_left") ? -16 : 16;
         *srcw = *srch = *h = 16;
+
+        float squish =  *entity.prop<float>("squish") / 30;
+        if (squish > +1) squish = +1;
+        if (squish < -1) squish = -1;
+        *w += squish * 16 * (*w < 0 ? -1 : 1);
+        *h -= squish * 16;
+
         return visible ? assets.get<Texture>("images/entities/player.png") : nullptr;
+    })
+    .event<CollisionNode>(lambda entity_player_collision(EntityNode* entity, TilemapNode* tilemap, TileNode* tile, int x, int y, int direction): void {
+        if (direction != Direction_Down) return;
+        if (*entity.prop<Direction>("ver_collision") != Direction_Down) return;
+        if (entity.vel_y < 0.1) return;
+        *entity.prop<float>("squish") += 15 * entity.vel_y;
     })
 .build();

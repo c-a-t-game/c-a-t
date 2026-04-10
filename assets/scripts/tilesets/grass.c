@@ -163,6 +163,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
             *entity.prop<bool>("nobreak") = true;
             sound_break().play_oneshot();
+            screenshake += 16;
         })
     .close()
     .open<TileNode>() // enemy stopper

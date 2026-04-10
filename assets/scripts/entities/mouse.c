@@ -17,6 +17,12 @@ Node* entity_squished_mouse(float x, float y) -> engine.open<EntityNode>()
         *srcx = 32;
         *srcy = 0;
         *srcw = *srch = *w = *h = 16;
+
+        float squish = (30 - *entity.prop<float>("timer")) / 30;
+        if (squish < 0) squi sh = 0;
+        *w += squish * 12;
+        *h -= squish * 12;
+
         return assets.get<Texture>("images/entities/mouse.png");
     })
 .build();
