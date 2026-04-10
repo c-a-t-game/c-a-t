@@ -1,4 +1,4 @@
-#depends "scripts/levels/level1.c"
+#depends "scripts/levels/title.c"
 
 #depends "scripts/engine.c"
 #depends "scripts/ui.c"
@@ -47,9 +47,9 @@ void entry_point() {
 
     if (engine.editor_mode()) {
         engine.load(lambda(): Node* -> engine.open<LevelRootNode>()
-            .exec(cave_bg)
+            .exec(grass_bg)
             .open<TilemapNode>()
-                .attach(tileset_cave())
+                .attach(tileset_grass())
                 .prop<float>(1.0f) // scale_x
                 .prop<float>(1.0f) // scale_y
                 .prop<float>(0.0f) // scroll_offset_x
@@ -79,7 +79,7 @@ void entry_point() {
         .build());
         editor_init();
     }
-    else engine.load(level1);
+    else engine.load(level_title);
 
     __curr_transition.progress = 1;
 

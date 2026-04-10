@@ -25,15 +25,19 @@ bool ui_container(int x, int y, int w, int h, int color) {
     return ui_hovering(x, y, w, h);
 }
 
-void ui_label(int x, int y, int color, const char* text) {
+void ui_scaled_label(int x, int y, int color, int scale, const char* text) {
     Texture* font = assets.get<Texture>("images/hud/font.png");
     char c;
     while ((c = *text++)) {
         int src_x = c % 16;
         int src_y = c / 16 - 2;
-        gfx.main().draw(font, x, y, 6, 8, src_x * 6, src_y * 8, 6, 8, color);
-        x += 6;
+        gfx.main().draw(font, x, y, 6 * scale, 8 * scale, src_x * 6, src_y * 8, 6, 8, color);
+        x += 6 * scale;
     }
+}
+
+void ui_label(int x, int y, int color, const char* text) {
+    ui_scaled_label(x, y, color, 1, text);
 }
 
 bool ui_button(int x, int y, int w, int h, bool disabled, const char* text) {

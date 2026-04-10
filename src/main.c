@@ -21,6 +21,18 @@ jitc_context_t* jitc_context;
 static bool compilation_failed = false;
 static bool editor_mode_enabled = false;
 
+#ifdef _WIN32
+int vasprintf(char** out, const char* fmt, va_list args) {
+    va_list args2;
+    va_copy(args2, args);
+    int len = snprintf(NULL, 0, fmt, args2);
+    va_end(args2);
+    *out = malloc(len + 1);
+    sprintf(*out, fmt, args);
+    return len;
+}
+#endif
+
 static void draw_text(Window* window, float anchor, int x, int y, Color color, const char* fmt, ...) {
     char *string, *ptr;
     va_list args;
