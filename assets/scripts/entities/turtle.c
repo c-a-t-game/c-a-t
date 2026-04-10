@@ -31,6 +31,7 @@ Node* entity_turtle_shell(float x, float y, float v) -> engine.open<EntityNode>(
                 }
                 entity.node.delete();
                 sound_break().play_oneshot();
+                explode_dust(tilemap, entity.pos_x, entity.pos_y, 0.3, 4);
                 screenshake += 16;
             }
         }

@@ -1,6 +1,7 @@
 #include <math.h>
 
 #depends "scripts/entities/heart.c"
+#depends "scripts/entities/dust.c"
 
 #define EPSILON (0.01)
 
@@ -30,6 +31,7 @@ Node* entity_bomb(float x, float y) -> engine.open<EntityNode>()
         if (*entity.prop<float>("bomb_timer") >= 600) {
             screenshake += 30;
             sound_explosion().play_oneshot();
+            explode_dust(tilemap, entity.pos_x, entity.pos_y, 0.6, 16);
             int orig_x = floorf(entity.pos_x);
             int orig_y = floorf(entity.pos_y - entity.height / 2);
             bool did_damage = false;
@@ -37,6 +39,7 @@ Node* entity_bomb(float x, float y) -> engine.open<EntityNode>()
                 if (tilemap.get(orig_x + x, orig_y + y) == 13) {
                     tilemap.set(orig_x + x, orig_y + y, 0);
                     did_damage = true;
+                    explode_dust(tilemap, orig_x + x + 0.5, orig_y + y + 0.5, 0.3, 4);
                 }
             }
             for (int i = 0; i < tilemap.node.children_size; i++) {

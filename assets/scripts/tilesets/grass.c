@@ -163,6 +163,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
             *entity.prop<bool>("nobreak") = true;
             sound_break().play_oneshot();
+            explode_dust(tilemap, x + 0.5, y + 0.5, 0.3, 4);
             screenshake += 16;
         })
     .close()

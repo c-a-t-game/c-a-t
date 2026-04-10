@@ -19,7 +19,7 @@ Node* entity_squished_mouse(float x, float y) -> engine.open<EntityNode>()
         *srcw = *srch = *w = *h = 16;
 
         float squish = (30 - *entity.prop<float>("timer")) / 30;
-        if (squish < 0) squi sh = 0;
+        if (squish < 0) squish = 0;
         *w += squish * 12;
         *h -= squish * 12;
 
@@ -66,6 +66,8 @@ Node* entity_mouse(float x, float y) -> engine.open<EntityNode>()
         entity.node.delete();
         sound_stomp().play_oneshot();
         screenshake += 8;
+        tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y, -0.2, 0));
+        tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y,  0.2, 0));
     })
     .event<EntityTextureNode>(lambda entity_mouse_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
         *srcx = 16 * (int)(engine.get_millis() % (200 * 2) / 200);

@@ -2,6 +2,7 @@
 #depends "scripts/screenshake.c"
 #depends "scripts/entities/heart.c"
 #depends "scripts/entities/crate_fragment.c"
+#depends "scripts/entities/dust.c"
 
 #depends "scripts/audio/sounds.c"
 
@@ -108,6 +109,11 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             if (entity.vel_x >  0.2) entity.vel_x =  0.2;
             if (signum(entity.vel_x) != curr_dir && curr_dir != 0) entity.vel_x = 0;
 
+            if (*entity.prop<bool>("touching_ground")) {
+                if (input.pressed("left"))  tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y, +0.2, 0));
+                if (input.pressed("right")) tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y, -0.2, 0));
+            }
+
             entity.prop<float>("cam_offset");
             if (moving && dir < 0) {
                 *entity.prop<bool>("facing_left") = true;
@@ -160,6 +166,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                 *entity.prop<float>("squish") -= 15;
                 *entity.prop<bool>("jumping") = *entity.prop<bool>("jumped") = true;
                 *entity.prop<float>("floor_y") = entity.pos_y;
+                tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y, -0.2, 0));
+                tilemap.node.attach(entity_dust(entity.pos_x, entity.pos_y,  0.2, 0));
             }
             if (*entity.prop<bool>("jumping")) {
                 if (*entity.prop<float>("floor_y") - entity.pos_y > 3 ||
@@ -181,6 +189,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
                         tilemap.set(x, y, 0);
                         for (int i = 0; i < 4; i++) tilemap.node.attach(entity_crate_fragment(x, y));
                         sound_break().play_oneshot();
+                        explode_dust(tilemap, x + 0.5, y + 0.5, 0.3, 4);
                         screenshake += 15;
                     }
                 };
@@ -224,8 +233,8 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             *entity.prop<bool>("squashed") = false;
 
             float* squish = entity.prop<float>("squish");
-            if (*squish < -1) *squish = -1;
-            if (*squish > +1) *squish = +1;
+            if (*squish < -60) *squish = -60;
+            if (*squish > +60) *squish = +60;
             if (*squish < 0) {
                 *squish += delta_time;
                 if (*squish > 0) *squish = 0;
@@ -266,6 +275,7 @@ Node* entity_player(float x, float y) -> engine.open<EntityNode>()
             entity.node.parent.attach(entity_broken_heart(entity.pos_x, entity.pos_y, +0.1));
         }
         sound_get_hurt().play_oneshot();
+        explode_dust(tilemap, entity.pos_x, entity.pos_y, 0.3, 4);
         screenshake += 30;
     })
     .event<EntityTextureNode>(lambda entity_player_texture(EntityNode* entity, TilemapNode* tilemap, float* srcx, float* srcy, float* srcw, float* srch, float* w, float* h): Texture* {
