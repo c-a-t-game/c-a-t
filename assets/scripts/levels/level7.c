@@ -9,9 +9,10 @@
 #depends "scripts/tilesets/cave.c"
 #depends "scripts/tilesets/upside_down.c"
 #depends "scripts/decorators/foliage.c"
+#depends "scripts/levels/end.c"
 
 Node* level7() -> engine.open<LevelRootNode>()
-    .prop<Level>(level7) // next_level
+    .prop<Level>(level_end) // next_level
     .exec(cave_bg)
     .open<TilemapNode>()
         .attach(tileset_cave())

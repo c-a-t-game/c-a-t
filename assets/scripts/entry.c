@@ -79,7 +79,7 @@ void entry_point() {
         .build());
         editor_init();
     }
-    else engine.load(level_title);
+    else engine.load(level_end);
 
     __curr_transition.progress = 1;
 

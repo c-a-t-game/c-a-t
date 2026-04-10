@@ -42,13 +42,13 @@ static void draw_text(Window* window, float anchor, int x, int y, Color color, c
     ptr = string;
 
     char c;
-    int pos_x = x - strlen(string) * 7 * anchor, pos_y = y;
+    int pos_x = x - strlen(string) * 6 * anchor, pos_y = y;
     Texture* texture = get_asset(Texture, "images/hud/font.png");
     while ((c = *ptr++)) {
         int x = c % 16;
         int y = c / 16 - 2;
         graphics_draw(window, texture, pos_x, pos_y, 6, 8, x * 6, y * 8, 6, 8, color);
-        pos_x += 7;
+        pos_x += 6;
     }
     free(string);
 }

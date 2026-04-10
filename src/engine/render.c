@@ -7,6 +7,7 @@
 extern TilesetNode* engine_get_tileset(TilemapNode* tilemap);
 
 static void engine_get_tilemap_offsets(TilemapNode* tilemap, TilesetNode* tileset, float cam_x, float cam_y, float* offset_x, float* offset_y) {
+    if (!tileset) return;
     *offset_x = cam_x * tilemap->scroll_speed_x / tilemap->scale_x / tileset->tile_width  - tilemap->scroll_offset_x;
     *offset_y = cam_y * tilemap->scroll_speed_y / tilemap->scale_y / tileset->tile_height - tilemap->scroll_offset_y;
 }
@@ -27,12 +28,13 @@ static void engine_render_entity(EntityNode* entity, TilesetNode* tileset, float
     if (isnan(sh)) sh = tex->height;
     if (isnan(w)) w = tex->width;
     if (isnan(h)) h = tex->height;
-    float x = ((entity->pos_x - offset_x) * tileset->tile_width  -  w / 2)                * tilemap->scale_x;
-    float y = ((entity->pos_y - offset_y) * tileset->tile_height - (h < 0 ? h / 4 : h)) * tilemap->scale_y;
+    float x = ((entity->pos_x - offset_x) * (tileset ? tileset->tile_width  : 1) -  w / 2)              * tilemap->scale_x;
+    float y = ((entity->pos_y - offset_y) * (tileset ? tileset->tile_height : 1) - (h < 0 ? h / 4 : h)) * tilemap->scale_y;
     graphics_draw(NULL, tex, x + off_x, y + off_y, w * tilemap->scale_x, h * tilemap->scale_y, sx, sy, sw, sh, GRAY(255));
 }
 
 static void engine_render_tile(TilemapNode* tilemap, TilesetNode* tileset, float x, float y, float offset_x, float offset_y) {
+    if (!tileset) return;
     TileNode* tile = (TileNode*)tileset->node.children[engine_get_tile(tilemap, x, y)];
     if (tile == NULL || tile->node.type != NodeType_Tile) return;
     int index = -1;
@@ -57,13 +59,15 @@ static void engine_render_tilemap(TilemapNode* tilemap, float width, float heigh
     TilesetNode* tileset = engine_get_tileset(tilemap);
     float offset_x, offset_y;
     engine_get_tilemap_offsets(tilemap, tileset, cam_x, cam_y, &offset_x, &offset_y);
-    int min_x = floorf(offset_x);
-    int min_y = floorf(offset_y);
-    int max_x = ceilf((offset_x + width  / tilemap->scale_x / tileset->tile_width));
-    int max_y = ceilf((offset_y + height / tilemap->scale_y / tileset->tile_height));
-    for (int x = min_x; x <= max_x; x++) {
-        for (int y = min_y; y <= max_y; y++) {
-            engine_render_tile(tilemap, tileset, x, y, offset_x, offset_y);
+    if (tileset) {
+        int min_x = floorf(offset_x);
+        int min_y = floorf(offset_y);
+        int max_x = ceilf((offset_x + width  / tilemap->scale_x / tileset->tile_width));
+        int max_y = ceilf((offset_y + height / tilemap->scale_y / tileset->tile_height));
+        for (int x = min_x; x <= max_x; x++) {
+            for (int y = min_y; y <= max_y; y++) {
+                engine_render_tile(tilemap, tileset, x, y, offset_x, offset_y);
+            }
         }
     }
     for (int i = 0; i < tilemap->node.children_size; i++) {
