@@ -1,5 +1,6 @@
 #depends "scripts/editor.c"
 #depends "scripts/entities/crate_fragment.c"
+#depends "scripts/entities/sparkles.c"
 
 #define TILE(x, y) ((y)*16+(x))
 #define ANIMATE(frames, delay) (engine.get_millis() / (delay) % (frames))
@@ -98,6 +99,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             tilemap.set(x, y, 0);
             *storage.get<int>("num_coins") += 1;
             sound_get_coin().play_oneshot();
+            tilemap.node.attach(entity_sparkles(x + 0.5, y + 1.0));
         })
     .close()
     .open<TileNode>() // tree stump
@@ -148,6 +150,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             if (!entity.is("player")) return;
             tilemap.set(x, y, 0);
             sound_get_coin().play_oneshot();
+            tilemap.node.attach(entity_sparkles(x + 0.5, y + 1.0));
         })
     .close()
     .open<TileNode>() // turtle crate
@@ -185,6 +188,7 @@ void tileset_grass_data(NodeBuilder* builder) -> builder
             tilemap.set(x, y, 0);
             *entity.prop<float>("time_until_death") = 600;
             sound_get_heart().play_oneshot();
+            tilemap.node.attach(entity_sparkles(x + 0.5, y + 1.0));
         })
     .close()
     .open<TileNode>() // bomb block

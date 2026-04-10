@@ -1,6 +1,7 @@
 #depends "scripts/editor.c"
 #depends "scripts/audio/sounds.c"
 #depends "scripts/screenshake.c"
+#depends "scripts/entities/sparkles.c"
 
 #define EPSILON (0.01)
 
@@ -52,8 +53,9 @@ Node* entity_heart(float x, float y) -> engine.open<EntityNode>()
             *storage.get<int>(*collidee.prop<char*>("target_storage")) += 1;
         if (collidee.prop<AudioSource*>("audio"))
             collidee.prop<AudioSource*>("audio").play_oneshot();
-        collidee.node.delete();
+        tilemap.node.attach(entity_sparkles(collidee.pos_x, collidee.pos_y));
         screenshake += *collidee.prop<float>("screenshake");
+        collidee.node.delete();
     })
 .build();
 
