@@ -1,8 +1,8 @@
 #depends "scripts/audio/driver.c"
 
 AudioSource* sound_jump() -> audio.create(lambda synth_jump(Synthesizer* synth): bool -> synth
-    .saw(0.0625, note("C5")).slide(note("C#5")).volume_slide(0, 1)
-    .saw(0.1875, note("C#5")).slide(note("E5")).volume_slide(1, 0)
+    .saw(0.0625, note("C5")).slide(note("C#5")).volume_slide(0, 0.4)
+    .saw(0.1875, note("C#5")).slide(note("E5")).volume_slide(0.4, 0)
     //.saw(0.25, note("E5")).volume_slide(1, 0)
 .finish());
 
