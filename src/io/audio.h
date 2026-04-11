@@ -24,9 +24,11 @@ void audio_pause(AudioInstance* instance);
 void audio_resume(AudioInstance* instance);
 void audio_seek(AudioInstance* instance, float sec);
 void audio_rate(AudioInstance* instance, float factor);
+void audio_volume(AudioInstance* instance, float volume);
 bool audio_is_paused(AudioInstance* instance);
 bool audio_is_playing(AudioInstance* instance);
 bool audio_is_done(AudioInstance* instance);
+float audio_get_volume(AudioInstance* instance);
 void audio_play_oneshot(AudioSource* audio); // holy fucking shit niko oneshot 🥞🐱
 AudioInstance* audio_play(AudioSource* audio);
 

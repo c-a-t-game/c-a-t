@@ -122,9 +122,11 @@ extern("audio_pause") void __audio_pause(AudioInstance* instance);
 extern("audio_resume") void __audio_resume(AudioInstance* instance);
 extern("audio_seek") void __audio_seek(AudioInstance* instance, float sec);
 extern("audio_rate") void __audio_rate(AudioInstance* instance, float factor);
+extern("audio_volume") void __audio_volume(AudioInstance* instance, float volume);
 extern("audio_is_paused") bool __audio_is_paused(AudioInstance* instance);
 extern("audio_is_playing") bool __audio_is_playing(AudioInstance* instance);
 extern("audio_is_done") bool __audio_is_done(AudioInstance* instance);
+extern("audio_get_volume") float __audio_get_volume(AudioInstance* instance);
 extern("audio_play_oneshot") void __audio_play_oneshot(AudioSource* audio);
 extern("audio_play") AudioInstance* __audio_play(AudioSource* audio);
 
@@ -263,9 +265,11 @@ void pause(AudioInstance* this) -> __audio_pause(this);
 void resume(AudioInstance* this) -> __audio_resume(this);
 void seek(AudioInstance* this, float sec) -> __audio_seek(this, sec);
 void rate(AudioInstance* this, float factor) -> __audio_rate(this, factor);
+void volume(AudioInstance* this, float volume) -> __audio_volume(this, volume);
 bool is_paused(AudioInstance* this) -> __audio_is_paused(this);
 bool is_playing(AudioInstance* this) -> __audio_is_playing(this);
 bool is_done(AudioInstance* this) -> __audio_is_done(this);
+float get_volume(AudioInstance* this) -> __audio_get_volume(this);
 void play_oneshot(AudioSource* this) -> __audio_play_oneshot(this);
 AudioInstance* create(AudioSource* this) -> __audio_play(this);
 

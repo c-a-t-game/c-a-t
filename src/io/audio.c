@@ -5,11 +5,12 @@
 
 struct AudioInstance {
     void* data;
+    AudioSource* source;
     bool paused;
     bool done;
     bool oneshot;
     bool do_free;
-    AudioSource* source;
+    float volume;
 };
 
 static AudioInstance* instances;
@@ -34,7 +35,7 @@ void audio_update(AudioSample* out, int samples) {
             continue;
         }
         for (int j = 0; j < samples; j++) {
-            int sample = out[j] + buf[j];
+            int sample = out[j] + buf[j] * instances[i].volume;
             if (sample < -32768) sample = -32768;
             if (sample > 32767) sample = 32767;
             out[j] = sample;
@@ -55,11 +56,20 @@ void audio_resume(AudioInstance* instance) {
 }
 
 void audio_seek(AudioInstance* instance, float sec) {
+    instance->done = false;
     instance->source->seek(instance->source->context, instance->data, sec);
 }
 
 void audio_rate(AudioInstance* instance, float factor) {
     instance->source->rate(instance->source->context, instance->data, factor);
+}
+
+void audio_volume(AudioInstance* instance, float volume) {
+    instance->volume = volume;
+}
+
+float audio_get_volume(AudioInstance* instance) {
+    return instance->volume;
 }
 
 bool audio_is_paused(AudioInstance* instance) {
@@ -94,6 +104,7 @@ AudioInstance* audio_play(AudioSource* source) {
     }
     instance->data = source->init(source->context);
     instance->source = source;
+    instance->volume = 1;
     instance->paused = false;
     instance->done = false;
     instance->oneshot = false;
